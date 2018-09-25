@@ -103,7 +103,7 @@ def _build(cls, dictionary):
 
         attribute_name = entry.name if entry.name else attribute.name
         entry_default = entry.default if entry.default else None
-        if not entry.subclass:
+        if entry.subclass is None:
             values[attribute.name] = dictionary.get(attribute_name, entry_default)
         else:
             if entry.multiple:
@@ -136,18 +136,15 @@ def _dump(instance):
 
         attribute_name = entry.name if entry.name else attribute.name
         entry_default = entry.default if entry.default else None
-        if not entry.subclass:
+        if entry.subclass is None:
             values[attribute_name] = getattr(instance, attribute.name, entry_default)
         else:
             if entry.multiple:
                 values[attribute_name] = [
-                    _dump(entry.subclass, _)
-                    for _ in getattr(instance, attribute.name, [])
+                    _dump(_) for _ in getattr(instance, attribute.name, [])
                 ]
             else:
-                values[attribute_name] = _dump(
-                    entry.subclass, getattr(instance, attribute.name, {})
-                )
+                values[attribute_name] = _dump(getattr(instance, attribute.name, {}))
     return values
 
 
@@ -165,7 +162,7 @@ def from_dict(cls, dictionary):
     return _build(cls, dictionary)
 
 
-def from_json(cls, json_content):
+def loads_json(cls, json_content):
     """ Loads an instance of ``cls`` from a json string.
 
     :param cls: The class to build an instance of
@@ -179,7 +176,7 @@ def from_json(cls, json_content):
     return from_dict(cls, json.loads(json_content))
 
 
-def from_yaml(cls, yaml_content):
+def loads_yaml(cls, yaml_content):
     """ Loads an instance of ``cls`` from a yaml string.
 
     :param cls: The class to build an instance of
@@ -190,10 +187,10 @@ def from_yaml(cls, yaml_content):
     :rtype: object
     """
 
-    return from_json(cls, yaml.load(yaml_content))
+    return from_dict(cls, yaml.load(yaml_content))
 
 
-def from_toml(cls, toml_content):
+def loads_toml(cls, toml_content):
     """ Loads an instance of ``cls`` from a toml string.
 
     :param cls: The class to build an instance of
@@ -204,51 +201,79 @@ def from_toml(cls, toml_content):
     :rtype: object
     """
 
-    return from_json(cls, toml.loads(toml_content))
+    return from_dict(cls, toml.loads(toml_content))
 
 
-def from_content(cls, content, content_extension=".json"):
-    """ Loads an instance of ``cls`` from a content string.
+def loads(cls, content):
+    """ Loads an instance of ``cls`` from some content.
 
-    :param cls: The class to build an instance of
-    :type cls: object
+    .. note:: It is almost always more efficient to just use the explicit ``load`` such
+        as ``loads_json`` or ``loads_toml`` as this iterates over the handlers and tries
+        to find which one succeeds.
+
     :param content: The content to load from
     :type content: str
-    :param content_extension: The extension of the content, defaults to ".json"
-    :param content_extension: str, optional
-    :raises ValueError: If a content handler cannot be found for an extension
+    :raises ValueError: If no parser can handle the loading
     :return: An instance of ``cls``
     :rtype: object
     """
 
-    content_handlers = {
-        ".json": from_json,
-        ".toml": from_toml,
-        ".yaml": from_yaml,
-        ".yml": from_yaml,
-    }
-    if content_extension not in content_handlers:
-        raise ValueError(f"don't know how to handle content from {content_extension!r}")
-    return content_handlers[content_extension](cls, content)
+    for handler in (loads_json, loads_toml, loads_yaml,):
+        try:
+            return handler(cls, content)
+        except Exception:
+            pass
+    raise ValueError(f"no parser can handle given content")
 
 
-def from_file(cls, filepath):
-    """ Loads an instance of ``cls`` from a filepath.
+def load_json(cls, file_object):
+    """ Loads an instance of ``cls`` from a given json file object.
+
+    :param file_object: The JSON file object.
+    :type file_object: File
+    :return: An instance of ``cls``
+    :rtype: object
+    """
+
+    return loads_json(cls, file_object.read())
+
+
+def load_toml(cls, file_object):
+    """ Loads an instance of ``cls`` from a given toml file object.
+
+    :param file_object: The TOML file object.
+    :type file_object: File
+    :return: An instance of ``cls``
+    :rtype: object
+    """
+
+    return loads_toml(cls, file_object.read())
+
+
+def load_yaml(cls, file_object):
+    """ Loads an instance of ``cls`` from a given yaml file object.
+
+    :param file_object: The YAML file object.
+    :type file_object: File
+    :return: An instance of ``cls``
+    :rtype: object
+    """
+
+    return loads_yaml(cls, file_object.read())
+
+
+def load(cls, file_object):
+    """ Loads an instance of ``cls`` from a file object.
 
     :param cls: The class to build an instance of
     :type cls: object
-    :param filepath: The filepath to load from
-    :type filepath: str
-    :raises FileNotFoundError: If the filepath doesn't exist
+    :param file_object: The file object to load from
+    :type file_object: File
     :return: An instance of ``cls``
     :rtype: object
     """
 
-    filepath = pathlib.Path(filepath)
-    if not filepath.is_file():
-        raise FileNotFoundError(f"no such file {filepath!r} exists")
-    with filepath.open("r") as stream:
-        return from_content(cls, stream.read(), filepath.suffix.lower())
+    return loads(cls, file_object.read())
 
 
 def to_dict(instance):
@@ -263,7 +288,7 @@ def to_dict(instance):
     return _dump(instance)
 
 
-def to_json(instance):
+def dumps_json(instance):
     """ Dumps an instance to a json string.
 
     :param instance: The instance to dump
@@ -275,7 +300,7 @@ def to_json(instance):
     return json.dumps(to_dict(instance))
 
 
-def to_yaml(instance):
+def dumps_yaml(instance):
     """ Dumps an instance to a yaml string.
 
     :param instance: The instance to dump
@@ -287,7 +312,7 @@ def to_yaml(instance):
     return yaml.dump(to_dict(instance))
 
 
-def to_toml(instance):
+def dumps_toml(instance):
     """ Dumps an instance to a toml string.
 
     :param instance: The instance to dump
@@ -299,38 +324,37 @@ def to_toml(instance):
     return toml.dumps(to_dict(instance))
 
 
-def to_content(instance, content_extension=".json"):
-    """ Dumps an instance to a content string.
+def dump_json(instance, file_object):
+    """ Dumps an instance to a json file object.
 
     :param instance: The instance to dump
     :type instance: object
-    :param content_extension: The extension of the format to dump, defaults to ".json"
-    :param content_extension: str, optional
-    :raises ValueError: If the content handler cannot be found for an extension
-    :return: Serialization of an instance
-    :rtype: str
+    :param file_object: JSON file object to dump to
+    :type file_object: File
     """
 
-    content_handlers = {
-        ".json": to_json,
-        ".toml": to_toml,
-        ".yaml": to_yaml,
-        ".yml": to_yaml,
-    }
-    if content_extension not in content_handlers:
-        raise ValueError(f"don't know how to handle content from {content_extension!r}")
-    return content_handlers[content_extension](instance)
+    file_object.write(dumps_json(instance))
 
 
-def to_file(instance, filepath):
-    """ Writes an instance to a filepath.
+def dump_toml(instance, file_object):
+    """ Dumps an instance to a toml file object.
 
-    :param instance: The instance to write
+    :param instance: The instance to dump
     :type instance: object
-    :param filepath: The filepath to write to
-    :type filepath: str
+    :param file_object: TOML file object to dump to
+    :type file_object: File
     """
 
-    filepath = pathlib.Path(filepath)
-    with filepath.open("r") as stream:
-        stream.write(to_content(instance, filepath.suffix.lower()))
+    file_object.write(dumps_toml(instance))
+
+
+def dump_yaml(instance, file_object):
+    """ Dumps an instance to a yaml file object.
+
+    :param instance: The instance to dump
+    :type instance: object
+    :param file_object: YAML file object to dump to
+    :type file_object: File
+    """
+
+    file_object.write(dumps_yaml(instance))
