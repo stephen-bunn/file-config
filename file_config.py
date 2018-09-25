@@ -2,8 +2,6 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import os
-import sys
-import uuid
 import pathlib
 
 import attr
