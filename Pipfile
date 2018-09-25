@@ -9,6 +9,7 @@ pyyaml = "*"
 ujson = "*"
 tomlkit = "*"
 jsonschema = "*"
+msgpack = "*"
 
 [dev-packages]
 "flake8" = "*"

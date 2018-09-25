@@ -7,6 +7,7 @@ from collections import OrderedDict
 import attr
 import yaml
 import tomlkit
+import msgpack
 import jsonschema
 import ujson as json
 
@@ -350,10 +351,16 @@ def _dump(instance, dict_type=OrderedDict):
 
         schema_type = _get_schema_type(attribute.type)
         if schema_type == "array":
-            values[attribute_name] = [
-                (_dump(item, dict_type=dict_type) if _is_config_type(item) else item)
-                for item in getattr(instance, attribute.name, [])
-            ]
+            items = getattr(instance, attribute.name, [])
+            if isinstance(items, list):
+                values[attribute_name] = [
+                    (
+                        _dump(item, dict_type=dict_type)
+                        if _is_config_type(item)
+                        else item
+                    )
+                    for item in items
+                ]
         else:
             if _is_config_type(attribute.type):
                 values[attribute_name] = _dump(
@@ -395,7 +402,7 @@ def loads_json(config_cls, json_content):
     :param config_cls: The class to build an instance of
     :type config_cls: type
     :param json_content: The json content to load from
-    :type json_content: dict
+    :type json_content: str
     :return: An instance of ``config_cls``
     :rtype: object
     """
@@ -409,7 +416,7 @@ def loads_yaml(config_cls, yaml_content):
     :param config_cls: The class to build an instance of
     :type config_cls: type
     :param yaml_content: The yaml content to load from
-    :type yaml_content: dict
+    :type yaml_content: str
     :return: An instance of ``config_cls``
     :rtype: object
     """
@@ -423,12 +430,26 @@ def loads_toml(config_cls, toml_content):
     :param config_cls: The class to build an instance of
     :type config_cls: type
     :param toml_content: The toml content to load from
-    :type toml_content: dict
+    :type toml_content: str
     :return: An instance of ``config_cls``
     :rtype: object
     """
 
     return from_dict(config_cls, tomlkit.parse(toml_content))
+
+
+def loads_msgpack(config_cls, msgpack_content):
+    """ Loads an isntance of ``config_cls`` from a msgpack content.
+
+    :param config_cls: The class to build an instance of
+    :type config_cls: type
+    :param msgpack_content: The msgpack content to load from
+    :type msgpack_content: bytes
+    :return: An instance of ``config_cls``
+    :rtype: object
+    """
+
+    return from_dict(config_cls, msgpack.loads(msgpack_content, raw=False))
 
 
 def loads(config_cls, content):
@@ -438,6 +459,8 @@ def loads(config_cls, content):
         as ``loads_json`` or ``loads_toml`` as this iterates over the handlers and tries
         to find which one succeeds.
 
+    :param config_cls: The class to build an isntance of
+    :type config_cls: type
     :param content: The content to load from
     :type content: str
     :raises ValueError: If no parser can handle the loading
@@ -456,6 +479,8 @@ def loads(config_cls, content):
 def load_json(config_cls, file_object):
     """ Loads an instance of ``config_cls`` from a given json file object.
 
+    :param config_cls: The class to build an isntance of
+    :type config_cls: type
     :param file_object: The JSON file object.
     :type file_object: File
     :return: An instance of ``config_cls``
@@ -468,6 +493,8 @@ def load_json(config_cls, file_object):
 def load_toml(config_cls, file_object):
     """ Loads an instance of ``config_cls`` from a given toml file object.
 
+    :param config_cls: The class to build an isntance of
+    :type config_cls: type
     :param file_object: The TOML file object.
     :type file_object: File
     :return: An instance of ``config_cls``
@@ -480,6 +507,8 @@ def load_toml(config_cls, file_object):
 def load_yaml(config_cls, file_object):
     """ Loads an instance of ``config_cls`` from a given yaml file object.
 
+    :param config_cls: The class to build an isntance of
+    :type config_cls: type
     :param file_object: The YAML file object.
     :type file_object: File
     :return: An instance of ``config_cls``
@@ -487,6 +516,20 @@ def load_yaml(config_cls, file_object):
     """
 
     return loads_yaml(config_cls, file_object.read())
+
+
+def load_msgpack(config_cls, file_object):
+    """ Loads an instance of ``config_cls`` from a given msgpack file object.
+
+    :param config_cls: The class to build an isntance of
+    :type config_cls: type
+    :param file_object: The fileobject to load from
+    :type file_object: File
+    :return: An instance of ``config_cls``
+    :rtype: object
+    """
+
+    return loads_msgpack(config_cls, file_object.read())
 
 
 def load(config_cls, file_object):
@@ -553,6 +596,18 @@ def dumps_toml(instance):
     return tomlkit.dumps(to_dict(instance))
 
 
+def dumps_msgpack(instance):
+    """ Dumps an instance to a msgpack bytes.
+
+    :param instance: The instance to dump
+    :type instance: object
+    :return: msgpack serialization of instance
+    :rtype: bytes
+    """
+
+    return msgpack.dumps(to_dict(instance))
+
+
 def dump_json(instance, file_object):
     """ Dumps an instance to a json file object.
 
@@ -587,6 +642,18 @@ def dump_yaml(instance, file_object):
     """
 
     file_object.write(dumps_yaml(instance))
+
+
+def dump_msgpack(instance, file_object):
+    """ Dumps an instance to a msgpack file object.
+
+    :param instance: The instance to dump
+    :type instance: object
+    :param file_object: msgpack file object to dump to
+    :type file_object: File
+    """
+
+    file_object.write(dumps_msgpack(instance))
 
 
 def validate(instance):
