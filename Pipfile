@@ -5,14 +5,16 @@ name = "pypi"
 
 [packages]
 attrs = "*"
-toml = "*"
 pyyaml = "*"
 ujson = "*"
+tomlkit = "*"
+jsonschema = "*"
 
 [dev-packages]
 "flake8" = "*"
 black = "*"
 isort = "*"
+ptpython = "*"
 
 [requires]
 python_version = "3.6"
