@@ -2,39 +2,15 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import typing
+from functools import partialmethod
 from collections import OrderedDict
 
 import attr
-import yaml
-import tomlkit
-import msgpack
 import jsonschema
-import ujson as json
+
+from . import handlers
 
 CONFIG_KEY = "__file_config_metadata"
-
-
-def yaml_represent_ordereddict(dumper, data):
-    """ A custom data representer for ``OrderedDict`` instances.
-
-    .. note:: Credit to https://stackoverflow.com/a/16782282/7828560.
-
-    :param dumper: The dumper object
-    :type dumper: object
-    :param data: The ``OrderedDict`` instance
-    :type data: OrderedDict
-    :return: The yaml mapping node
-    :rtype: yaml.nodes.MappingNode
-    """
-
-    values = []
-    for (key, value) in data.items():
-        values.append((dumper.represent_data(key), dumper.represent_data(value)))
-    return yaml.nodes.MappingNode("tag:yaml.org,2002:map", values)
-
-
-# add a custom representer for OrderedDict for correctly ordered yaml
-yaml.add_representer(OrderedDict, yaml_represent_ordereddict)
 
 
 @attr.s(slots=True)
@@ -47,6 +23,62 @@ class _ConfigEntry(object):
     description = attr.ib(type=str, default=None)
     required = attr.ib(type=bool, default=True)
     examples = attr.ib(type=list, default=None)
+
+
+def _handle_dumps(self, handler):
+    """ Dumps caller, used by partial method for dynamic handler assignments.
+
+    :param handler: The dump handler
+    :type handler: object
+    :return: The dumped string
+    :rtype: str
+    """
+
+    return handler.dumps(to_dict(self))
+
+
+def _handle_dump(self, handler, file_object):
+    """ Dump caller, used by partial method for dynamic handler assignments.
+
+    :param handler: The dump handler
+    :type handler: object
+    :param file_object: The file object to dump to
+    :type file_object: File
+    :return: The dumped string
+    :rtype: str
+    """
+
+    return handler.dump(to_dict(self), file_object)
+
+
+@classmethod
+def _handle_loads(cls, handler, content):
+    """ Loads caller, used by partial method for dynamic handler assignments.
+
+    :param handler: The loads handler
+    :type handler: object
+    :param content: The content to load from
+    :type content: str
+    :return: The loaded instance
+    :rtype: object
+    """
+
+    return from_dict(cls, handler.loads(content)) # noqa
+
+
+@classmethod
+def _handle_load(cls, handler, file_object):
+        """ Loads caller, used by partial method for dynamic handler assignments.
+
+    :param handler: The loads handler
+    :type handler: object
+    :param file_object: The file object to load from
+    :type file_object: File
+    :return: The loaded instance
+    :rtype: object
+    """
+
+    return from_dict(cls, handler.load(file_object)) # noqa
 
 
 def config(maybe_cls=None, title=None, description=None):
@@ -66,6 +98,25 @@ def config(maybe_cls=None, title=None, description=None):
         """
 
         setattr(config_cls, CONFIG_KEY, dict(title=title, description=description))
+        # dynamically assign available handlers to the wrapped class
+        for handler_name in handlers.__all__:
+            handler = getattr(handlers, handler_name)()
+            setattr(
+                config_cls,
+                f"dumps_{handler.name}",
+                partialmethod(_handle_dumps, handler),
+            )
+            setattr(
+                config_cls, f"dump_{handler.name}", partialmethod(_handle_dump, handler)
+            )
+            setattr(
+                config_cls,
+                f"loads_{handler.name}",
+                partialmethod(_handle_loads, handler),
+            )
+            setattr(
+                config_cls, f"load_{handler.name}", partialmethod(_handle_load, handler)
+            )
         return attr.s(config_cls, slots=True)
 
     if maybe_cls is None:
@@ -270,12 +321,10 @@ def _build_schema(config_cls, property_path=[]):
         raise ValueError(f"class {config_cls!r} is not a 'file_config.config' class")
 
     config_entry = getattr(config_cls, CONFIG_KEY)
-    schema = {
-        "type": "object",
-        "title": config_entry.get("title", config_cls.__qualname__),
-        "required": [],
-        "properties": {},
-    }
+    schema = {"type": "object", "required": [], "properties": {}}
+    schema_title = config_entry.get("title", config_cls.__qualname__)
+    if isinstance(schema_title, str):
+        schema["title"] = schema_title
     schema_description = config_entry.get("description")
     if isinstance(schema_description, str):
         schema["description"] = schema_description
@@ -423,6 +472,18 @@ def _dump(instance, dict_type=OrderedDict):
     return values
 
 
+def validate(instance):
+    """ Validates a given ``instance``.
+
+    :param instance: The instance to validate
+    :type instance: object
+    """
+
+    jsonschema.validate(
+        to_dict(instance, dict_type=dict), build_schema(instance.__class__)
+    )
+
+
 def from_dict(config_cls, dictionary):
     """ Loads an instance of ``config_cls`` from a dictionary.
 
@@ -437,156 +498,6 @@ def from_dict(config_cls, dictionary):
     return _build(config_cls, dictionary)
 
 
-def loads_json(config_cls, json_content):
-    """ Loads an instance of ``config_cls`` from a json string.
-
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param json_content: The json content to load from
-    :type json_content: str
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return from_dict(config_cls, json.loads(json_content))
-
-
-def loads_yaml(config_cls, yaml_content):
-    """ Loads an instance of ``config_cls`` from a yaml string.
-
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param yaml_content: The yaml content to load from
-    :type yaml_content: str
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return from_dict(config_cls, yaml.load(yaml_content))
-
-
-def loads_toml(config_cls, toml_content):
-    """ Loads an instance of ``config_cls`` from a toml string.
-
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param toml_content: The toml content to load from
-    :type toml_content: str
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return from_dict(config_cls, tomlkit.parse(toml_content))
-
-
-def loads_msgpack(config_cls, msgpack_content):
-    """ Loads an isntance of ``config_cls`` from a msgpack content.
-
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param msgpack_content: The msgpack content to load from
-    :type msgpack_content: bytes
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return from_dict(config_cls, msgpack.loads(msgpack_content, raw=False))
-
-
-def loads(config_cls, content):
-    """ Loads an instance of ``config_cls`` from some content.
-
-    .. note:: It is almost always more efficient to just use the explicit ``load`` such
-        as ``loads_json`` or ``loads_toml`` as this iterates over the handlers and tries
-        to find which one succeeds.
-
-    :param config_cls: The class to build an isntance of
-    :type config_cls: type
-    :param content: The content to load from
-    :type content: str
-    :raises ValueError: If no parser can handle the loading
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    for handler in (loads_json, loads_toml, loads_yaml):
-        try:
-            return handler(config_cls, content)
-        except Exception:
-            pass
-    raise ValueError(f"no parser can handle given content")
-
-
-def load_json(config_cls, file_object):
-    """ Loads an instance of ``config_cls`` from a given json file object.
-
-    :param config_cls: The class to build an isntance of
-    :type config_cls: type
-    :param file_object: The JSON file object.
-    :type file_object: File
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return loads_json(config_cls, file_object.read())
-
-
-def load_toml(config_cls, file_object):
-    """ Loads an instance of ``config_cls`` from a given toml file object.
-
-    :param config_cls: The class to build an isntance of
-    :type config_cls: type
-    :param file_object: The TOML file object.
-    :type file_object: File
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return loads_toml(config_cls, file_object.read())
-
-
-def load_yaml(config_cls, file_object):
-    """ Loads an instance of ``config_cls`` from a given yaml file object.
-
-    :param config_cls: The class to build an isntance of
-    :type config_cls: type
-    :param file_object: The YAML file object.
-    :type file_object: File
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return loads_yaml(config_cls, file_object.read())
-
-
-def load_msgpack(config_cls, file_object):
-    """ Loads an instance of ``config_cls`` from a given msgpack file object.
-
-    :param config_cls: The class to build an isntance of
-    :type config_cls: type
-    :param file_object: The fileobject to load from
-    :type file_object: File
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return loads_msgpack(config_cls, file_object.read())
-
-
-def load(config_cls, file_object):
-    """ Loads an instance of ``config_cls`` from a file object.
-
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param file_object: The file object to load from
-    :type file_object: File
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return loads(config_cls, file_object.read())
-
-
 def to_dict(instance, dict_type=OrderedDict):
     """ Dumps an instance to an dictionary mapping.
 
@@ -599,111 +510,3 @@ def to_dict(instance, dict_type=OrderedDict):
     """
 
     return _dump(instance, dict_type=dict_type)
-
-
-def dumps_json(instance):
-    """ Dumps an instance to a json string.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :return: JSON serialization of instance
-    :rtype: str
-    """
-
-    return json.dumps(to_dict(instance))
-
-
-def dumps_yaml(instance):
-    """ Dumps an instance to a yaml string.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :return: YAML serialization of instance
-    :rtype: str
-    """
-
-    return yaml.dump(to_dict(instance))
-
-
-def dumps_toml(instance):
-    """ Dumps an instance to a toml string.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :return: TOML serialization of instance
-    :rtype: str
-    """
-
-    return tomlkit.dumps(to_dict(instance))
-
-
-def dumps_msgpack(instance):
-    """ Dumps an instance to a msgpack bytes.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :return: msgpack serialization of instance
-    :rtype: bytes
-    """
-
-    return msgpack.dumps(to_dict(instance))
-
-
-def dump_json(instance, file_object):
-    """ Dumps an instance to a json file object.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :param file_object: JSON file object to dump to
-    :type file_object: File
-    """
-
-    file_object.write(dumps_json(instance))
-
-
-def dump_toml(instance, file_object):
-    """ Dumps an instance to a toml file object.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :param file_object: TOML file object to dump to
-    :type file_object: File
-    """
-
-    file_object.write(dumps_toml(instance))
-
-
-def dump_yaml(instance, file_object):
-    """ Dumps an instance to a yaml file object.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :param file_object: YAML file object to dump to
-    :type file_object: File
-    """
-
-    file_object.write(dumps_yaml(instance))
-
-
-def dump_msgpack(instance, file_object):
-    """ Dumps an instance to a msgpack file object.
-
-    :param instance: The instance to dump
-    :type instance: object
-    :param file_object: msgpack file object to dump to
-    :type file_object: File
-    """
-
-    file_object.write(dumps_msgpack(instance))
-
-
-def validate(instance):
-    """ Validates a given ``instance``.
-
-    :param instance: The instance to validate
-    :type instance: object
-    """
-
-    jsonschema.validate(
-        to_dict(instance, dict_type=dict), build_schema(instance.__class__)
-    )
