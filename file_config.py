@@ -73,23 +73,25 @@ def config(maybe_cls=None):
         return wrap(maybe_cls)
 
 
-def var(default=None, type=None, name=None, required=True, validator=None):
+def var(default=None, name=None, required=True, **kwargs):
     """ Creates a config variable.
     """
 
-    attrib_kwargs = dict(default=default, type=type, validator=validator, metadata={})
-    config_entry = None
-    if _is_config_type(type):
-        config_entry = _ConfigEntry(name, default, required, type, False)
-    elif _is_typing_type(type):
-        if _get_schema_type(type) == "array" and _is_config_type(type.__args__[0]):
-            config_entry = _ConfigEntry(name, default, required, type.__args__[0], True)
-        else:
-            config_entry = _ConfigEntry(name, default, required, None, False)
-    else:
-        config_entry = _ConfigEntry(name, default, required, None, False)
-    attrib_kwargs["metadata"] = {CONFIG_KEY: config_entry}
-    return attr.ib(**attrib_kwargs)
+    type_ = kwargs.get("type")
+    is_multiple = _get_schema_type(type_) == "array"
+    subclass = None
+    if _is_config_type(type_):
+        subclass = type_
+    elif _is_typing_type(type_):
+        if is_multiple and _is_config_type(type_.__args__[0]):
+            subclass = type_.__args__[0]
+
+    return attr.ib(
+        metadata={
+            CONFIG_KEY: _ConfigEntry(name, default, required, subclass, is_multiple)
+        },
+        **kwargs,
+    )
 
 
 def _is_config_type(type_):
