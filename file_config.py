@@ -42,7 +42,6 @@ class _ConfigEntry(object):
     """
 
     name = attr.ib(type=str, default=None)
-    default = attr.ib(default=None)
     required = attr.ib(type=bool, default=True)
     subclass = attr.ib(type=object, default=None)
     multiple = attr.ib(type=bool, default=False)
@@ -77,6 +76,7 @@ def var(default=None, name=None, required=True, **kwargs):
     """ Creates a config variable.
     """
 
+    kwargs["default"] = default
     type_ = kwargs.get("type")
     is_multiple = _get_schema_type(type_) == "array"
     subclass = None
@@ -88,7 +88,7 @@ def var(default=None, name=None, required=True, **kwargs):
 
     return attr.ib(
         metadata={
-            CONFIG_KEY: _ConfigEntry(name, default, required, subclass, is_multiple)
+            CONFIG_KEY: _ConfigEntry(name, required, subclass, is_multiple)
         },
         **kwargs,
     )
@@ -312,9 +312,9 @@ def _build(config_cls, dictionary):
             continue
 
         attribute_name = entry.name if entry.name else attribute.name
-        entry_default = entry.default if entry.default else None
+        attribute_default = attribute.default if attribute.default else None
         if attribute.type is None:
-            values[attribute.name] = dictionary.get(attribute_name, entry_default)
+            values[attribute.name] = dictionary.get(attribute_name, attribute_default)
         else:
             if entry.multiple:
                 values[attribute.name] = [
@@ -347,11 +347,10 @@ def _dump(instance, dict_type=OrderedDict):
             continue
 
         attribute_name = entry.name if entry.name else attribute.name
-        # TODO: convert to attribute.default rather than entry.default
-        entry_default = entry.default if entry.default else None
+        attribute_default = attribute.default if attribute.default else None
 
         if entry.subclass is None:
-            entry_value = getattr(instance, attribute.name, entry_default)
+            entry_value = getattr(instance, attribute.name, attribute_default)
             if isinstance(entry_value, (OrderedDict, dict)):
                 entry_mapping = {}
                 for (key, value) in entry_value.items():
