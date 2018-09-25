@@ -1,0 +1,35 @@
+# EditorConfig http://editorconfig.org
+
+root = true
+
+# global config
+[*]
+charset = utf-8
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# python config
+[*.py]
+indent_size = 4
+
+# sphinx config
+[*.rst]
+indent_size = 3
+
+# external config
+[*.{json,yaml,yml,toml,html,js}]
+indent_size = 2
+
+# batch config
+[*.{bat}]
+end_of_line = crlf
+
+# license config
+[LICENSE]
+insert_final_newline = false
+
+# make config
+[Makefile]
+indent_style = tab

@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+attrs = "*"
+toml = "*"
+pyyaml = "*"
+ujson = "*"
+
+[dev-packages]
+"flake8" = "*"
+black = "*"
+isort = "*"
+
+[requires]
+python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
