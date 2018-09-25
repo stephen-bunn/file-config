@@ -63,12 +63,12 @@ def _handle_loads(cls, handler, content):
     :rtype: object
     """
 
-    return from_dict(cls, handler.loads(content)) # noqa
+    return from_dict(cls, handler.loads(content))
 
 
 @classmethod
 def _handle_load(cls, handler, file_object):
-        """ Loads caller, used by partial method for dynamic handler assignments.
+    """ Loads caller, used by partial method for dynamic handler assignments.
 
     :param handler: The loads handler
     :type handler: object
@@ -78,7 +78,7 @@ def _handle_load(cls, handler, file_object):
     :rtype: object
     """
 
-    return from_dict(cls, handler.load(file_object)) # noqa
+    return from_dict(cls, handler.load(file_object))
 
 
 def config(maybe_cls=None, title=None, description=None):

@@ -12,7 +12,8 @@ class YAMLHandler(BaseHandler):
     packages = ("yaml",)
 
     def on_yaml_imported(self, yaml):
-        def represent_ordereddict(self, dumper, data):
+
+        def represent_ordereddict(dumper, data):
             """ A custom data representer for ``OrderedDict`` instances.
 
             .. note:: Credit to https://stackoverflow.com/a/16782282/7828560.
@@ -30,7 +31,7 @@ class YAMLHandler(BaseHandler):
                 values.append(
                     (dumper.represent_data(key), dumper.represent_data(value))
                 )
-            return yaml.nodes.MappingNode("tag:yaml.org,2002:map", values)
+            return yaml.MappingNode("tag:yaml.org,2002:map", values)
 
         yaml.add_representer(OrderedDict, represent_ordereddict)
 
