@@ -43,7 +43,10 @@ class _ConfigEntry(object):
     """
 
     name = attr.ib(type=str, default=None)
+    title = attr.ib(type=str, default=None)
+    description = attr.ib(type=str, default=None)
     required = attr.ib(type=bool, default=True)
+    examples = attr.ib(type=list, default=None)
 
 
 def config(maybe_cls=None):
@@ -71,12 +74,32 @@ def config(maybe_cls=None):
         return wrap(maybe_cls)
 
 
-def var(default=None, type=None, name=None, required=True, **kwargs):
+def var(
+    default=None,
+    type=None,
+    name=None,
+    title=None,
+    description=None,
+    required=True,
+    examples=None,
+    **kwargs,
+):
     """ Creates a config variable.
     """
 
     kwargs.update(dict(default=default, type=type))
-    return attr.ib(metadata={CONFIG_KEY: _ConfigEntry(name, required)}, **kwargs)
+    return attr.ib(
+        metadata={
+            CONFIG_KEY: _ConfigEntry(
+                name=name,
+                title=title,
+                description=description,
+                required=required,
+                examples=examples,
+            )
+        },
+        **kwargs,
+    )
 
 
 def _is_config_type(type_):
@@ -207,8 +230,21 @@ def _build_attribute_schema(attribute, property_path=[]):
     """
 
     schema = {"$id": f"#/{'/'.join(property_path)}/{attribute.name}"}
+    entry = None
+    try:
+        entry = attribute.metadata[CONFIG_KEY]
+    except KeyError:
+        pass
+
     if attribute.default is not None:
         schema["default"] = attribute.default
+    if entry is not None:
+        if isinstance(entry.title, str):
+            schema["title"] = entry.title
+        if isinstance(entry.description, str):
+            schema["description"] = entry.description
+        if isinstance(entry.examples, list) and len(entry.examples) > 0:
+            schema["examples"] = entry.examples
 
     schema.update(
         _build_type_schema(
