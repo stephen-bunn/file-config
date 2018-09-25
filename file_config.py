@@ -43,8 +43,6 @@ class _ConfigEntry(object):
 
     name = attr.ib(type=str, default=None)
     required = attr.ib(type=bool, default=True)
-    subclass = attr.ib(type=object, default=None)
-    multiple = attr.ib(type=bool, default=False)
 
 
 def config(maybe_cls=None):
@@ -72,26 +70,12 @@ def config(maybe_cls=None):
         return wrap(maybe_cls)
 
 
-def var(default=None, name=None, required=True, **kwargs):
+def var(default=None, type=None, name=None, required=True, **kwargs):
     """ Creates a config variable.
     """
 
-    kwargs["default"] = default
-    type_ = kwargs.get("type")
-    is_multiple = _get_schema_type(type_) == "array"
-    subclass = None
-    if _is_config_type(type_):
-        subclass = type_
-    elif _is_typing_type(type_):
-        if is_multiple and _is_config_type(type_.__args__[0]):
-            subclass = type_.__args__[0]
-
-    return attr.ib(
-        metadata={
-            CONFIG_KEY: _ConfigEntry(name, required, subclass, is_multiple)
-        },
-        **kwargs,
-    )
+    kwargs.update(dict(default=default, type=type))
+    return attr.ib(metadata={CONFIG_KEY: _ConfigEntry(name, required)}, **kwargs)
 
 
 def _is_config_type(type_):
@@ -269,13 +253,14 @@ def _build_schema(config_cls, property_path=[]):
 
         if entry.required:
             schema["required"].append(attribute.name)
-        if entry.subclass is None:
-            schema["properties"][attribute.name] = _build_attribute_schema(
-                attribute, property_path=property_path
+
+        if _is_config_type(attribute.type):
+            schema["properties"][attribute.name] = _build_schema(
+                attribute.type, property_path=property_path + [attribute.name]
             )
         else:
-            schema["properties"][attribute.name] = _build_schema(
-                entry.subclass, property_path=property_path + [attribute.name]
+            schema["properties"][attribute.name] = _build_attribute_schema(
+                attribute, property_path=property_path
             )
 
     return schema
@@ -313,18 +298,32 @@ def _build(config_cls, dictionary):
 
         attribute_name = entry.name if entry.name else attribute.name
         attribute_default = attribute.default if attribute.default else None
+
         if attribute.type is None:
             values[attribute.name] = dictionary.get(attribute_name, attribute_default)
         else:
-            if entry.multiple:
-                values[attribute.name] = [
-                    _build(entry.subclass, _)
-                    for _ in dictionary.get(attribute_name, [])
-                ]
+            schema_type = _get_schema_type(attribute.type)
+            if schema_type == "array":
+                values[attribute.name] = dictionary.get(attribute_name, [])
+                if (
+                    len(values[attribute.name]) > 0
+                    and _is_typing_type(attribute.type)
+                    and len(attribute.type.__args__) > 0
+                ):
+                    nested_type = attribute.type.__args__[0]
+                    if _is_config_type(nested_type):
+                        values[attribute.name] = [
+                            _build(nested_type, item)
+                            for item in dictionary.get(attribute_name, [])
+                        ]
             else:
-                values[attribute.name] = _build(
-                    entry.subclass, dictionary.get(attribute_name, {})
+                item = dictionary.get(attribute_name, {})
+                values[attribute.name] = (
+                    _build(attribute.type, item)
+                    if _is_config_type(attribute.type)
+                    else item
                 )
+
     return config_cls(**values)
 
 
@@ -349,24 +348,30 @@ def _dump(instance, dict_type=OrderedDict):
         attribute_name = entry.name if entry.name else attribute.name
         attribute_default = attribute.default if attribute.default else None
 
-        if entry.subclass is None:
-            entry_value = getattr(instance, attribute.name, attribute_default)
-            if isinstance(entry_value, (OrderedDict, dict)):
-                entry_mapping = {}
-                for (key, value) in entry_value.items():
-                    entry_mapping[key] = _dump(value, dict_type=dict_type)
-                entry_value = entry_mapping
-            values[attribute_name] = entry_value
+        schema_type = _get_schema_type(attribute.type)
+        if schema_type == "array":
+            values[attribute_name] = [
+                (_dump(item, dict_type=dict_type) if _is_config_type(item) else item)
+                for item in getattr(instance, attribute.name, [])
+            ]
         else:
-            if entry.multiple:
-                values[attribute_name] = [
-                    _dump(_, dict_type=dict_type)
-                    for _ in getattr(instance, attribute.name, [])
-                ]
-            else:
+            if _is_config_type(attribute.type):
                 values[attribute_name] = _dump(
                     getattr(instance, attribute.name, {}), dict_type=dict_type
                 )
+            else:
+                entry_value = getattr(instance, attribute.name, attribute_default)
+                if isinstance(entry_value, (dict, OrderedDict)):
+                    entry_mapping = {}
+                    for (key, value) in entry_value.items():
+                        entry_mapping[key] = (
+                            _dump(value, dict_type=dict_type)
+                            if _is_config_type(value)
+                            else value
+                        )
+                    entry_value = entry_mapping
+                values[attribute_name] = entry_value
+
     return values
 
 
