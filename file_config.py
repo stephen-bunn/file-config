@@ -49,7 +49,7 @@ class _ConfigEntry(object):
     examples = attr.ib(type=list, default=None)
 
 
-def config(maybe_cls=None):
+def config(maybe_cls=None, title=None, description=None):
     """ File config class decorator.
 
     :param maybe_cls: The class to inherit from, defaults to None
@@ -65,7 +65,7 @@ def config(maybe_cls=None):
         :rtype: object
         """
 
-        setattr(config_cls, CONFIG_KEY, True)
+        setattr(config_cls, CONFIG_KEY, dict(title=title, description=description))
         return attr.s(config_cls, slots=True)
 
     if maybe_cls is None:
@@ -269,12 +269,17 @@ def _build_schema(config_cls, property_path=[]):
     if not _is_config_type(config_cls):
         raise ValueError(f"class {config_cls!r} is not a 'file_config.config' class")
 
+    config_entry = getattr(config_cls, CONFIG_KEY)
     schema = {
         "type": "object",
-        "title": config_cls.__qualname__,
+        "title": config_entry.get("title", config_cls.__qualname__),
         "required": [],
         "properties": {},
     }
+    schema_description = config_entry.get("description")
+    if isinstance(schema_description, str):
+        schema["description"] = schema_description
+
     if len(property_path) <= 0:
         schema["$id"] = f"{config_cls.__qualname__}.json"
         schema["$schema"] = "http://json-schema.org/draft-07/schema#"
