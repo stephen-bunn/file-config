@@ -4,7 +4,13 @@
 from .json import JSONHandler
 from .toml import TOMLHandler
 from .yaml import YAMLHandler
+from .pickle import PickleHandler
 from .message_pack import MessagePackHandler
 
-
-__all__ = ["JSONHandler", "TOMLHandler", "YAMLHandler", "MessagePackHandler"]
+__all__ = [
+    "JSONHandler",
+    "TOMLHandler",
+    "YAMLHandler",
+    "PickleHandler",
+    "MessagePackHandler",
+]
