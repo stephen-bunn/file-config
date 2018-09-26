@@ -175,7 +175,7 @@ def _is_typing_type(type_):
     """
 
     if type_ is not None:
-        return "__module__" in type_.__dict__ and type_.__module__ == "typing"
+        return getattr(type_, "__module__", None) == "typing"
     return False
 
 
@@ -467,7 +467,8 @@ def _dump(instance, dict_type=OrderedDict):
                             else value
                         )
                     entry_value = entry_mapping
-                values[attribute_name] = entry_value
+                if entry_value is not None:
+                    values[attribute_name] = entry_value
 
     return values
 
