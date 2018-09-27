@@ -2,20 +2,34 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import re
+import typing
+import warnings
 import collections
-from typing import List
 
 import six
 import attr
 
 from .constants import CONFIG_KEY
-from .utils import is_config_type, is_config_var, is_typing_type
+from .utils import is_config_type, is_config_var, is_typing_type, is_builtin_type
 
 RE_PATTERN_TYPE = type(re.compile(""))
 
 
-def _build_type(type_, property_path=[]):
+def _build_typing_type(type_, property_path=[]):
     return {}
+
+
+def _build_builtin_type(type_, property_path=[]):
+    return {}
+
+
+def _build_type(type_, property_path=[]):
+    if is_typing_type(type_):
+        return _build_typing_type(type_)
+    elif is_builtin_type(type_):
+        return _build_builtin_type(type_)
+    else:
+        warnings.warn(f"unhandled translation type {type_!r}")
 
 
 def _build_var(var, property_path=[]):

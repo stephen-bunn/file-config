@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
+import six
 import attr
 
 from .constants import CONFIG_KEY
@@ -19,6 +20,23 @@ def is_config_type(type_):
         isinstance(type_, type)
         and hasattr(type_, "__attrs_attrs__")
         and hasattr(type_, CONFIG_KEY)
+    )
+
+
+def is_builtin_type(type_):
+    return isinstance(type_, type) and type_ in (
+        str,
+        int,
+        float,
+        complex,
+        list,
+        tuple,
+        str,
+        bytes,
+        bytearray,
+        set,
+        frozenset,
+        dict,
     )
 
 
