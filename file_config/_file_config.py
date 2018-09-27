@@ -9,8 +9,7 @@ import attr
 import jsonschema
 
 from . import handlers
-
-CONFIG_KEY = "__file_config_metadata"
+from .constants import CONFIG_KEY
 
 
 @attr.s(slots=True)
