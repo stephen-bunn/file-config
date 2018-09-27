@@ -100,23 +100,29 @@ def config(maybe_cls=None, title=None, description=None):
         setattr(config_cls, CONFIG_KEY, dict(title=title, description=description))
         # dynamically assign available handlers to the wrapped class
         for handler_name in handlers.__all__:
-            handler = getattr(handlers, handler_name)()
-            setattr(
-                config_cls,
-                f"dumps_{handler.name}",
-                partialmethod(_handle_dumps, handler),
-            )
-            setattr(
-                config_cls, f"dump_{handler.name}", partialmethod(_handle_dump, handler)
-            )
-            setattr(
-                config_cls,
-                f"loads_{handler.name}",
-                partialmethod(_handle_loads, handler),
-            )
-            setattr(
-                config_cls, f"load_{handler.name}", partialmethod(_handle_load, handler)
-            )
+            handler = getattr(handlers, handler_name)
+            if handler.available:
+                handler = handler()
+                setattr(
+                    config_cls,
+                    f"dumps_{handler.name}",
+                    partialmethod(_handle_dumps, handler),
+                )
+                setattr(
+                    config_cls,
+                    f"dump_{handler.name}",
+                    partialmethod(_handle_dump, handler),
+                )
+                setattr(
+                    config_cls,
+                    f"loads_{handler.name}",
+                    partialmethod(_handle_loads, handler),
+                )
+                setattr(
+                    config_cls,
+                    f"load_{handler.name}",
+                    partialmethod(_handle_load, handler),
+                )
         return attr.s(config_cls, slots=True)
 
     if maybe_cls is None:

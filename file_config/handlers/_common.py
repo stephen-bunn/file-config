@@ -29,6 +29,13 @@ class BaseHandler(abc.ABC):
     def packages(self) -> List[str]:
         raise NotImplementedError(f"subclasses must implement 'packages'")
 
+    @classmethod
+    def available(self):
+        for module_name in self.packages:
+            if importlib.util.find_spec(module_name):
+                return True
+        return False
+
     def _discover_import(self):
         for module_name in self.packages:
             spec = importlib.util.find_spec(module_name)
