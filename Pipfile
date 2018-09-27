@@ -11,14 +11,21 @@ jsonschema = "*"
 "flake8" = "*"
 black = "*"
 isort = "*"
-ptpython = "*"
 ujson = "*"
 tomlkit = "*"
 pyyaml = "*"
 msgpack = "*"
+pytest = "*"
+pytest-xdist = "*"
+pytest-sugar = "*"
+"pytest-flake8" = "*"
+hypothesis = "*"
 
 [requires]
 python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+tests = "pytest -rc ./tests -n 4"
