@@ -9,8 +9,8 @@ class TOMLHandler(BaseHandler):
     name = "toml"
     packages = ("tomlkit",)
 
-    def on_tomlkit_dumps(self, tomlkit, dictionary: dict) -> str:
+    def on_tomlkit_dumps(self, tomlkit, dictionary):
         return tomlkit.dumps(dictionary)
 
-    def on_tomlkit_loads(self, tomlkit, content: str) -> dict:
+    def on_tomlkit_loads(self, tomlkit, content):
         return tomlkit.parse(content)

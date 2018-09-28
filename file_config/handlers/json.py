@@ -9,14 +9,14 @@ class JSONHandler(BaseHandler):
     name = "json"
     packages = ("ujson", "json",)
 
-    def on_json_dumps(self, json, dictionary: dict) -> str:
+    def on_json_dumps(self, json, dictionary):
         return json.dumps(dictionary)
 
-    def on_json_loads(self, json, content: str) -> dict:
+    def on_json_loads(self, json, content):
         return json.loads(content)
 
-    def on_ujson_dumps(self, ujson, dictionary: dict) -> str:
+    def on_ujson_dumps(self, ujson, dictionary):
         return ujson.dumps(dictionary)
 
-    def on_ujson_loads(self, ujson, content: str) -> dict:
+    def on_ujson_loads(self, ujson, content):
         return ujson.loads(content)

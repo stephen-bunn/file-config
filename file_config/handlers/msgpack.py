@@ -9,8 +9,8 @@ class MsgpackHandler(BaseHandler):
     name = "msgpack"
     packages = ("msgpack",)
 
-    def on_msgpack_dumps(self, msgpack, dictionary: dict) -> str:
+    def on_msgpack_dumps(self, msgpack, dictionary):
         return msgpack.dumps(dictionary)
 
-    def on_msgpack_loads(self, msgpack, content: str) -> dict:
+    def on_msgpack_loads(self, msgpack, content):
         return msgpack.loads(content, raw=False)

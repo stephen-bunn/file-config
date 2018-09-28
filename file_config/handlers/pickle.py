@@ -9,8 +9,8 @@ class PickleHandler(BaseHandler):
     name = "pickle"
     packages = ("pickle",)
 
-    def on_pickle_dumps(self, pickle, dictionary: dict) -> str:
+    def on_pickle_dumps(self, pickle, dictionary):
         return pickle.dumps(dictionary, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def on_pickle_loads(self, pickle, content: str) -> dict:
+    def on_pickle_loads(self, pickle, content):
         return pickle.loads(content)
