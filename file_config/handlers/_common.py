@@ -40,9 +40,7 @@ class BaseHandler(abc.ABC):
         for module_name in self.packages:
             spec = importlib.util.find_spec(module_name)
             if spec is not None:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                sys.modules[module_name] = module
+                importlib.import_module(module_name)
                 imported_hook = getattr(self, f"on_{module_name}_imported", None)
                 if callable(imported_hook):
                     imported_hook(sys.modules[module_name])

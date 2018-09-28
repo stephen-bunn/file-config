@@ -4,7 +4,7 @@
 from ._common import BaseHandler
 
 
-class MessagePackHandler(BaseHandler):
+class MsgpackHandler(BaseHandler):
 
     name = "msgpack"
     packages = ("msgpack",)

@@ -1,7 +1,6 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
-import re
 import typing
 import warnings
 import collections
@@ -10,26 +9,76 @@ import six
 import attr
 
 from .constants import CONFIG_KEY
-from .utils import is_config_type, is_config_var, is_typing_type, is_builtin_type
+from .utils import (
+    is_config_type,
+    is_config_var,
+    is_typing_type,
+    is_builtin_type,
+    is_string_type,
+    is_number_type,
+    is_array_type,
+    is_object_type,
+)
 
-RE_PATTERN_TYPE = type(re.compile(""))
+# TODO: handle jsonschema/typing union types and regex pattern matching
 
 
-def _build_typing_type(type_, property_path=[]):
+def _build_string_type(var, property_path=[]):
+    schema = {"type": "string"}
+    # TODO: handle jsonschema arguments
+    return schema
+
+
+def _build_number_type(var, property_path=[]):
+    schema = {"type": "number"}
+    # TODO: handle jsonschema arguments
+    return schema
+
+
+def _build_array_type(var, property_path=[]):
+    schema = {"type": "array", "items": {"$id": f"#/{'/'.join(property_path)}/items"}}
+    if is_typing_type(var.type) and len(var.type.__args__) > 0:
+        # NOTE: typing.List only allows one typing argument
+        nested_type = var.type.__args__[0]
+        schema["items"].update(
+            _build(nested_type, property_path=property_path + ["items"])
+        )
+    return schema
+
+
+def _build_object_type(var, property_path=[]):
+    schema = {"type": "object"}
+    if is_typing_type(var.type) and len(var.type.__args__) == 2:
+        (key_type, value_type) = var.type.__args__
+
+        key_pattern = "^(.*)$"
+        # FIXME: find a way to override the regex used in patternProperties
+        # (and everywhere else)
+        if not is_string_type(key_type):
+            raise ValueError(
+                f"cannot serialize object with key of type {key_type!r}, "
+                f"located in var {var.name!r}"
+            )
+
+        schema["patternProperties"] = {
+            key_pattern: _build(value_type, property_path=property_path)
+        }
+
+    return schema
+
+
+def _build_type(type_, value, property_path=[]):
+    for (type_check, builder) in (
+        (is_string_type, _build_string_type),
+        (is_number_type, _build_number_type),
+        (is_array_type, _build_array_type),
+        (is_object_type, _build_object_type),
+    ):
+        if type_check(type_):
+            return builder(value, property_path=property_path)
+
+    warnings.warn(f"unhandled translation for type {type_!r}")
     return {}
-
-
-def _build_builtin_type(type_, property_path=[]):
-    return {}
-
-
-def _build_type(type_, property_path=[]):
-    if is_typing_type(type_):
-        return _build_typing_type(type_)
-    elif is_builtin_type(type_):
-        return _build_builtin_type(type_)
-    else:
-        warnings.warn(f"unhandled translation type {type_!r}")
 
 
 def _build_var(var, property_path=[]):
@@ -50,7 +99,7 @@ def _build_var(var, property_path=[]):
         if isinstance(entry.examples, collections.Iterable) and len(entry.examples) > 0:
             schema["examples"] = entry.examples
 
-    schema.update(_build_type(var.type, property_path=property_path + [var.name]))
+    schema.update(_build_type(var.type, var, property_path=property_path + [var.name]))
     return schema
 
 
@@ -96,6 +145,14 @@ def _build_config(config_cls, property_path=[]):
             )
 
     return schema
+
+
+def _build(value, property_path=[]):
+    if is_config_type(value):
+        return _build_config(value, property_path=property_path)
+    elif is_config_var(value):
+        return _build_var(value, property_path=property_path)
+    return _build_type(type(value), value, property_path=property_path)
 
 
 def build_schema(config_cls):
