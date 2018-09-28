@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
+import re
 import typing
 import collections
 
@@ -8,6 +9,9 @@ import six
 import attr
 
 from .constants import CONFIG_KEY
+
+
+COMPILED_PATTERN_TYPE = type(re.compile(""))
 
 
 def is_config_var(var):
@@ -28,6 +32,10 @@ def is_config_type(type_):
 
 def is_config(config_instance):
     return isinstance(config_instance, object) and is_config_type(type(config_instance))
+
+
+def is_compiled_pattern(compiled_pattern):
+    return isinstance(compiled_pattern, COMPILED_PATTERN_TYPE)
 
 
 def is_builtin_type(type_):
@@ -57,6 +65,14 @@ def is_collections_type(type_):
     )
 
 
+def is_regex_type(type_):
+    return (
+        callable(type_)
+        and hasattr(type_, "__supertype__")
+        and is_compiled_pattern(type_.__supertype__)
+    )
+
+
 def is_null_type(type_):
     if type_ in (type(None),):
         return True
@@ -76,6 +92,8 @@ def is_string_type(type_):
         return type_.__origin__ in (typing.Text, typing.AnyStr)
     elif is_collections_type(type_):
         return type_ in (collections.UserString,)
+    elif is_regex_type(type_):
+        return True
     return False
 
 

@@ -1,17 +1,20 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
+import re
 import typing
 import warnings
 import collections
+from functools import partial
 
 import six
 import attr
 
-from .constants import CONFIG_KEY
+from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 from .utils import (
     is_config_type,
     is_config_var,
+    is_regex_type,
     is_typing_type,
     is_builtin_type,
     is_null_type,
@@ -21,40 +24,73 @@ from .utils import (
     is_number_type,
     is_array_type,
     is_object_type,
+    is_compiled_pattern,
 )
 
 # TODO: handle jsonschema/typing union types and regex pattern matching
 
 
+def Regex(pattern):
+    return typing.NewType(REGEX_TYPE_NAME, re.compile(pattern))
+
+
 def _build_null_type(var, property_path=[]):
-    schema = {"type": "null"}
-    return schema
+    return {"type": "null"}
 
 
 def _build_bool_type(var, property_path=[]):
-    schema = {"type": "boolean"}
-    return schema
+    return {"type": "boolean"}
 
 
 def _build_string_type(var, property_path=[]):
     schema = {"type": "string"}
+    entry = var.metadata[CONFIG_KEY]
+
+    if isinstance(entry.min, int):
+        schema["minLength"] = entry.min
+    if isinstance(entry.max, int):
+        schema["maxLength"] = entry.max
+
+    if is_regex_type(var.type):
+        schema["pattern"] = var.type.__supertype__.pattern
+
     # TODO: handle jsonschema arguments
     return schema
 
 
 def _build_integer_type(var, property_path=[]):
     schema = {"type": "integer"}
+    entry = var.metadata[CONFIG_KEY]
+
+    if isinstance(entry.min, int):
+        schema["minimum"] = entry.min
+    if isinstance(entry.max, int):
+        schema["maximum"] = entry.max
+
     return schema
 
 
 def _build_number_type(var, property_path=[]):
     schema = {"type": "number"}
+    entry = var.metadata[CONFIG_KEY]
+
+    if isinstance(entry.min, int):
+        schema["minimum"] = entry.min
+    if isinstance(entry.max, int):
+        schema["maximum"] = entry.max
     # TODO: handle jsonschema arguments
     return schema
 
 
 def _build_array_type(var, property_path=[]):
     schema = {"type": "array", "items": {"$id": f"#/{'/'.join(property_path)}/items"}}
+    entry = var.metadata[CONFIG_KEY]
+
+    if isinstance(entry.min, int):
+        schema["minItems"] = entry.min
+    if isinstance(entry.max, int):
+        schema["maxItems"] = entry.max
+
     if is_typing_type(var.type) and len(var.type.__args__) > 0:
         # NOTE: typing.List only allows one typing argument
         nested_type = var.type.__args__[0]
@@ -66,13 +102,23 @@ def _build_array_type(var, property_path=[]):
 
 def _build_object_type(var, property_path=[]):
     schema = {"type": "object"}
+    entry = var.metadata[CONFIG_KEY]
+
+    if isinstance(entry.min, int):
+        schema["minProperties"] = entry.min
+    if isinstance(entry.max, int):
+        schema["maxProperties"] = entry.max
+
+    # NOTE: typing.Dict only accepts two typing arguments
     if is_typing_type(var.type) and len(var.type.__args__) == 2:
         (key_type, value_type) = var.type.__args__
 
         key_pattern = "^(.*)$"
-        # FIXME: find a way to override the regex used in patternProperties
-        # (and everywhere else)
-        if not is_string_type(key_type):
+        if hasattr(key_type, "__supertype__") and is_compiled_pattern(
+            key_type.__supertype__
+        ):
+            key_pattern = key_type.__supertype__.pattern
+        elif not is_string_type(key_type):
             raise ValueError(
                 f"cannot serialize object with key of type {key_type!r}, "
                 f"located in var {var.name!r}"

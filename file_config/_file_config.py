@@ -34,6 +34,8 @@ class _ConfigEntry(object):
     description = attr.ib(type=str, default=None)
     required = attr.ib(type=bool, default=True)
     examples = attr.ib(type=list, default=None)
+    min = attr.ib(type=int, default=None)
+    max = attr.ib(type=int, default=None)
 
 
 def _handle_dumps(self, handler):
@@ -150,6 +152,8 @@ def var(
     description=None,
     required=True,
     examples=None,
+    min=None,
+    max=None,
     **kwargs,
 ):
     """ Creates a config variable.
@@ -166,6 +170,8 @@ def var(
                 description=description,
                 required=required,
                 examples=examples,
+                min=min,
+                max=max,
             )
         },
         **kwargs,
@@ -221,9 +227,7 @@ def _build(config_cls, dictionary):
             else:
                 kwargs[var.name] = item
         elif is_config_type(entry.type):
-            kwargs[var.name] = _build(
-                entry.type, dictionary.get(arg_key, arg_default)
-            )
+            kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
         else:
             kwargs[var.name] = dictionary.get(arg_key, arg_default)
 
