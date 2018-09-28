@@ -14,7 +14,10 @@ from .utils import (
     is_config_var,
     is_typing_type,
     is_builtin_type,
+    is_null_type,
+    is_bool_type,
     is_string_type,
+    is_integer_type,
     is_number_type,
     is_array_type,
     is_object_type,
@@ -23,9 +26,24 @@ from .utils import (
 # TODO: handle jsonschema/typing union types and regex pattern matching
 
 
+def _build_null_type(var, property_path=[]):
+    schema = {"type": "null"}
+    return schema
+
+
+def _build_bool_type(var, property_path=[]):
+    schema = {"type": "boolean"}
+    return schema
+
+
 def _build_string_type(var, property_path=[]):
     schema = {"type": "string"}
     # TODO: handle jsonschema arguments
+    return schema
+
+
+def _build_integer_type(var, property_path=[]):
+    schema = {"type": "integer"}
     return schema
 
 
@@ -69,7 +87,10 @@ def _build_object_type(var, property_path=[]):
 
 def _build_type(type_, value, property_path=[]):
     for (type_check, builder) in (
+        (is_null_type, _build_null_type),
+        (is_bool_type, _build_bool_type),
         (is_string_type, _build_string_type),
+        (is_integer_type, _build_integer_type),
         (is_number_type, _build_number_type),
         (is_array_type, _build_array_type),
         (is_object_type, _build_object_type),

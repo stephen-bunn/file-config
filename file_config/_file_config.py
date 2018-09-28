@@ -27,8 +27,8 @@ class _ConfigEntry(object):
     """ Configuration entry.
     """
 
-    default = attr.ib(type=str, default=None)
     type = attr.ib(default=None)
+    default = attr.ib(type=str, default=None)
     name = attr.ib(type=str, default=None)
     title = attr.ib(type=str, default=None)
     description = attr.ib(type=str, default=None)
@@ -143,8 +143,8 @@ def config(maybe_cls=None, title=None, description=None):
 
 
 def var(
-    default=None,
     type=None,
+    default=None,
     name=None,
     title=None,
     description=None,
@@ -159,8 +159,8 @@ def var(
     return attr.ib(
         metadata={
             CONFIG_KEY: _ConfigEntry(
-                default=default,
                 type=type,
+                default=default,
                 name=name,
                 title=title,
                 description=description,

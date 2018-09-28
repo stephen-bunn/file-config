@@ -32,6 +32,7 @@ def is_config(config_instance):
 
 def is_builtin_type(type_):
     return isinstance(type_, type) and type_ in (
+        bool,
         str,
         int,
         float,
@@ -56,6 +57,18 @@ def is_collections_type(type_):
     )
 
 
+def is_null_type(type_):
+    if type_ in (type(None),):
+        return True
+    return False
+
+
+def is_bool_type(type_):
+    if is_builtin_type(type_):
+        return type_ in (bool,)
+    return False
+
+
 def is_string_type(type_):
     if is_builtin_type(type_):
         return type_ in (str,)
@@ -66,9 +79,15 @@ def is_string_type(type_):
     return False
 
 
+def is_integer_type(type_):
+    if is_builtin_type(type_):
+        return type_ in (int,)
+    return False
+
+
 def is_number_type(type_):
     if is_builtin_type(type_):
-        return type_ in (int, float, complex)
+        return type_ in (float, complex)
     return False
 
 
