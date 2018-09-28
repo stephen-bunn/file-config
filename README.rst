@@ -27,7 +27,138 @@ File Config
       ]
    )
 
-   file_config.validate(my_config)
+   my_config.dumps_json()
+   # {"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
+
+
+Define Configs
+--------------
+
+Making config is straight-forward if you are familiar with attrs syntax.
+Decorate a class with the ``file_config.config`` decorator and the class is considered to be a config.
+
+.. code-block:: python
+
+   @file_config.config
+   class MyConfig(object):
+      pass
+
+You can check if a variable is a config type or instance by using the ``file_config.utils.is_config_type`` or ``file_config.utils.is_config`` methods.
+
+.. code-block:: python
+
+   assert file_config.utils.is_config_type(MyConfig)
+   assert file_config.utils.is_config(my_config)
+
+There are two optional attributes are available on the ``file_config.config`` method (both used for validation):
+
+- ``title`` - *Defines the title of the object in the resulting jsonschema*
+- ``description`` - *Defines the description of the object in the resulting jsonschema*
+
+
+.. code-block:: python
+
+   @file_config.config(title="My Config", description="A simple/sample config")
+   class MyConfig(object):
+      pass
+
+
+
+Defining Config Vars
+--------------------
+
+The real meat of the config class comes from adding attributes to the config through the ``file_config.var`` method.
+Again, if you're familiar with attrs syntax, this should be pretty straight-forward.
+
+.. code-block:: python
+
+   @file_config.config(title="My Config", description="A simple/sample config")
+   class MyConfig(object):
+
+      name = file_config.var()
+
+
+Required
+~~~~~~~~
+
+If no args are given the the ``var`` method then the config object only expects that the variable is ``required`` when validating.
+You can disable the config exepecting the ``var`` to exist by setting ``required = False``...
+
+.. code-block:: python
+
+   name = file_config.var(required=False)
+
+Type
+~~~~
+
+You can specify the type of a ``var`` by using either builtin types or *most common* typing types.
+This is accepted as either the first argument to the method or as the keyword ``type``.
+
+.. code-block:: python
+
+   name = file_config.var(type=str)
+   keywords = file_config.var(type=typing.List[str])
+
+Commonly you need to validate strings against regular expressions.
+Since this package is trying to stick as close as possible to Python's typing there is no builtin type to store regular expressions.
+To do handle this a special method was created to store regular expressions in a ``typing`` type.
+
+.. code-block:: python
+
+   version = file_config.var(type=file_config.Regex(r"^v\d+$"))
+
+Nested configs are also possible to throw into the ``type`` keyword of the var.
+These are serialized into nested objects in the jsonschema.
+
+.. code-block:: python
+
+   @file_config.config
+   class GroupContainer(object):
+
+      @file_config.config
+      class Group(object):
+         name = file_config.var(str)
+
+      name = file_config.var(str)
+      parent_group = file_config.var(Group)
+      children_groups = file_config.var(typing.List[Group])
+
+-----
+
+Note that types require to be json serializable.
+So types that don't dump out to json (like ``typing.Dict[int, str]``) will fail in the ``file_config.build_schema`` step.
+
+.. code-block:: python
+
+   @file_config.config
+   class PackageConfig:
+      depends = file_config.var(type=typing.Dict[int, str])
+
+>>> file_config.build_schema(PackageConfig)
+Traceback (most recent call last):
+  File "main.py", line 21, in <module>
+    pprint(file_config.build_schema(PackageConfig))
+  File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 278, in build_schema
+    return _build_config(config_cls, property_path=[])
+  File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 261, in _build_config
+    var, property_path=property_path
+  File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 218, in _build_var
+    _build_type(var.type, var, property_path=property_path + [var.name])
+  File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 182, in _build_type
+    return builder(value, property_path=property_path)
+  File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 160, in _build_object_type
+    f"cannot serialize object with key of type {key_type!r}, "
+ValueError: cannot serialize object with key of type <class 'int'>, located in var 'depends'
+
+Title
+~~~~~
+
+TODO: Document title
+
+Description
+~~~~~~~~~~~
+
+TODO: Document description
 
 
 Serialization / Deserialization
@@ -111,6 +242,10 @@ Failed validating 'pattern' in schema['properties']['version']:
     {'$id': '#/properties/version', 'pattern': '^v\\d+$', 'type': 'string'}
 On instance['version']:
     '12'
+
+The attribute types added config vars **do not** imply type checking when creating an instance of the class.
+Attribute types are used for generating the jsonschema for the config and validating the model.
+This allows you to throw any data you need to throw around in the config class, but validate the config only when you need to.
 
 You can get the jsonschema that is created to validate a config class through the ``build_schema`` method.
 
