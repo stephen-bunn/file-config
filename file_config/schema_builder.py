@@ -17,6 +17,7 @@ from .utils import (
     is_regex_type,
     is_typing_type,
     is_builtin_type,
+    is_union_type,
     is_null_type,
     is_bool_type,
     is_string_type,
@@ -26,8 +27,6 @@ from .utils import (
     is_object_type,
     is_compiled_pattern,
 )
-
-# TODO: handle jsonschema/typing union types
 
 
 def Regex(pattern):
@@ -203,7 +202,20 @@ def _build_var(var, property_path=[]):
         if isinstance(entry.examples, collections.Iterable) and len(entry.examples) > 0:
             schema["examples"] = entry.examples
 
-    schema.update(_build_type(var.type, var, property_path=property_path + [var.name]))
+    # handle typing.Union types by simply using the "anyOf" key
+    if is_union_type(var.type):
+        type_union = {"anyOf": []}
+        for allowed_type in var.type.__args__:
+            type_union["anyOf"].append(
+                _build_type(
+                    allowed_type, allowed_type, property_path=property_path + [var.name]
+                )
+            )
+        schema.update(type_union)
+    else:
+        schema.update(
+            _build_type(var.type, var, property_path=property_path + [var.name])
+        )
     return schema
 
 

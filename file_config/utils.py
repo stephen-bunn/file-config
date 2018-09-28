@@ -73,6 +73,10 @@ def is_regex_type(type_):
     )
 
 
+def is_union_type(type_):
+    return isinstance(type_, typing._Union)
+
+
 def is_null_type(type_):
     if type_ in (type(None),):
         return True
