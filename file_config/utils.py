@@ -9,7 +9,6 @@ import attr
 
 from .constants import CONFIG_KEY
 
-
 COMPILED_PATTERN_TYPE = type(re.compile(""))
 
 

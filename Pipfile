@@ -20,6 +20,7 @@ pytest-xdist = "*"
 pytest-sugar = "*"
 "pytest-flake8" = "*"
 hypothesis = "*"
+tox = "*"
 
 [requires]
 python_version = "3.6"

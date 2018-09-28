@@ -7,7 +7,7 @@ from ._common import BaseHandler
 class JSONHandler(BaseHandler):
 
     name = "json"
-    packages = ("ujson", "json",)
+    packages = ("ujson", "json")
 
     def on_json_dumps(self, json, dictionary):
         return json.dumps(dictionary)

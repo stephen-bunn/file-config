@@ -7,7 +7,6 @@ import importlib
 
 
 class BaseHandler(abc.ABC):
-
     @property
     def imported(self):
         if not hasattr(self, "_imported"):

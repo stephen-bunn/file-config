@@ -9,23 +9,23 @@ from functools import partial
 
 import attr
 
-from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 from .utils import (
-    is_config_type,
+    is_bool_type,
+    is_null_type,
+    is_array_type,
     is_config_var,
     is_regex_type,
+    is_union_type,
+    is_config_type,
+    is_number_type,
+    is_object_type,
+    is_string_type,
     is_typing_type,
     is_builtin_type,
-    is_union_type,
-    is_null_type,
-    is_bool_type,
-    is_string_type,
     is_integer_type,
-    is_number_type,
-    is_array_type,
-    is_object_type,
     is_compiled_pattern,
 )
+from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
 
 def Regex(pattern):

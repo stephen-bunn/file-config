@@ -12,7 +12,6 @@ class YAMLHandler(BaseHandler):
     packages = ("yaml",)
 
     def on_yaml_imported(self, yaml):
-
         def represent_ordereddict(dumper, data):
             """ A custom data representer for ``OrderedDict`` instances.
 
