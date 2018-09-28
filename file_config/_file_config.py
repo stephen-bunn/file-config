@@ -184,6 +184,12 @@ def var(
     )
 
 
+def make_config(name, var_dict, title=None, description=None, **kwargs):
+    return config(
+        attr.make_class(name, var_dict, **kwargs), title=title, description=description
+    )
+
+
 def _build(config_cls, dictionary):
     """ Builds an instance of ``config_cls`` using ``dictionary``.
 
@@ -268,10 +274,11 @@ def _dump(config_instance, dict_type=OrderedDict):
 
         if is_array_type(entry.type):
             items = getattr(config_instance, var.name, [])
-            result[dump_key] = [
-                (_dump(item, dict_type=dict_type) if is_config(item) else item)
-                for item in items
-            ]
+            if items is not None:
+                result[dump_key] = [
+                    (_dump(item, dict_type=dict_type) if is_config(item) else item)
+                    for item in items
+                ]
         else:
             if is_config_type(entry.type):
                 result[dump_key] = _dump(

@@ -14,7 +14,7 @@ COMPILED_PATTERN_TYPE = type(re.compile(""))
 
 def is_config_var(var):
     return (
-        isinstance(var, attr._make.Attribute)
+        isinstance(var, (attr._make.Attribute, attr._make._CountingAttr))
         and hasattr(var, "metadata")
         and CONFIG_KEY in var.metadata
     )

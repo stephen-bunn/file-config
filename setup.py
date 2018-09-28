@@ -13,21 +13,25 @@ from file_config import __version__
 INSTALL_REQUIRES = ["attrs", "jsonschema"]
 SETUP_REQUIRES = []
 EXTRAS_REQUIRE = {
-    "dev": [
-        "flake8",
-        "black",
-        "isort",
-        "ujson",
-        "tomlkit",
-        "pyyaml",
-        "msgpack",
-        "pytest",
-        "pytest-xdist",
-        "pytest-sugar",
-        "pytest-flake8",
-        "hypothesis",
-    ]
+    "tomlkit": ["tomlkit"],
+    "ujson": ["ujson"],
+    "pyyaml": ["pyyaml"],
+    "msgpack": ["msgpack"],
 }
+
+all_extras = list(set().union(*[packages for packages in EXTRAS_REQUIRE.values()]))
+EXTRAS_REQUIRE["docs"] = all_extras + ["sphinx"]
+EXTRAS_REQUIRE["test"] = all_extras + [
+    "flake8",
+    "pytest",
+    "pytest-flake8",
+    "pytest-sugar",
+    "pytest-xdist",
+    "hypothesis",
+]
+EXTRAS_REQUIRE["dev"] = (
+    EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["test"] + ["black", "isort"]
+)
 
 
 class UploadCommand(setuptools.Command):

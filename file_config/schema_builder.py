@@ -32,7 +32,9 @@ def Regex(pattern):
     return typing.NewType(REGEX_TYPE_NAME, re.compile(pattern))
 
 
-def _build_attribute_modifiers(var, attribute_mapping, ignore=["type", "required"]):
+def _build_attribute_modifiers(
+    var, attribute_mapping, ignore=["type", "required", "default"]
+):
     if not is_config_var(var):
         raise ValueError(
             f"cannot build field modifiers for {var!r}, is not a config var"

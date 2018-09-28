@@ -3,11 +3,18 @@
 
 import typing
 
-from file_config import _file_config as file_config
+from hypothesis import given
+
+import file_config
+
+from . import config, config_var
 
 
-def test_is_typing_type():
-    for type_name in typing.__all__:
-        type_ = getattr(typing, type_name)
-        if hasattr(type_, "__module__") and type_.__module__ == "typing":
-            assert file_config._is_typing_type(type_)
+@given(config_var())
+def test_config_var(var):
+    assert file_config.utils.is_config_var(var)
+
+
+@given(config())
+def test_config(config):
+    assert file_config.utils.is_config_type(config)
