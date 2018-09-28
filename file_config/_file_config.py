@@ -36,6 +36,8 @@ class _ConfigEntry(object):
     examples = attr.ib(type=list, default=None)
     min = attr.ib(type=int, default=None)
     max = attr.ib(type=int, default=None)
+    unique = attr.ib(type=bool, default=None)
+    contains = attr.ib(type=list, default=None)
 
 
 def _handle_dumps(self, handler):
@@ -154,6 +156,8 @@ def var(
     examples=None,
     min=None,
     max=None,
+    unique=None,
+    contains=None,
     **kwargs,
 ):
     """ Creates a config variable.
@@ -172,6 +176,8 @@ def var(
                 examples=examples,
                 min=min,
                 max=max,
+                unique=unique,
+                contains=contains,
             )
         },
         **kwargs,

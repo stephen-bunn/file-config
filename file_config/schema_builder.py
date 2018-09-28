@@ -27,11 +27,45 @@ from .utils import (
     is_compiled_pattern,
 )
 
-# TODO: handle jsonschema/typing union types and regex pattern matching
+# TODO: handle jsonschema/typing union types
 
 
 def Regex(pattern):
     return typing.NewType(REGEX_TYPE_NAME, re.compile(pattern))
+
+
+def _build_attribute_modifiers(var, attribute_mapping, ignore=["type", "required"]):
+    if not is_config_var(var):
+        raise ValueError(
+            f"cannot build field modifiers for {var!r}, is not a config var"
+        )
+
+    entry = var.metadata[CONFIG_KEY]
+    modifiers = {}
+
+    for (entry_attribute, entry_value) in zip(
+        attr.fields(type(entry)), attr.astuple(entry)
+    ):
+        if entry_value is not None:
+            if entry_attribute.name in ignore:
+                continue
+            elif entry_attribute.name in attribute_mapping:
+                # NOTE: required for `isinstance(True, (int, float)) == True`
+                if type(entry_value) == entry_attribute.type:
+                    modifiers[attribute_mapping[entry_attribute.name]] = entry_value
+                else:
+                    raise ValueError(
+                        f"invalid modifier type for modifier {entry_attribute.name!r} "
+                        f"on var {var.name!r}, expected type {entry_attribute.type!r}, "
+                        f"received {entry_value!r} of type {type(entry_value)!r}"
+                    )
+            else:
+                warnings.warn(
+                    f"field modifier {entry_attribute.name!r} has no effect on var "
+                    f"{var.name!r} of type {entry.type!r}"
+                )
+
+    return modifiers
 
 
 def _build_null_type(var, property_path=[]):
@@ -44,52 +78,52 @@ def _build_bool_type(var, property_path=[]):
 
 def _build_string_type(var, property_path=[]):
     schema = {"type": "string"}
-    entry = var.metadata[CONFIG_KEY]
+    if is_builtin_type(var):
+        return schema
 
-    if isinstance(entry.min, int):
-        schema["minLength"] = entry.min
-    if isinstance(entry.max, int):
-        schema["maxLength"] = entry.max
+    schema.update(
+        _build_attribute_modifiers(var, {"min": "minLength", "max": "maxLength"})
+    )
 
     if is_regex_type(var.type):
         schema["pattern"] = var.type.__supertype__.pattern
-
-    # TODO: handle jsonschema arguments
     return schema
 
 
 def _build_integer_type(var, property_path=[]):
     schema = {"type": "integer"}
-    entry = var.metadata[CONFIG_KEY]
+    if is_builtin_type(var):
+        return schema
 
-    if isinstance(entry.min, int):
-        schema["minimum"] = entry.min
-    if isinstance(entry.max, int):
-        schema["maximum"] = entry.max
-
+    schema.update(_build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"}))
     return schema
 
 
 def _build_number_type(var, property_path=[]):
     schema = {"type": "number"}
-    entry = var.metadata[CONFIG_KEY]
+    if is_builtin_type(var):
+        return schema
 
-    if isinstance(entry.min, int):
-        schema["minimum"] = entry.min
-    if isinstance(entry.max, int):
-        schema["maximum"] = entry.max
-    # TODO: handle jsonschema arguments
+    schema.update(_build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"}))
     return schema
 
 
 def _build_array_type(var, property_path=[]):
     schema = {"type": "array", "items": {"$id": f"#/{'/'.join(property_path)}/items"}}
-    entry = var.metadata[CONFIG_KEY]
+    if is_builtin_type(var):
+        return schema
 
-    if isinstance(entry.min, int):
-        schema["minItems"] = entry.min
-    if isinstance(entry.max, int):
-        schema["maxItems"] = entry.max
+    schema.update(
+        _build_attribute_modifiers(
+            var,
+            {
+                "min": "minItems",
+                "max": "maxItems",
+                "unique": "uniqueItems",
+                "contains": "contains",
+            },
+        )
+    )
 
     if is_typing_type(var.type) and len(var.type.__args__) > 0:
         # NOTE: typing.List only allows one typing argument
@@ -102,6 +136,9 @@ def _build_array_type(var, property_path=[]):
 
 def _build_object_type(var, property_path=[]):
     schema = {"type": "object"}
+    if is_builtin_type(var):
+        return schema
+
     entry = var.metadata[CONFIG_KEY]
 
     if isinstance(entry.min, int):
@@ -219,6 +256,8 @@ def _build(value, property_path=[]):
         return _build_config(value, property_path=property_path)
     elif is_config_var(value):
         return _build_var(value, property_path=property_path)
+    elif is_builtin_type(value):
+        return _build_type(value, value, property_path=property_path)
     return _build_type(type(value), value, property_path=property_path)
 
 
