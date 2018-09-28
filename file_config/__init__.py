@@ -2,4 +2,6 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 from . import handlers
-from ._file_config import config, var, to_dict, from_dict, build_schema, validate
+from .constants import CONFIG_KEY
+from .schema_builder import Regex, build_schema
+from ._file_config import config, var, to_dict, from_dict, validate

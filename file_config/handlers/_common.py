@@ -4,29 +4,28 @@
 import abc
 import sys
 import importlib
-from typing import Any, List, TextIO
 
 
 class BaseHandler(abc.ABC):
 
     @property
-    def imported(self) -> Any:
+    def imported(self):
         if not hasattr(self, "_imported"):
             self._imported = self._discover_import()
         return self._imported
 
     @property
-    def handler(self) -> Any:
+    def handler(self):
         if not hasattr(self, "_handler"):
             self._handler = sys.modules[self.imported]
         return self._handler
 
     @abc.abstractproperty
-    def name(self) -> str:
+    def name(self):
         raise NotImplementedError(f"subclasses must implement 'name'")
 
     @abc.abstractproperty
-    def packages(self) -> List[str]:
+    def packages(self):
         raise NotImplementedError(f"subclasses must implement 'packages'")
 
     @classmethod
@@ -40,16 +39,14 @@ class BaseHandler(abc.ABC):
         for module_name in self.packages:
             spec = importlib.util.find_spec(module_name)
             if spec is not None:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                sys.modules[module_name] = module
+                importlib.import_module(module_name)
                 imported_hook = getattr(self, f"on_{module_name}_imported", None)
                 if callable(imported_hook):
                     imported_hook(sys.modules[module_name])
                 return module_name
         raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
 
-    def dumps(self, instance: Any) -> Any:
+    def dumps(self, instance):
         dumps_hook_name = f"on_{self.imported}_dumps"
         dumps_hook = getattr(self, dumps_hook_name, None)
         if not callable(dumps_hook):
@@ -59,7 +56,7 @@ class BaseHandler(abc.ABC):
             )
         return dumps_hook(self.handler, instance)
 
-    def loads(self, content: Any) -> Any:
+    def loads(self, content):
         loads_hook_name = f"on_{self.imported}_loads"
         loads_hook = getattr(self, loads_hook_name, None)
         if not callable(loads_hook):
@@ -69,8 +66,8 @@ class BaseHandler(abc.ABC):
             )
         return loads_hook(self.handler, content)
 
-    def dump(self, instance: Any, file_object: TextIO):
+    def dump(self, instance, file_object):
         file_object.write(self.dumps(instance))
 
-    def load(self, file_object: TextIO) -> Any:
+    def load(self, file_object):
         return self.loads(file_object.read())

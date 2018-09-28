@@ -35,8 +35,8 @@ class YAMLHandler(BaseHandler):
 
         yaml.add_representer(OrderedDict, represent_ordereddict)
 
-    def on_yaml_dumps(self, yaml, instance: dict) -> str:
+    def on_yaml_dumps(self, yaml, instance):
         return yaml.dump(instance)
 
-    def on_yaml_loads(self, yaml, content: str) -> dict:
+    def on_yaml_loads(self, yaml, content):
         return yaml.load(content)
