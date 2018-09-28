@@ -33,6 +33,8 @@ File Config
 Serialization / Deserialization
 -------------------------------
 
+Be default dictionary, json, and pickle serialization is included.
+
 
 >>> config_dict = file_config.to_dict(my_config)
 OrderedDict([('name', 'Sample Config'), ('version', 'v12'), ('groups', [OrderedDict([('name', 'Sample Group'), ('type', 'config')])])])
@@ -46,6 +48,14 @@ MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sampl
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 
+>>> pickle_content = my_config.dumps_pickle()
+b'\x80\x04\x95\x7f\x00\x00\x00\x00\x00\x00\x00\x8c\x0bcollections\x94\x8c\x0bOrderedDict\x94\x93\x94)R\x94(\x8c\x04name\x94\x8c\rSample Config\x94\x8c\x07version\x94\x8c\x03v12\x94\x8c\x06groups\x94]\x94h\x02)R\x94(h\x04\x8c\x0cSample Group\x94\x8c\x04type\x94\x8c\x06config\x94uau.'
+>>> new_config = MyConfig.loads_pickle(pickle_content)
+MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
+
+
+Serializing yaml requires ``pyyaml``, ``pipenv install file-config[pyyaml]``
+
 >>> yaml_content = my_config.dumps_yaml()
 name: Sample Config
 version: v12
@@ -54,6 +64,9 @@ groups:
   type: config
 >>> new_config = MyConfig.loads_yaml(yaml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
+
+
+Serializing toml requires ``tomlkit``, ``pipenv install file-config[tomlkit]``
 
 
 >>> toml_content = my_config.dumps_toml()
@@ -66,23 +79,40 @@ type = "config"
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 
+Serializing message pack requires ``msgpack``, ``pipenv install file-config[msgpack]``
+
+
 >>> msgpack_content = my_config.dumps_msgpack()
 b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
 >>> new_config = MyConfig.loads_msgpack(msgpack_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 
->>> pickle_content = my_config.dumps_pickle()
-b'\x80\x04\x95\x7f\x00\x00\x00\x00\x00\x00\x00\x8c\x0bcollections\x94\x8c\x0bOrderedDict\x94\x93\x94)R\x94(\x8c\x04name\x94\x8c\rSample Config\x94\x8c\x07version\x94\x8c\x03v12\x94\x8c\x06groups\x94]\x94h\x02)R\x94(h\x04\x8c\x0cSample Group\x94\x8c\x04type\x94\x8c\x06config\x94uau.'
->>> new_config = MyConfig.loads_pickle(pickle_content)
-MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
-
-
 Validation
 ----------
 
+Validation is done through jsonschema and can be used to check a config instance using the ``validate`` method.
+
 >>> file_config.validate(my_config)
 None
+>>> my_config.version = "12"
+>>> file_config.validate(mod_config)
+Traceback (most recent call last):
+  File "main.py", line 61, in <module>
+    print(file_config.validate(my_config))
+  File "/home/stephen-bunn/Git/file-config/file_config/_file_config.py", line 313, in validate
+    to_dict(instance, dict_type=dict), build_schema(instance.__class__)
+  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 823, in validate
+    cls(schema, *args, **kwargs).validate(instance)
+  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 299, in validate
+    raise error
+jsonschema.exceptions.ValidationError: '12' does not match '^v\\d+$'
+Failed validating 'pattern' in schema['properties']['version']:
+    {'$id': '#/properties/version', 'pattern': '^v\\d+$', 'type': 'string'}
+On instance['version']:
+    '12'
+
+You can get the jsonschema that is created to validate a config class through the ``build_schema`` method.
 
 >>> file_config.build_schema(ModConfig)
 {'$id': 'MyConfig.json',
@@ -113,20 +143,3 @@ None
  'title': 'My Config',
  'type': 'object'}
 
-
->>> my_config.version = "12"
->>> file_config.validate(mod_config)
-Traceback (most recent call last):
-  File "main.py", line 61, in <module>
-    print(file_config.validate(my_config))
-  File "/home/stephen-bunn/Git/file-config/file_config/_file_config.py", line 313, in validate
-    to_dict(instance, dict_type=dict), build_schema(instance.__class__)
-  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 823, in validate
-    cls(schema, *args, **kwargs).validate(instance)
-  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 299, in validate
-    raise error
-jsonschema.exceptions.ValidationError: '12' does not match '^v\\d+$'
-Failed validating 'pattern' in schema['properties']['version']:
-    {'$id': '#/properties/version', 'pattern': '^v\\d+$', 'type': 'string'}
-On instance['version']:
-    '12'
