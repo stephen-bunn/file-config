@@ -7,7 +7,6 @@ import warnings
 import collections
 from functools import partial
 
-import six
 import attr
 
 from .constants import CONFIG_KEY, REGEX_TYPE_NAME
@@ -195,9 +194,9 @@ def _build_var(var, property_path=[]):
         schema["default"] = var.default
 
     if entry is not None:
-        if isinstance(entry.title, six.string_types):
+        if isinstance(entry.title, str):
             schema["title"] = entry.title
-        if isinstance(entry.description, six.string_types):
+        if isinstance(entry.description, str):
             schema["description"] = entry.description
         if isinstance(entry.examples, collections.Iterable) and len(entry.examples) > 0:
             schema["examples"] = entry.examples
@@ -228,7 +227,7 @@ def _build_config(config_cls, property_path=[]):
 
     # add schema title, defaults to config classes `__qualname__`
     schema_title = cls_entry.get("title", config_cls.__qualname__)
-    if isinstance(schema_title, six.string_types):
+    if isinstance(schema_title, str):
         schema["title"] = schema_title
 
     schema_description = cls_entry.get("description")

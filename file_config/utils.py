@@ -5,7 +5,6 @@ import re
 import typing
 import collections
 
-import six
 import attr
 
 from .constants import CONFIG_KEY

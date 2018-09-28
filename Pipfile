@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 attrs = "*"
 jsonschema = "*"
-six = "*"
 
 [dev-packages]
 "flake8" = "*"
