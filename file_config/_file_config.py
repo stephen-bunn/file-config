@@ -161,6 +161,34 @@ def var(
     **kwargs,
 ):
     """ Creates a config variable.
+
+    :param type: The expected type of the variable, defaults to None
+    :param type: type, optional
+    :param default: The default value of the var, defaults to None
+    :param default: any, optional
+    :param name: The serialized name of the variable, defaults to None
+    :param name: str, optional
+    :param title: The validation title of the variable, defaults to None
+    :param title: str, optional
+    :param description: The validation description of the variable, defaults to None
+    :param description: str, optional
+    :param required: Flag to indicate if variable is required during validation,
+        defaults to True
+    :param required: bool, optional
+    :param examples: A list of validation examples, if necessary, defaults to None
+    :param examples: list, optional
+    :param min: The minimum constraint of the variable, defaults to None
+    :param min: int, optional
+    :param max: The maximum constraint of the variable, defaults to None
+    :param max: int, optional
+    :param unique: Flag to indicate if variable should be unique,
+        may not apply to all variable types, defaults to None
+    :param unique: bool, optional
+    :param contains: Value that list varaible should contain in validation,
+        may not apply to all variable types, defaults to None
+    :param contains: any, optional
+    :return: A new config variable
+    :rtype: attr._make.Attribute
     """
 
     kwargs.update(dict(default=default, type=type))
@@ -185,6 +213,20 @@ def var(
 
 
 def make_config(name, var_dict, title=None, description=None, **kwargs):
+    """ Creates a config instance from scratch.
+
+    :param name: The name of the config
+    :type name: str
+    :param var_dict: The dictionary of config variable definitions
+    :type var_dict: dict
+    :param title: The title of the config, defaults to None
+    :param title: str, optional
+    :param description: The description of the config, defaults to None
+    :param description: str, optional
+    :return: A new config class
+    :rtype: class
+    """
+
     return config(
         attr.make_class(name, var_dict, **kwargs), title=title, description=description
     )
