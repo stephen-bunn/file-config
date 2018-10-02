@@ -4,6 +4,9 @@ File Config
 .. image:: https://travis-ci.org/stephen-bunn/file-config.svg?branch=master
    :target: https://travis-ci.org/stephen-bunn/file-config
 
+.. image:: https://img.shields.io/pypi/pyversions/file-config.svg
+   :target: https://pypi.org/project/file-config/
+
 
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.
 
@@ -40,6 +43,14 @@ An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class 
    config_json = my_config.dumps_json()
    # {"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
    assert my_config == ModConfig.loads_json(config_json)
+
+Install from `PyPi <https://pypi.org/project/file-config/>`_.
+
+.. code-block:: bash
+
+   pip install file-config
+   # or
+   pipenv install file-config
 
 
 Define Configs
