@@ -185,11 +185,27 @@ Similar to the ``title`` kwarg, the ``description`` kwarg of a ``var`` is simply
 Serialization / Deserialization
 -------------------------------
 
-Be default **dictionary**, **JSON**, and **Pickle** serialization is included.
+To keep api's consistent, serialization and deserialization methods are dynamically added to your config class.
+For example, JSON serialization/deserialization is done through the following dynamically added methods:
+
+- ``dumps_json()`` - *Returns json serialization of the config instance*
+- ``dump_json(file_object)`` - *Writes json serialization of the config instance to the given file object*
+- ``loads_json(json_content)`` - *Builds a new config instance from the given json content*
+- ``load_json(file_object)`` - *Builds a new config instance from the result of reading the given json file object*
+
+This changes for the different types of serialization desired.
+For example, when dumping toml content the method name changes from ``dumps_json()`` to ``dumps_toml()``.
+
+**By default dictionary, JSON, and Pickle serialization is included.**
 
 
 Dictionary
 ~~~~~~~~~~
+
+**The serialization of dictionaries is a bit different since it does not a serialization of the instance.**
+
+For this reason, representing the config instance as dictionary is done through the ``file_config.to_dict(config_instance)`` method.
+Loading a new config instance from a dictionary is done through the ``file_config.from_dict(config_class, config_dictionary)`` method.
 
 >>> config_dict = file_config.to_dict(my_config)
 OrderedDict([('name', 'Sample Config'), ('version', 'v12'), ('groups', [OrderedDict([('name', 'Sample Group'), ('type', 'config')])])])
