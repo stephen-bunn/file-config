@@ -1,6 +1,10 @@
 File Config
 ===========
 
+.. image:: https://travis-ci.org/stephen-bunn/file-config.svg?branch=master
+   :target: https://travis-ci.org/stephen-bunn/file-config
+
+
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.
 
 - These config files can dump and load from popular formats such as `JSON <http://www.json.org/>`_, `YAML <http://yaml.org/>`_, `TOML <https://github.com/toml-lang/toml>`_, `Message Pack <https://msgpack.org/index.html>`_, and others.
