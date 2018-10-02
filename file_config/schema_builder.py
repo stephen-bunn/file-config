@@ -33,7 +33,7 @@ def Regex(pattern):
 
 
 def _build_attribute_modifiers(
-    var, attribute_mapping, ignore=["type", "required", "default"]
+    var, attribute_mapping, ignore=["type", "name", "required", "default"]
 ):
     if not is_config_var(var):
         raise ValueError(
@@ -189,8 +189,9 @@ def _build_var(var, property_path=[]):
     if not is_config_var(var):
         raise ValueError(f"var {var!r} is not a config var")
 
-    schema = {"$id": f"#/{'/'.join(property_path)}/{var.name}"}
     entry = var.metadata[CONFIG_KEY]
+    var_name = entry.name if entry.name else var.name
+    schema = {"$id": f"#/{'/'.join(property_path)}/{var_name}"}
 
     if var.default is not None:
         schema["default"] = var.default
@@ -209,13 +210,13 @@ def _build_var(var, property_path=[]):
         for allowed_type in var.type.__args__:
             type_union["anyOf"].append(
                 _build_type(
-                    allowed_type, allowed_type, property_path=property_path + [var.name]
+                    allowed_type, allowed_type, property_path=property_path + [var_name]
                 )
             )
         schema.update(type_union)
     else:
         schema.update(
-            _build_type(var.type, var, property_path=property_path + [var.name])
+            _build_type(var.type, var, property_path=property_path + [var_name])
         )
     return schema
 
@@ -249,15 +250,16 @@ def _build_config(config_cls, property_path=[]):
             # encountered attribute is not a serialized field (i.e. missing CONFIG_KEY)
             continue
         entry = var.metadata[CONFIG_KEY]
+        var_name = entry.name if entry.name else var.name
         if entry.required:
-            schema["required"].append(var.name)
+            schema["required"].append(var_name)
 
         if is_config_type(var.type):
-            schema["properties"][var.name] = _build_config(
-                var.type, property_path=property_path + [var.name]
+            schema["properties"][var_name] = _build_config(
+                var.type, property_path=property_path + [var_name]
             )
         else:
-            schema["properties"][var.name] = _build_var(
+            schema["properties"][var_name] = _build_var(
                 var, property_path=property_path
             )
 
