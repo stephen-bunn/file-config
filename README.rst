@@ -1,6 +1,12 @@
 File Config
 ===========
 
+An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.
+
+- These config files can dump and load from popular formats such as `JSON <http://www.json.org/>`_, `YAML <http://yaml.org/>`_, `TOML <https://github.com/toml-lang/toml>`_, `Message Pack <https://msgpack.org/index.html>`_, and others.
+- Validation of the config's state is done through dynamically generated `JSONSchema <https://json-schema.org/>`_.
+- Inspired from Hynek's `environ-config <https://pypi.org/project/environ-config/>`_.
+
 .. code-block:: python
 
    from typing import List
@@ -27,8 +33,9 @@ File Config
       ]
    )
 
-   my_config.dumps_json()
+   config_json = my_config.dumps_json()
    # {"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
+   assert my_config == ModConfig.loads_json(config_json)
 
 
 Define Configs
@@ -134,6 +141,7 @@ So types that don't dump out to json (like ``typing.Dict[int, str]``) will fail 
    class PackageConfig:
       depends = file_config.var(type=typing.Dict[int, str])
 
+
 >>> file_config.build_schema(PackageConfig)
 Traceback (most recent call last):
   File "main.py", line 21, in <module>
@@ -150,28 +158,46 @@ Traceback (most recent call last):
     f"cannot serialize object with key of type {key_type!r}, "
 ValueError: cannot serialize object with key of type <class 'int'>, located in var 'depends'
 
+Name
+~~~~
+
+The ``name`` kwarg is used for specifying the name of the variable that should be used during serialization/deserialization.
+This is useful for when you might need to use Python keywords as variables in your serialized configs but don't want to specify the keyword as a attribute of your config.
+
+.. code-block:: python
+
+   @file_config.config
+   class PackageConfig:
+      type_ = file_config.var(name="type")
+
+
 Title
 ~~~~~
 
-TODO: Document title
+The ``title`` kwarg of a ``var`` is used in the built jsonschema as the varaible's title.
 
 Description
 ~~~~~~~~~~~
 
-TODO: Document description
+Similar to the ``title`` kwarg, the ``description`` kwarg of a ``var`` is simply used as the variable's description in the built jsonschema.
 
 
 Serialization / Deserialization
 -------------------------------
 
-Be default dictionary, json, and pickle serialization is included.
+Be default **dictionary**, **JSON**, and **Pickle** serialization is included.
 
+
+Dictionary
+~~~~~~~~~~
 
 >>> config_dict = file_config.to_dict(my_config)
 OrderedDict([('name', 'Sample Config'), ('version', 'v12'), ('groups', [OrderedDict([('name', 'Sample Group'), ('type', 'config')])])])
 >>> new_config = file_config.from_dict(MyConfig, config_dict)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
+JSON
+~~~~
 
 >>> json_content = my_config.dumps_json()
 {"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
@@ -179,11 +205,27 @@ MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sampl
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 
+Serializing json using ``ujson`` requires you to install ``ujson``, ``pipenv install file-config[ujson]``
+
+>>> json_content = my_config.dumps_json()
+{"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
+>>> new_config = MyConfig.loads_json(json_content)
+MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
+
+*The json serialization/deserialization handler prefers ujson over the builtin json module when trying to discover which module to use.*
+
+Pickle
+~~~~~~
+
 >>> pickle_content = my_config.dumps_pickle()
 b'\x80\x04\x95\x7f\x00\x00\x00\x00\x00\x00\x00\x8c\x0bcollections\x94\x8c\x0bOrderedDict\x94\x93\x94)R\x94(\x8c\x04name\x94\x8c\rSample Config\x94\x8c\x07version\x94\x8c\x03v12\x94\x8c\x06groups\x94]\x94h\x02)R\x94(h\x04\x8c\x0cSample Group\x94\x8c\x04type\x94\x8c\x06config\x94uau.'
 >>> new_config = MyConfig.loads_pickle(pickle_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
+-----
+
+YAML
+~~~~
 
 Serializing yaml requires ``pyyaml``, ``pipenv install file-config[pyyaml]``
 
@@ -196,9 +238,10 @@ groups:
 >>> new_config = MyConfig.loads_yaml(yaml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
+TOML
+~~~~
 
 Serializing toml requires ``tomlkit``, ``pipenv install file-config[tomlkit]``
-
 
 >>> toml_content = my_config.dumps_toml()
 name = "Sample Config"
@@ -209,9 +252,10 @@ type = "config"
 >>> new_config = MyConfig.loads_toml(toml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
+Message Pack
+~~~~~~~~~~~~
 
 Serializing message pack requires ``msgpack``, ``pipenv install file-config[msgpack]``
-
 
 >>> msgpack_content = my_config.dumps_msgpack()
 b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
