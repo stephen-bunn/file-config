@@ -8,7 +8,7 @@ import shutil
 
 import setuptools
 
-from file_config import __version__
+VERSION = "0.0.2"
 
 INSTALL_REQUIRES = ["attrs", "jsonschema"]
 SETUP_REQUIRES = []
@@ -65,7 +65,7 @@ class UploadCommand(setuptools.Command):
         os.system("twine upload dist/*")
 
         self.status("pushing git tags")
-        os.system("git tag v{0}".format(__version__.__version__))
+        os.system("git tag v{0}".format(VERSION))
         os.system("git push --tags")
 
         sys.exit()
@@ -76,14 +76,14 @@ with codecs.open("README.rst", encoding="utf-8") as fp:
     long_description = "\n" + fp.read()
 
 setuptools.setup(
-    name=__version__.__name__,
-    version=__version__.__version__,
-    description=__version__.__description__,
+    name="file-config",
+    version=VERSION,
+    description="An attr's based configuration file abstraction",
     long_description=long_description,
-    url=__version__.__repo__,
-    license=__version__.__license__,
-    author=__version__.__author__,
-    author_email=__version__.__contact__,
+    url="https://github.com/stephen-bunn/file-config",
+    license="MIT License",
+    author="Stephen Bunn",
+    author_email="stephen@bunn.io",
     install_requires=INSTALL_REQUIRES,
     setup_requires=SETUP_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
