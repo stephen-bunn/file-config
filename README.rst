@@ -217,7 +217,7 @@ For example, when dumping toml content the method name changes from ``dumps_json
 Dictionary
 ~~~~~~~~~~
 
-**The serialization of dictionaries is a bit different since it does not a serialization of the instance.**
+*The dumping of dictionaries is a bit different than other serialization methods since a dictionary representation of a config instance is not a end result of serialization.*
 
 For this reason, representing the config instance as dictionary is done through the ``file_config.to_dict(config_instance)`` method.
 Loading a new config instance from a dictionary is done through the ``file_config.from_dict(config_class, config_dictionary)`` method.
@@ -293,12 +293,39 @@ b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacS
 >>> new_config = MyConfig.loads_msgpack(msgpack_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
+-----
+
+If during serialization you don't have the extra depedencies installed for the requested serialization type, a ``ModuleNotFoundError`` is raised that looks similar to the following:
+
+>>> my_config.dumps_toml()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4ada15392238b/lib/python3.6/site-packages/file_config/_file_config.py", line 52, in _handle_dumps
+    return handler.dumps(to_dict(self))
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4ada15392238b/lib/python3.6/site-packages/file_config/handlers/_common.py", line 49, in dumps
+    dumps_hook_name = f"on_{self.imported}_dumps"
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4ada15392238b/lib/python3.6/site-packages/file_config/handlers/_common.py", line 13, in imported
+    self._imported = self._discover_import()
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4ada15392238b/lib/python3.6/site-packages/file_config/handlers/_common.py", line 46, in _discover_import
+    raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
+ModuleNotFoundError: no modules in ('tomlkit',) found
+no modules in ('tomlkit',) found
+
+In this case you should install ``tomlkit`` as an extra dependency using something similar to the following:
+
+.. code-block:: bash
+
+   pip install file-config[tomlkit]
+   # or
+   pipenv install file-config[tomlkit]
+
 
 Validation
 ----------
 
 Validation is done through jsonschema and can be used to check a config instance using the ``validate`` method.
 
+>>> file_config.version = "v12"
 >>> file_config.validate(my_config)
 None
 >>> my_config.version = "12"
