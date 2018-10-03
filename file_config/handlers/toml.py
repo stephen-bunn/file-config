@@ -7,7 +7,13 @@ from ._common import BaseHandler
 class TOMLHandler(BaseHandler):
 
     name = "toml"
-    packages = ("tomlkit",)
+    packages = ("pytoml", "tomlkit",)
+
+    def on_pytoml_dumps(self, pytoml, dictionary):
+        return pytoml.dumps(dictionary)
+
+    def on_pytoml_loads(self, pytoml, content):
+        return pytoml.loads(content)
 
     def on_tomlkit_dumps(self, tomlkit, dictionary):
         return tomlkit.dumps(dictionary)
