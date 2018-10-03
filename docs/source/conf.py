@@ -17,19 +17,19 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
 
-from file_config import __info__
+from file_config import __version__
 
 
 # -- Project information -----------------------------------------------------
 
 project = "File Config"
-copyright = f"2018, {__info__.__author__}"
-author = __info__.__author__
+copyright = f"2018, {__version__.__author__}"
+author = __version__.__author__
 
 # The short X.Y version
-version = __info__.__version__
+version = __version__.__version__
 # The full version, including alpha/beta/rc tags
-release = __info__.__author__
+release = __version__.__author__
 
 
 # -- General configuration ---------------------------------------------------
@@ -83,7 +83,7 @@ html_theme = "alabaster"
 # documentation.
 #
 html_theme_options = {
-    "description": __info__.__description__,
+    "description": __version__.__description__,
     "github_user": "stephen-bunn",
     "github_repo": "file-config",
     "github_type": "star",
