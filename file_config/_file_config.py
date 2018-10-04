@@ -10,6 +10,7 @@ import jsonschema
 
 from . import handlers
 from .utils import (
+    typecast,
     is_config,
     is_array_type,
     is_config_var,
@@ -17,7 +18,6 @@ from .utils import (
     is_object_type,
     is_string_type,
     is_typing_type,
-    typecast,
 )
 from .constants import CONFIG_KEY
 from .schema_builder import build_schema
