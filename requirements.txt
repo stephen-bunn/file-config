@@ -1,0 +1,5 @@
+-i https://pypi.org/simple
+attrs==18.2.0
+jsonschema==3.0.0a3
+pyrsistent==0.14.4
+six==1.11.0
