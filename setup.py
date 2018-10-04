@@ -8,7 +8,7 @@ import shutil
 
 import setuptools
 
-VERSION = "0.0.3"
+VERSION = "0.0.4"
 
 INSTALL_REQUIRES = ["attrs", "jsonschema"]
 SETUP_REQUIRES = []

@@ -6,6 +6,10 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
-**WIP: 0.0.4** (*unreleased*)
+**0.0.4** (*2018-10-04*)
 -----------------------------
 - added basic sphinx documentation
+- fixing dynamic type casting for config var typing types
+
+
+.. _0.0.4: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.0
