@@ -17,6 +17,7 @@ from .utils import (
     is_object_type,
     is_string_type,
     is_typing_type,
+    typecast,
 )
 from .constants import CONFIG_KEY
 from .schema_builder import build_schema
@@ -249,6 +250,10 @@ def _build(config_cls, dictionary):
             f"{config_cls!r} is not a config"
         )
 
+    # perform jsonschema validation on the given dictionary
+    # (simplifys dynamic typecasting)
+    jsonschema.validate(dictionary, build_schema(config_cls))
+
     kwargs = {}
     for var in attr.fields(config_cls):
         if not is_config_var(var):
@@ -267,7 +272,7 @@ def _build(config_cls, dictionary):
                         for item in dictionary.get(arg_key, [])
                     ]
                 else:
-                    kwargs[var.name] = dictionary.get(arg_key, [])
+                    kwargs[var.name] = typecast(entry.type, dictionary.get(arg_key, []))
         elif is_object_type(entry.type):
             item = dictionary.get(arg_key, {})
             if is_typing_type(entry.type) and len(entry.type.__args__) == 2:
@@ -275,15 +280,18 @@ def _build(config_cls, dictionary):
                 kwargs[var.name] = {
                     key: _build(value_type, value)
                     if is_config_type(value_type)
-                    else value
+                    else typecast(value_type, value)
                     for (key, value) in item.items()
                 }
             else:
-                kwargs[var.name] = item
+                kwargs[var.name] = typecast(entry.type, item)
         elif is_config_type(entry.type):
             kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
         else:
-            kwargs[var.name] = dictionary.get(arg_key, arg_default)
+            # TODO: handle correct type casting logic based on builtin or typing types
+            kwargs[var.name] = typecast(
+                entry.type, dictionary.get(arg_key, arg_default)
+            )
 
     return config_cls(**kwargs)
 

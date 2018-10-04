@@ -140,3 +140,35 @@ def is_object_type(type_):
             collections.UserDict,
         )
     return False
+
+
+def typecast(type_, value):
+    # NOTE: does not do any special validation of types before casting
+    # will just raise errors on type casting failures
+    if is_builtin_type(type_) or is_collections_type(type_):
+        return type_(value)
+    elif is_typing_type(type_):
+        base_type = type_.__extra__
+        arg_types = type_.__args__
+
+        if is_array_type(type_):
+            if len(arg_types) == 1:
+                item_type = arg_types[0]
+                return base_type([typecast(item_type, item) for item in value])
+            else:
+                return base_type(value)
+        elif is_object_type(type_):
+            if len(arg_types) == 2:
+                (key_type, item_type) = arg_types
+                return base_type(
+                    {
+                        typecast(key_type, key): typecast(item_type, item)
+                        for (key, item) in value.items()
+                    }
+                )
+            else:
+                return base_type(value)
+        else:
+            return base_type(value)
+    else:
+        raise ValueError(f"unsure how to cast from type {type_!r} for value {value!r}")
