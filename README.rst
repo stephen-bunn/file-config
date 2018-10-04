@@ -3,9 +3,16 @@ File Config
 
 .. image:: https://travis-ci.org/stephen-bunn/file-config.svg?branch=master
    :target: https://travis-ci.org/stephen-bunn/file-config
+   :alt: Travis CI
 
 .. image:: https://img.shields.io/pypi/pyversions/file-config.svg
    :target: https://pypi.org/project/file-config/
+   :alt: Supported Python Versions
+
+.. image:: https://readthedocs.org/projects/file-config/badge/?version=latest
+   :target: https://file-config.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 
 
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.

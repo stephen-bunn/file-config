@@ -261,6 +261,35 @@ However, you can't serialize set out Python sets in many data formats such as JS
 >>> ProjectConfig.loads_json('{"name": "Testing", "versions": ["123", "123"]}')
 ProjectConfig(name='Testing', versions={'123'})
 
+.. important:: Using :mod:`typing` types requires a bit of intuition. Your defined var type must be JSON serializable.
+
+   .. code-block:: python
+
+      from typing import Dict
+
+      @file_config.config
+      class ProjectConfig(object):
+         name = file_config.var(str)
+         depends = file_config.var(Dict[int, str])
+
+   Trying to build the schema with a non JSON serializable var type (``Dict[int, str]``) will throw an error similar to this...
+
+   >>> file_config.build_schema(ProjectConfig)
+   Traceback (most recent call last):
+      File "main.py", line 83, in <module>
+        file_config.build_schema(ProjectConfig)
+      File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 282, in build_schema
+        return _build_config(config_cls, property_path=[])
+      File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 265, in _build_config
+        var, property_path=property_path
+      File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 221, in _build_var
+        _build_type(var.type, var, property_path=property_path + [var_name])
+      File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 182, in _build_type
+        return builder(value, property_path=property_path)
+      File "/home/stephen-bunn/Git/file-config/file_config/schema_builder.py", line 160, in _build_object_type
+        f"cannot serialize object with key of type {key_type!r}, "
+   ValueError: cannot serialize object with key of type <class 'int'>, located in var 'depends'
+
 
 Nested Configs
 ..............
