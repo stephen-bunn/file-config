@@ -235,12 +235,12 @@ This allows you to get a bit more specific with the exact format of the var type
 
 .. code-block:: python
 
-   from typing import List
+   from typing import Set
 
    @file_config.config
    class ProjectConfig(object):
       name = file_config.var(str)
-      versions = file_config.var(List[str])
+      versions = file_config.var(Set[str])
 
 Using a fancy :mod:`typing` type like this will result in the following JSONSchema being built...
 
@@ -254,6 +254,12 @@ Using a fancy :mod:`typing` type like this will result in the following JSONSche
                              'type': 'array'}},
  'required': ['name', 'versions'],
  'type': 'object'}
+
+You might notice that the ``versions`` var says to use :func:`set` as the loaded in type.
+However, you can't serialize set out Python sets in many data formats such as JSON, but loading it back into a config instance can cast it back into a set.
+
+>>> ProjectConfig.loads_json('{"name": "Testing", "versions": ["123", "123"]}')
+ProjectConfig(name='Testing', versions={'123'})
 
 
 Nested Configs
