@@ -21,6 +21,8 @@ pytest-xdist = "*"
 pytest-sugar = "*"
 "pytest-flake8" = "*"
 hypothesis = "*"
+sphinx = "*"
+pytoml = "*"
 
 [requires]
 python_version = "3.6"
@@ -30,3 +32,6 @@ allow_prereleases = true
 
 [scripts]
 tests = "pytest -rc ./tests -n 4"
+make-docs = "make -C ./docs html"
+clean-docs = "make -C ./docs clean"
+open-docs = "python -m webbrowser -t ./docs/build/html/index.html"

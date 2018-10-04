@@ -1,0 +1,4 @@
+[tool.towncrier]
+  package = "file_config"
+  filename = "CHANGELOG.rst"
+  directory = ".newsfragments"
