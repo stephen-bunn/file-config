@@ -181,7 +181,9 @@ def _build_type(type_, value, property_path=[]):
         if type_check(type_):
             return builder(value, property_path=property_path)
 
-    warnings.warn(f"unhandled translation for type {type_!r}")
+    # NOTE: warning ignores type None (as that is the config var default)
+    if type_:
+        warnings.warn(f"unhandled translation for type {type_!r}")
     return {}
 
 
