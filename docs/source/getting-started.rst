@@ -55,13 +55,13 @@ One of main features that :mod:`file_config` provides is the ability to generate
 You can get the schema by passing a config class to the :func:`file_config.build_schema` method.
 
 >>> file_config.build_schema(ProjectConfig)
-{'$id': 'PackageConfig.json',
+{'$id': 'ProjectConfig.json',
  '$schema': 'http://json-schema.org/draft-07/schema#',
  'properties': {},
  'required': [],
  'type': 'object'}
 
-Currently the generated JSONSchema is pretty boring since the ``PackageConfig`` class is totally empty.
+Currently the generated JSONSchema is pretty boring since the ``ProjectConfig`` class is totally empty.
 We can add a quick title and description to the root JSONSchema object by adding two arguments to the :func:`file_config.config` decorator...
 
 - ``title`` - *Defines the title of the object in the generated JSONSchema*
@@ -80,7 +80,7 @@ We can add a quick title and description to the root JSONSchema object by adding
 After building the schema again you can see the added ``title`` and ``description`` properties in the resulting JSONSchema dictionary.
 
 >>> file_config.build_schema(ProjectConfig)
-{'$id': 'PackageConfig.json',
+{'$id': 'ProjectConfig.json',
  '$schema': 'http://json-schema.org/draft-07/schema#',
  'description': 'The project configuration for my project',
  'properties': {},
@@ -99,41 +99,169 @@ You can start off with the most basic config var possible by using the :func:`fi
 
 .. code-block:: python
 
-   @file_config.config(
-      title="Project Config",
-      description="The project configuration for my project"
-   )
+   @file_config.config
    class ProjectConfig(object):
-
       name = file_config.var()
 
 By default a config var...
 
 - uses the name you assigned to it in the config class (in this case ``name``)
-- is required for validation
+- is ``required`` for validation
 
 Checkout how the built JSONSchema looks now that you added a basic var.
 
 >>> file_config.build_schema(ProjectConfig)
-{'$id': 'PackageConfig.json',
+{'$id': 'ProjectConfig.json',
  '$schema': 'http://json-schema.org/draft-07/schema#',
- 'description': 'The project configuration for my project',
  'properties': {'name': {'$id': '#/properties/name'}},
  'required': ['name'],
- 'title': 'Project Config',
  'type': 'object'}
 
 
 Required
 ~~~~~~~~
 
+You can make a config var "optional" by setting ``required`` to ``False``.
+
+.. code-block:: python
+
+   @file_config.config
+   class ProjectConfig(object):
+      name = file_config.var(required=False)
+
+You'll notice that the ``name`` entry in the ``required`` list is now missing from the built JSONSchema.
+
+>>> file_config.build_schema(ProjectConfig)
+{'$id': 'ProjectConfig.json',
+ '$schema': 'http://json-schema.org/draft-07/schema#',
+ 'properties': {'name': {'$id': '#/properties/name'}},
+ 'required': [],
+ 'type': 'object'}
+
 
 Name
 ~~~~
 
+You can change the serialization name of the config var by setting ``name`` to some string.
+This is useful when you need to use Python keywords as attribute names in the config.
+
+.. code-block:: python
+
+   @file_config.config
+   class ProjectConfig(object):
+      name = file_config.var()
+      type_ = file_config.var(name="type")
+
+>>> file_config.build_schema(ProjectConfig)
+{'$id': 'ProjectConfig.json',
+ '$schema': 'http://json-schema.org/draft-07/schema#',
+ 'properties': {'name': {'$id': '#/properties/name'},
+                'type': {'$id': '#/properties/type'}},
+ 'required': ['name', 'type'],
+ 'type': 'object'}
+
+Serialization dumps to/loads from the given ``name`` attribute.
+
+>>> ProjectConfig(name="My Project", type_="config").dumps_json()
+'{"name":"My Project","type":"config"}'
+>>> ProjectConfig.loads_json('{"name":"My Project","type":"config"}')
+ProjectConfig(name='My Project', type_='config')
+
 
 Type
 ~~~~
+
+Defining a config var's type is straight forward but can be complex given your config requirements.
+A config var's type can either be passed in as the first argument or as the ``type`` kwarg to the :func:`file_config.var` method.
+
+Builtin Types
+.............
+
+The :func:`file_config.var` can take in any of the `builtin Python types <https://docs.python.org/3/library/stdtypes.html>`_.
+
+.. code-block:: python
+
+   @file_config.config
+   class ProjectConfig(object):
+      name = file_config.var(str)
+      type_ = file_config.var(name="type", type=str)
+
+This results in some extra rules being added to the properties in the built JSONSchema.
+
+>>> file_config.build_schema(ProjectConfig)
+{'$id': 'ProjectConfig.json',
+ '$schema': 'http://json-schema.org/draft-07/schema#',
+ 'properties': {'name': {'$id': '#/properties/name', 'type': 'string'},
+                'type': {'$id': '#/properties/type', 'type': 'string'}},
+ 'required': ['name', 'type'],
+ 'type': 'object'}
+
+You'll notice now that both the ``name`` and ``type`` properties have a declared type of ``string``.
+So when validating a ``ProjectConfig`` instance where ``type_`` is a string you get no errors...
+
+>>> config = ProjectConfig(name='My Project', type_="config")
+>>> print(config)
+ProjectConfig(name='My Project', type_="config")
+>>> file_config.validate(config)
+None
+
+But if validating a ``ProjectConfig`` instance where ``type_`` is an integer, you'll get an error similar to the following...
+
+>>> config.type_ = 0
+>>> print(config)
+ProjectConfig(name='My Project', type_=0)
+>>> file_config.validate(config)
+Traceback (most recent call last):
+  File "main.py", line 82, in <module>
+    file_config.validate(config)
+  File "/home/stephen-bunn/Git/file-config/file_config/_file_config.py", line 355, in validate
+    to_dict(instance, dict_type=dict), build_schema(instance.__class__)
+  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 861, in validate
+    cls(schema, *args, **kwargs).validate(instance)
+  File "/home/stephen-bunn/.local/share/virtualenvs/file-config-zZO-gwXq/lib/python3.6/site-packages/jsonschema/validators.py", line 305, in validate
+    raise error
+jsonschema.exceptions.ValidationError: 0 is not of type 'string'
+Failed validating 'type' in schema['properties']['type']:
+    {'$id': '#/properties/type', 'type': 'string'}
+On instance['type']:
+    0
+
+
+Typing Types
+............
+
+The :func:`file_config.var` can also use :mod:`typing` types as the ``type`` argument.
+This allows you to get a bit more specific with the exact format of the var type.
+
+.. code-block:: python
+
+   from typing import List
+
+   @file_config.config
+   class ProjectConfig(object):
+      name = file_config.var(str)
+      versions = file_config.var(List[str])
+
+Using a fancy :mod:`typing` type like this will result in the following JSONSchema being built...
+
+>>> file_config.build_schema(ProjectConfig)
+{'$id': 'ProjectConfig.json',
+ '$schema': 'http://json-schema.org/draft-07/schema#',
+ 'properties': {'name': {'$id': '#/properties/name', 'type': 'string'},
+                'versions': {'$id': '#/properties/versions',
+                             'items': {'$id': '#/properties/versions/items',
+                                       'type': 'string'},
+                             'type': 'array'}},
+ 'required': ['name', 'versions'],
+ 'type': 'object'}
+
+
+Nested Configs
+..............
+
+
+Regular Expressions
+...................
 
 
 Validation
