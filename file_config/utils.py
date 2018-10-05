@@ -148,6 +148,8 @@ def typecast(type_, value):
     # will just raise errors on type casting failures
     if is_builtin_type(type_) or is_collections_type(type_):
         return type_(value)
+    elif is_regex_type(type_):
+        return typecast(str, value)
     elif is_typing_type(type_):
         base_type = type_.__extra__
         arg_types = type_.__args__
