@@ -7,7 +7,7 @@ import collections
 
 import attr
 
-from .constants import CONFIG_KEY
+from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
 COMPILED_PATTERN_TYPE = type(re.compile(""))
 
@@ -66,6 +66,7 @@ def is_collections_type(type_):
 def is_regex_type(type_):
     return (
         callable(type_)
+        and type_.__name__ == REGEX_TYPE_NAME
         and hasattr(type_, "__supertype__")
         and is_compiled_pattern(type_.__supertype__)
     )

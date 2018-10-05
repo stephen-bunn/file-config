@@ -81,6 +81,10 @@ def _build_string_type(var, property_path=[]):
     if is_builtin_type(var):
         return schema
 
+    if is_regex_type(var):
+        schema["pattern"] = var.__supertype__.pattern
+        return schema
+
     schema.update(
         _build_attribute_modifiers(var, {"min": "minLength", "max": "maxLength"})
     )
@@ -151,9 +155,7 @@ def _build_object_type(var, property_path=[]):
         (key_type, value_type) = var.type.__args__
 
         key_pattern = "^(.*)$"
-        if hasattr(key_type, "__supertype__") and is_compiled_pattern(
-            key_type.__supertype__
-        ):
+        if is_regex_type(key_type):
             key_pattern = key_type.__supertype__.pattern
         elif not is_string_type(key_type):
             raise ValueError(
@@ -183,7 +185,7 @@ def _build_type(type_, value, property_path=[]):
 
     # NOTE: warning ignores type None (as that is the config var default)
     if type_:
-        warnings.warn(f"unhandled translation for type {type_!r}")
+        warnings.warn(f"unhandled translation for type {type_!r} with value {value!r}")
     return {}
 
 
@@ -275,6 +277,9 @@ def _build(value, property_path=[]):
         return _build_var(value, property_path=property_path)
     elif is_builtin_type(value):
         return _build_type(value, value, property_path=property_path)
+    elif is_regex_type(value):
+        # NOTE: building regular expression types assumes type is string
+        return _build_type(str, value, property_path=property_path)
     return _build_type(type(value), value, property_path=property_path)
 
 
