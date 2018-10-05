@@ -44,8 +44,7 @@ class _ConfigEntry(object):
 def _handle_dumps(self, handler):
     """ Dumps caller, used by partial method for dynamic handler assignments.
 
-    :param handler: The dump handler
-    :type handler: object
+    :param object handler: The dump handler
     :return: The dumped string
     :rtype: str
     """
@@ -56,10 +55,8 @@ def _handle_dumps(self, handler):
 def _handle_dump(self, handler, file_object):
     """ Dump caller, used by partial method for dynamic handler assignments.
 
-    :param handler: The dump handler
-    :type handler: object
-    :param file_object: The file object to dump to
-    :type file_object: File
+    :param object handler: The dump handler
+    :param file file_object: The file object to dump to
     :return: The dumped string
     :rtype: str
     """
@@ -71,10 +68,8 @@ def _handle_dump(self, handler, file_object):
 def _handle_loads(cls, handler, content):
     """ Loads caller, used by partial method for dynamic handler assignments.
 
-    :param handler: The loads handler
-    :type handler: object
-    :param content: The content to load from
-    :type content: str
+    :param object handler: The loads handler
+    :param str content: The content to load from
     :return: The loaded instance
     :rtype: object
     """
@@ -86,10 +81,8 @@ def _handle_loads(cls, handler, content):
 def _handle_load(cls, handler, file_object):
     """ Loads caller, used by partial method for dynamic handler assignments.
 
-    :param handler: The loads handler
-    :type handler: object
-    :param file_object: The file object to load from
-    :type file_object: File
+    :param object handler: The loads handler
+    :param file file_object: The file object to load from
     :return: The loaded instance
     :rtype: object
     """
@@ -100,17 +93,17 @@ def _handle_load(cls, handler, file_object):
 def config(maybe_cls=None, title=None, description=None):
     """ File config class decorator.
 
-    :param maybe_cls: The class to inherit from, defaults to None
-    :param maybe_cls: object, optional
-    :return: Wrapped class
-    :rtype: object
+    :param class maybe_cls: The class to inherit from, defaults to None, optional
+    :return: Config wrapped class
+    :rtype: class
     """
 
     def wrap(config_cls):
         """ The wrapper function.
 
-        :return: The class decorator
-        :rtype: object
+        :param class config_cls: The class to wrap
+        :return: The config_cls wrapper
+        :rtype: class
         """
 
         setattr(config_cls, CONFIG_KEY, dict(title=title, description=description))
@@ -163,33 +156,24 @@ def var(
 ):
     """ Creates a config variable.
 
-    :param type: The expected type of the variable, defaults to None
-    :param type: type, optional
-    :param default: The default value of the var, defaults to None
-    :param default: any, optional
-    :param name: The serialized name of the variable, defaults to None
-    :param name: str, optional
-    :param title: The validation title of the variable, defaults to None
-    :param title: str, optional
-    :param description: The validation description of the variable, defaults to None
-    :param description: str, optional
-    :param required: Flag to indicate if variable is required during validation,
-        defaults to True
-    :param required: bool, optional
-    :param examples: A list of validation examples, if necessary, defaults to None
-    :param examples: list, optional
-    :param min: The minimum constraint of the variable, defaults to None
-    :param min: int, optional
-    :param max: The maximum constraint of the variable, defaults to None
-    :param max: int, optional
-    :param unique: Flag to indicate if variable should be unique,
-        may not apply to all variable types, defaults to None
-    :param unique: bool, optional
+    :param type type: The expected type of the variable, defaults to None, optional
+    :param default: The default value of the var, defaults to None, optional
+    :param str name: The serialized name of the variable, defaults to None, optional
+    :param str title: The validation title of the variable, defaults to None, optional
+    :param str description: The validation description of the variable,
+        defaults to None, optional
+    :param bool required: Flag to indicate if variable is required during validation,
+        defaults to True, optional
+    :param list examples: A list of validation examples, if necessary,
+        defaults to None, optional
+    :param int min: The minimum constraint of the variable, defaults to None, optional
+    :param int max: The maximum constraint of the variable, defaults to None, optional
+    :param bool unique: Flag to indicate if variable should be unique,
+        may not apply to all variable types, defaults to None, optional
     :param contains: Value that list varaible should contain in validation,
-        may not apply to all variable types, defaults to None
-    :param contains: any, optional
+        may not apply to all variable types, defaults to None, optional
     :return: A new config variable
-    :rtype: attr._make.Attribute
+    :rtype: attr.Attribute
     """
 
     kwargs.update(dict(default=default, type=type))
@@ -216,14 +200,10 @@ def var(
 def make_config(name, var_dict, title=None, description=None, **kwargs):
     """ Creates a config instance from scratch.
 
-    :param name: The name of the config
-    :type name: str
-    :param var_dict: The dictionary of config variable definitions
-    :type var_dict: dict
-    :param title: The title of the config, defaults to None
-    :param title: str, optional
-    :param description: The description of the config, defaults to None
-    :param description: str, optional
+    :param str name: The name of the config
+    :param dict var_dict: The dictionary of config variable definitions
+    :param str title: The title of the config, defaults to None, optional
+    :param str description: The description of the config, defaults to None, optional
     :return: A new config class
     :rtype: class
     """
@@ -236,10 +216,8 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
 def _build(config_cls, dictionary):
     """ Builds an instance of ``config_cls`` using ``dictionary``.
 
-    :param config_cls: The class to use for building
-    :type config_cls: type
-    :param dictionary: The dictionary to use for building ``config_cls``
-    :type dictionary: dict
+    :param type config_cls: The class to use for building
+    :param dict dictionary: The dictionary to use for building ``config_cls``
     :return: An instance of ``config_cls``
     :rtype: object
     """
@@ -299,12 +277,10 @@ def _build(config_cls, dictionary):
 def _dump(config_instance, dict_type=OrderedDict):
     """ Dumps an instance from ``instance`` to a dictionary type mapping.
 
-    :param instance: The instance to serialized to a dictionary
-    :type instance: object
-    :param dict_type: Some dictionary type, defaults to ``OrderedDict``
-    :type dict_type: object
+    :param object instance: The instance to serialized to a dictionary
+    :param object dict_type: Some dictionary type, defaults to ``OrderedDict``
     :return: Dumped dictionary
-    :rtype: dict
+    :rtype: collections.OrderedDict (or instance of ``dict_type``)
     """
 
     if not is_config(config_instance):
@@ -355,8 +331,8 @@ def _dump(config_instance, dict_type=OrderedDict):
 def validate(instance):
     """ Validates a given ``instance``.
 
-    :param instance: The instance to validate
-    :type instance: object
+    :param object instance: The instance to validate
+    :raises jsonschema.exceptions.ValidationError: On failed validation
     """
 
     jsonschema.validate(
@@ -367,10 +343,8 @@ def validate(instance):
 def from_dict(config_cls, dictionary):
     """ Loads an instance of ``config_cls`` from a dictionary.
 
-    :param config_cls: The class to build an instance of
-    :type config_cls: type
-    :param dictionary: The dictionary to load from
-    :type dictionary: dict
+    :param type config_cls: The class to build an instance of
+    :param dict dictionary: The dictionary to load from
     :return: An instance of ``config_cls``
     :rtype: object
     """
@@ -381,10 +355,8 @@ def from_dict(config_cls, dictionary):
 def to_dict(instance, dict_type=OrderedDict):
     """ Dumps an instance to an dictionary mapping.
 
-    :param instance: The instance to dump
-    :type instance: object
-    :param dict_type: The dictionary type to use, defaults to ``OrderedDict``
-    :type dict_type: object
+    :param object instance: The instance to dump
+    :param object dict_type: The dictionary type to use, defaults to ``OrderedDict``
     :return: Dictionary serialization of instance
     :rtype: OrderedDict
     """

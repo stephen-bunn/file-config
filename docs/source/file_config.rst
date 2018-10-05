@@ -1,6 +1,5 @@
-.. _file-config:
+.. _file_config:
 
-===================
 File Config Package
 ===================
 
@@ -8,3 +7,12 @@ File Config Package
    :members:
    :undoc-members:
    :show-inheritance:
+
+-----
+
+Handlers
+--------
+
+.. automodule:: file_config.handlers
+   :members:
+   :undoc-members:

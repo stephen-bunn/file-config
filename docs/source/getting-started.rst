@@ -405,6 +405,35 @@ On instance['dependencies']['A Dependency']:
 Extras
 ------
 
+There are several other validation rules that :func:`file_config.var` method exposes.
+These arguments are used only to add validation logic to the generated JSONSchema.
+
+- ``examples`` - *A list of examples for what the config var might be*
+- ``min`` - *A minimum value for the var (applies to numbers, strings, and arrays)*
+- ``max`` - *A maximum value for the var (applies to numbers, strings, and arrays)*
+- ``unique`` - *Indicates that the var must be unique (applies to arrays)*
+- ``contains`` - *Indicates that the var must contain the given element (applies to arrays)*
+
+If you try to use one of the rules on a :func:`file_config.var` that doesn't actually take that rule into consideration, a :class:`UserWarning` is raised when :func:`file_config.build_schema` is called...
+
+.. code-block:: python
+
+   @file_config.config
+   class ProjectConfig(object):
+      name = file_config.var(str, unique=True)
+
+
+>>> file_config.build_schema(ProjectConfig)
+/home/stephen-bunn/Git/file-config/file_config/schema_builder.py:64: UserWarning: field modifier 'unique' has no effect on var 'name' of type <class 'str'>
+  f"field modifier {entry_attribute.name!r} has no effect on var "
+{'$id': 'ProjectConfig.json',
+ '$schema': 'http://json-schema.org/draft-07/schema#',
+ 'properties': {'name': {'$id': '#/properties/name', 'type': 'string'}},
+ 'required': ['name'],
+ 'type': 'object'}
+
+The appropriate schema (disregarding the unapplied ``unique`` rule on ``name``) is still returned.
+
 
 Validation
 ==========
@@ -528,3 +557,110 @@ This might help you inform your project what to look for to fix in a config.
 
 Dumping / Loading
 =================
+
+The serialization / deserialization steps of :func:`file_config.config` wrapped objects are built from the :class:`collections.OrderedDict`.
+You can get the resulting dictionary that is used for serialization by using the :func:`file_config.to_dict` method...
+
+Given the following config instance ``config``...
+
+.. code-block:: python
+
+   from typing import List, Dict
+
+   @file_config.config
+   class ProjectConfig(object):
+
+      @file_config.config
+      class Dependency(object):
+         name = file_config.var(str, min=1)
+         version = file_config.var(file_config.Regex(r"^v\d+$"))
+
+      name = file_config.var(str, min=1)
+      type_ = file_config.var(str, name="type", required=False)
+      keywords = file_config.var(List[str], min=0, max=10)
+      dependencies = file_config.var(Dict[str, Dependency])
+
+   config = ProjectConfig(
+      name="My Project",
+      type_="personal-project",
+      keywords=["example", "test"],
+      dependencies={
+          "a-dependency": ProjectConfig.Dependency(name="A Dependency", version="v12")
+      },
+   )
+
+
+You can get the resulting :class:`collections.OrderedDict` with the following method call...
+
+>>> file_config.to_dict(config)
+OrderedDict([('name', 'My Project'),
+             ('type', 'personal-project'),
+             ('keywords', ['example', 'test']),
+             ('dependencies',
+              {'a-dependency': OrderedDict([('name', 'A Dependency'),
+                                            ('version', 'v12')])})])
+
+
+This :func:`file_config.to_dict` method is used implicitly by all of the available :mod:`file_config.handlers`.
+These handlers provide an abstract interface to dumping and loading config instances to and from different formats.
+
+For every config instance you create, several methods and classmethods are added to the instance.
+These methods follow the naming standard ``dumps_x``, ``dump_x``, ``loads_x``, and ``load_x`` where is the name of the handler.
+**Thsese methods will always exist**, however, if you are missing a module required to do serialization for a specific format, the handler will raise an exception...
+
+>>> config.dumps_toml()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4b8296442234/lib/python3.6/site-packages/file_config/_file_config.py", line 53, in _handle_dumps
+    return handler.dumps(to_dict(self))
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4b8296442234/lib/python3.6/site-packages/file_config/handlers/_common.py", line 49, in dumps
+    dumps_hook_name = f"on_{self.imported}_dumps"
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4b8296442234/lib/python3.6/site-packages/file_config/handlers/_common.py", line 13, in imported
+    self._imported = self._discover_import()
+  File "/home/stephen-bunn/.virtualenvs/tempenv-4b8296442234/lib/python3.6/site-packages/file_config/handlers/_common.py", line 46, in _discover_import
+    raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
+ModuleNotFoundError: no modules in ('pytoml', 'tomlkit') found
+
+
+In order to serialize a config instance out into `toml <https://github.com/toml-lang/toml>`_ you will need to either have ``pytoml`` or ``tomlkit`` present (as indicated by the exception)...
+
+.. code-block:: bash
+
+   pipenv install file-config[pytoml]
+   # or...
+   pip install file-config[pytoml]
+
+
+After installing the `pytoml <https://pypi.org/project/pytoml/>`_ `extra <https://packaging.python.org/tutorials/installing-packages/#installing-setuptools-extras>`_ dependency, you should be able to dump out to toml...
+
+>>> config.dumps_toml()
+name = "My Project"
+type = "personal-project"
+keywords = ["example", "test"]
+[dependencies]
+[dependencies.a-dependency]
+name = "A Dependency"
+version = "v12"
+
+
+.. note:: `pytoml <https://pypi.org/project/pytoml/>`_ typically does insert newlines betwen secions like ``[dependencies]`` and ``[dependencies.a-dependency]``.
+   Unfortunately, I don't know how to represent it in restucturedText examples as the ``\`` character is not actually escaped... 😢
+
+
+Loading from this toml content is also super straight forward...
+
+>>> new_config = ProjectConfig.loads_toml('''name = "My Project"\ntype = "personal-project"\nkeywords = ["example", "test"]\n\n[dependencies]\n\n[dependencies.a-dependency]\nname = "A Dependency"\nversion = "v12"\n''')
+ProjectConfig(name='My Project', type_='personal-project', keywords=['example', 'test'], dependencies={'a-dependency': ProjectConfig.Dependency(name='A Dependency', version='v12')})
+
+
+| You can do this for all supported serialization types listed in the :mod:`file_config.handlers` module.
+| By default several serialization types are supported without any need for extra dependencies...
+
+- ``json`` - via :mod:`json` (prefers `ujson <https://pypi.org/project/ujson/>`_ if module is present)
+- ``pickle`` - via :mod:`pickle`
+
+
+>>> config.dumps_json()
+'{"name":"My Project","type":"personal-project","keywords":["example","test"],"dependencies":{"a-dependency":{"name":"A Dependency","version":"v12"}}}'
+>>> config.dumps_pickle()
+b'\x80\x04\x95\xbb\x00\x00\x00\x00\x00\x00\x00\x8c\x0bcollections\x94\x8c\x0bOrderedDict\x94\x93\x94)R\x94(\x8c\x04name\x94\x8c\nMy Project\x94\x8c\x04type\x94\x8c\x10personal-project\x94\x8c\x08keywords\x94]\x94(\x8c\x07example\x94\x8c\x04test\x94e\x8c\x0cdependencies\x94}\x94\x8c\x0ca-dependency\x94h\x02)R\x94(h\x04\x8c\x0cA Dependency\x94\x8c\x07version\x94\x8c\x03v12\x94usu.'
