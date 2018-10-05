@@ -408,6 +408,8 @@ Extras
 There are several other validation rules that :func:`var <file_config._file_config.var>` method exposes.
 These arguments are used only to add validation logic to the generated JSONSchema.
 
+- ``title`` - *A title for the config var, used as the title of the JSONSchema property*
+- ``description`` - *A description for the config var, used as the description of the JSONSchema property*
 - ``examples`` - *A list of examples for what the config var might be*
 - ``min`` - *A minimum value for the var (applies to numbers, strings, and arrays)*
 - ``max`` - *A maximum value for the var (applies to numbers, strings, and arrays)*
