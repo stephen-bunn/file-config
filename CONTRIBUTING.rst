@@ -22,7 +22,7 @@ Style Guide
 - Linting and test environments are configured via ``tox.ini``.
 - Imports are sorted using `isort <https://pypi.python.org/pypi/isort>`_ with multi-line output mode ``3``.
 - An ``.editorconfig`` file is included in this repository which dictates whitespace, indentation, and file encoding rules.
-- Although ``requirements.txt`` and ``requirements_dev.txt`` do exist, `Pipenv <https://docs.pipenv.org/>`_ is utilized as the primary virtual environment and package manager for this project.
+- Although ``requirements.txt`` and ``requirements-dev.txt`` do exist, `Pipenv <https://docs.pipenv.org/>`_ is utilized as the primary virtual environment and package manager for this project.
 - We strictly utilize `Semantic Versioning <https://semver.org/>`_ as our version specification.
 - All Python source files are post-processed using `ambv/black <https://github.com/ambv/black>`_.
 
