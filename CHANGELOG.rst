@@ -6,10 +6,18 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
+`0.0.5`_ (*2018-10-04*)
+-----------------------
+- added better docstrings
+- added better documentation in rtd
+- fixed ``file_config._file_config._build`` for ``file_config.Regex`` types
+- fixed ``file_config.utils.typecast`` for serializing to ``str`` instead of None
+
 `0.0.4`_ (*2018-10-04*)
------------------------------
+-----------------------
 - added basic sphinx documentation
 - fixing dynamic type casting for config var typing types
 
 
-.. _0.0.4: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.0
+.. _0.0.5: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.5
+.. _0.0.4: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.4
