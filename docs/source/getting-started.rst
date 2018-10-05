@@ -30,7 +30,7 @@ Or you can build and install the package from the git repo.
 Defining Configs
 ================
 
-Similar to `attrs <https://attrs.readthedocs.io/en/stable/examples.html#basics>`_, the most basic way to setup a new config is to use the :func:`file_config.config` decorator.
+Similar to `attrs <https://attrs.readthedocs.io/en/stable/examples.html#basics>`_, the most basic way to setup a new config is to use the :func:`config <file_config._file_config.config>` decorator.
 
 .. code-block:: python
 
@@ -48,8 +48,8 @@ True
 >>> ProjectConfig() is ProjectConfig()
 False
 
-One of main features that :mod:`file_config` provides is the ability to generate a `JSONSchema <https://json-schema.org/>`_ dictionary to use for validating the state of a config instance.
-You can get the schema by passing a config class to the :func:`file_config.build_schema` method.
+One of main features that :mod:`file_config <file_config._file_config>` provides is the ability to generate a `JSONSchema <https://json-schema.org/>`_ dictionary to use for validating the state of a config instance.
+You can get the schema by passing a config class to the :func:`~.schema_builder.build_schema` method.
 
 >>> file_config.build_schema(ProjectConfig)
 {'$id': 'ProjectConfig.json',
@@ -59,7 +59,7 @@ You can get the schema by passing a config class to the :func:`file_config.build
  'type': 'object'}
 
 Currently the generated JSONSchema is pretty boring since the ``ProjectConfig`` class is totally empty.
-We can add a quick title and description to the root JSONSchema object by adding two arguments to the :func:`file_config.config` decorator...
+We can add a quick title and description to the root JSONSchema object by adding two arguments to the :func:`config <file_config._file_config.config>` decorator...
 
 - ``title`` - *Defines the title of the object in the generated JSONSchema*
 - ``description`` - *Defines the description of the object in the generated JSONSchema*
@@ -92,7 +92,7 @@ Config Vars
 Now that you have an empty config class, you can start adding variables that should be part of the config.
 Adding config vars is simple, but the more constraints you have on your vars the more complex the definition of that var becomes.
 
-You can start off with the most basic config var possible by using the :func:`file_config.var` method.
+You can start off with the most basic config var possible by using the :func:`var <file_config._file_config.var>` method.
 
 .. code-block:: python
 
@@ -169,12 +169,12 @@ Type
 ----
 
 Defining a config var's type is straight forward but can be complex given your config requirements.
-A config var's type can either be passed in as the first argument or as the ``type`` kwarg to the :func:`file_config.var` method.
+A config var's type can either be passed in as the first argument or as the ``type`` kwarg to the :func:`var <file_config._file_config.var>` method.
 
 Builtin Types
 ~~~~~~~~~~~~~
 
-The :func:`file_config.var` can take in any of the `builtin Python types <https://docs.python.org/3/library/stdtypes.html>`_.
+The :func:`var <file_config._file_config.var>` can take in any of the `builtin Python types <https://docs.python.org/3/library/stdtypes.html>`_.
 
 .. code-block:: python
 
@@ -227,7 +227,7 @@ On instance['type']:
 Typing Types
 ~~~~~~~~~~~~
 
-The :func:`file_config.var` can also use :mod:`typing` types as the ``type`` argument.
+The :func:`var <file_config._file_config.var>` can also use :mod:`typing` types as the ``type`` argument.
 This allows you to get a bit more specific with the exact format of the var type.
 
 .. code-block:: python
@@ -342,7 +342,7 @@ Regular Expressions
 ~~~~~~~~~~~~~~~~~~~
 
 In some cases you might need to do string validation based on some regular expression.
-Since there is no decent builtin way to specify a pattern as a type you must use the custom :func:`file_config.Regex` method to specify the regular expression to validate against.
+Since there is no decent builtin way to specify a pattern as a type you must use the custom :func:`Regex <file_config.schema_builder.Regex>` method to specify the regular expression to validate against.
 
 .. code-block:: python
 
@@ -363,7 +363,7 @@ Generating the JSONSchema for this config results in the ``pattern`` property of
  'required': ['name', 'version'],
  'type': 'object'}
 
-.. note:: Using the :func:`file_config.Regex` method uses :func:`typing.NewType` to generate a typing instance where the regex you supply is compiled by :func:`re.compile` and stored in the ``__supertype__`` attribute of the newly generated type.
+.. note:: Using the :func:`Regex <file_config.schema_builder.Regex>` method uses :func:`typing.NewType` to generate a typing instance where the regex you supply is compiled by :func:`re.compile` and stored in the ``__supertype__`` attribute of the newly generated type.
 
    This method **assumes** that the base type of the attribute is ``string`` (as you cannot do regex matching against any other type).
 
@@ -405,7 +405,7 @@ On instance['dependencies']['A Dependency']:
 Extras
 ------
 
-There are several other validation rules that :func:`file_config.var` method exposes.
+There are several other validation rules that :func:`var <file_config._file_config.var>` method exposes.
 These arguments are used only to add validation logic to the generated JSONSchema.
 
 - ``examples`` - *A list of examples for what the config var might be*
@@ -414,7 +414,7 @@ These arguments are used only to add validation logic to the generated JSONSchem
 - ``unique`` - *Indicates that the var must be unique (applies to arrays)*
 - ``contains`` - *Indicates that the var must contain the given element (applies to arrays)*
 
-If you try to use one of the rules on a :func:`file_config.var` that doesn't actually take that rule into consideration, a :class:`UserWarning` is raised when :func:`file_config.build_schema` is called...
+If you try to use one of the rules on a :func:`var <file_config._file_config.var>` that doesn't actually take that rule into consideration, a :class:`UserWarning` is raised when :func:`~.schema_builder.build_schema` is called...
 
 .. code-block:: python
 
@@ -441,8 +441,8 @@ Validation
 You've probably seen some examples of validation in the previous sections (as it relates pretty closely to how to declare config vars).
 Validation is done 100% through the use of dynamically generated `JSONSchema <https://json-schema.org/>`_ based on the declarations of the ``config``.
 
-The method used to generate the JSONSchema is :func:`file_config.build_schema`.
-You can use this method by simply passing in a class wrapped by :func:`file_config.config`...
+The method used to generate the JSONSchema is :func:`~.schema_builder.build_schema`.
+You can use this method by simply passing in a class wrapped by :func:`config <file_config._file_config.config>`...
 
 For example take the following (pretty specific) config class...
 
@@ -495,7 +495,7 @@ The resulting JSONSchema ends up being the following...
  'type': 'object'}
 
 Performing validation is very simple.
-All you need to do is pass an **instance** of the config into the :func:`file_config.validate` method...
+All you need to do is pass an **instance** of the config into the :func:`validate <file_config._file_config.validate>` method...
 
 >>> config = ProjectConfig(
 ...    name="My Project",
@@ -550,16 +550,16 @@ Since we use the :mod:`jsonschema` package to perform validation, it provides so
 
 This might help you inform your project what to look for to fix in a config.
 
-.. important:: Validation is only applied before loading a new instance from some serialized content or when you explicitly ask it to validate through :func:`file_config.validate`.
+.. important:: Validation is only applied before loading a new instance from some serialized content or when you explicitly ask it to validate through :func:`validate <file_config._file_config.validate>`.
 
-   Validation is **not** done as setter methods for :func:`file_config.config` wrapped classes.
+   Validation is **not** done as setter methods for :func:`config <file_config._file_config.config>` wrapped classes.
    This means you can throw whatever data you want into a config instance and it will never yell at you until you either try to load it from some content or when you explicitly ask for validation to occur.
 
 Dumping / Loading
 =================
 
-The serialization / deserialization steps of :func:`file_config.config` wrapped objects are built from the :class:`collections.OrderedDict`.
-You can get the resulting dictionary that is used for serialization by using the :func:`file_config.to_dict` method...
+The serialization / deserialization steps of :func:`config <file_config._file_config.config>` wrapped objects are built from the :class:`collections.OrderedDict`.
+You can get the resulting dictionary that is used for serialization by using the :func:`to_dict <file_config._file_config.to_dict>` method...
 
 Given the following config instance ``config``...
 
@@ -601,7 +601,7 @@ OrderedDict([('name', 'My Project'),
                                             ('version', 'v12')])})])
 
 
-This :func:`file_config.to_dict` method is used implicitly by all of the available :mod:`file_config.handlers`.
+This :func:`to_dict <file_config._file_config.to_dict>` method is used implicitly by all of the available :mod:`file_config.handlers`.
 These handlers provide an abstract interface to dumping and loading config instances to and from different formats.
 
 For every config instance you create, several methods and classmethods are added to the instance.
@@ -649,7 +649,7 @@ version = "v12"
 
 Loading from this toml content is also super straight forward...
 
->>> new_config = ProjectConfig.loads_toml('''name = "My Project"\ntype = "personal-project"\nkeywords = ["example", "test"]\n\n[dependencies]\n\n[dependencies.a-dependency]\nname = "A Dependency"\nversion = "v12"\n''')
+>>> ProjectConfig.loads_toml('''name = "My Project"\ntype = "personal-project"\nkeywords = ["example", "test"]\n\n[dependencies]\n\n[dependencies.a-dependency]\nname = "A Dependency"\nversion = "v12"\n''')
 ProjectConfig(name='My Project', type_='personal-project', keywords=['example', 'test'], dependencies={'a-dependency': ProjectConfig.Dependency(name='A Dependency', version='v12')})
 
 

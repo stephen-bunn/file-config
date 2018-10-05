@@ -10,6 +10,15 @@ File Config Package
 
 -----
 
+Schema Builder
+--------------
+
+.. automodule:: file_config.schema_builder
+   :members:
+   :undoc-members:
+
+-----
+
 Handlers
 --------
 

@@ -29,6 +29,13 @@ from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
 
 def Regex(pattern):
+    """ A custom typing type to store regular expressions for schema building.
+
+    :param str pattern: The regular expression
+    :return: A new Regex type instance
+    :rtype: typing.Type
+    """
+
     return typing.NewType(REGEX_TYPE_NAME, re.compile(pattern))
 
 
@@ -284,4 +291,11 @@ def _build(value, property_path=[]):
 
 
 def build_schema(config_cls):
+    """ Builds the JSONSchema for a given config class.
+
+    :param class config_cls: The config class to build the JSONSchema for
+    :return: The resulting JSONSchema
+    :rtype: dict
+    """
+
     return _build_config(config_cls, property_path=[])

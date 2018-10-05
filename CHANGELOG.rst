@@ -6,6 +6,11 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
+**0.0.6** (*work in progress*)
+------------------------------
+- improved documentation in ``file_config.schema_builder``
+- improved sphinx linking from ``getting-started.rst`` to generated autodocs
+
 `0.0.5`_ (*2018-10-05*)
 -----------------------
 - added better docstrings
