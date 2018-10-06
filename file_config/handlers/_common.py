@@ -49,6 +49,16 @@ class BaseHandler(abc.ABC):
 
         raise NotImplementedError(f"subclasses must implement 'packages'")
 
+    @abc.abstractproperty
+    def options(self):
+        """ A dictionary of dumping options that should be supported by the handler.
+
+        :raises NotImplementedError: Must be implemented by subclasses
+        """
+
+        raise NotImplementedError(f"subclasses must implement 'options'")
+
+
     @classmethod
     def available(self):
         """ True if any of the supported modules from ``packages`` is available for use.
@@ -80,7 +90,7 @@ class BaseHandler(abc.ABC):
                 return module_name
         raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
 
-    def dumps(self, instance):
+    def dumps(self, instance, **kwargs):
         """ An abstract dumps method which dumps an instance into the subclasses format.
 
         :param object instance: The instance to dump
@@ -96,7 +106,10 @@ class BaseHandler(abc.ABC):
                 f"no dumps handler for {self.imported!r}, requires method "
                 f"{dumps_hook_name!r} in {self!r}"
             )
-        return dumps_hook(self.handler, instance)
+
+        extras = self.options.copy()
+        extras.update(kwargs)
+        return dumps_hook(self.handler, instance, **extras)
 
     def loads(self, content):
         """ An abstract loads method which loads an instance from some content.

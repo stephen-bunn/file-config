@@ -10,6 +10,7 @@ class TOMLHandler(BaseHandler):
 
     name = "toml"
     packages = ("pytoml", "tomlkit")
+    options = {}
 
     def on_pytoml_dumps(self, pytoml, dictionary):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ dumps method.

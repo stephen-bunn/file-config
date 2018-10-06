@@ -41,7 +41,7 @@ class _ConfigEntry(object):
     contains = attr.ib(type=list, default=None)
 
 
-def _handle_dumps(self, handler):
+def _handle_dumps(self, handler, **kwargs):
     """ Dumps caller, used by partial method for dynamic handler assignments.
 
     :param object handler: The dump handler
@@ -49,10 +49,10 @@ def _handle_dumps(self, handler):
     :rtype: str
     """
 
-    return handler.dumps(to_dict(self))
+    return handler.dumps(to_dict(self), **kwargs)
 
 
-def _handle_dump(self, handler, file_object):
+def _handle_dump(self, handler, file_object, **kwargs):
     """ Dump caller, used by partial method for dynamic handler assignments.
 
     :param object handler: The dump handler
@@ -61,7 +61,7 @@ def _handle_dump(self, handler, file_object):
     :rtype: str
     """
 
-    return handler.dump(to_dict(self), file_object)
+    return handler.dump(to_dict(self), file_object, **kwargs)
 
 
 @classmethod

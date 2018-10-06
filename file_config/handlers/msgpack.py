@@ -10,6 +10,7 @@ class MsgpackHandler(BaseHandler):
 
     name = "msgpack"
     packages = ("msgpack",)
+    options = {}
 
     def on_msgpack_dumps(self, msgpack, dictionary):
         """ The `msgpack <https://pypi.org/project/msgpack/>`_ dumps method.

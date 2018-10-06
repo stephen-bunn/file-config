@@ -12,6 +12,7 @@ class YAMLHandler(BaseHandler):
 
     name = "yaml"
     packages = ("yaml",)
+    options = {}
 
     def on_yaml_imported(self, yaml):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ import hook.

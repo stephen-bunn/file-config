@@ -10,6 +10,7 @@ class PickleHandler(BaseHandler):
 
     name = "pickle"
     packages = ("pickle",)
+    options = {}
 
     def on_pickle_dumps(self, pickle, dictionary):
         """ The :mod:`pickle` dumps method.
