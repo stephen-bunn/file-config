@@ -90,10 +90,13 @@ def _handle_load(cls, handler, file_object):
     return from_dict(cls, handler.load(file_object))
 
 
-def config(maybe_cls=None, title=None, description=None):
+def config(maybe_cls=None, these=None, title=None, description=None):
     """ File config class decorator.
 
     :param class maybe_cls: The class to inherit from, defaults to None, optional
+    :param dict these: A dictionary of str to ``file_config.var`` to use as attribs
+    :param str title: The title of the config, defaults to None, optional
+    :param str description: A description of the config, defaults to None, optional
     :return: Config wrapped class
     :rtype: class
     """
@@ -132,7 +135,8 @@ def config(maybe_cls=None, title=None, description=None):
                     f"load_{handler.name}",
                     partialmethod(_handle_load, handler),
                 )
-        return attr.s(config_cls, slots=True)
+        config_vars = these if isinstance(these, dict) else None
+        return attr.s(config_cls, these=config_vars, slots=True)
 
     if maybe_cls is None:
         return wrap
@@ -209,7 +213,10 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
     """
 
     return config(
-        attr.make_class(name, var_dict, **kwargs), title=title, description=description
+        attr.make_class(name, attrs={}, **kwargs),
+        these=var_dict,
+        title=title,
+        description=description,
     )
 
 

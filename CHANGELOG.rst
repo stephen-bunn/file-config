@@ -8,6 +8,7 @@ Changelog
 
 **0.0.6** (*work in progress*)
 ------------------------------
+- fixing ``make_config`` not using any passed in ``file_config.var`` instances
 - added ``indent`` dumping argument for ``JSONHandler``
 - improved documentation in ``file_config.schema_builder``
 - improved sphinx linking from ``getting-started.rst`` to generated autodocs
