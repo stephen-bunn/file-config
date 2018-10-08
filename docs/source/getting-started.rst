@@ -666,3 +666,64 @@ ProjectConfig(name='My Project', type_='personal-project', keywords=['example', 
 '{"name":"My Project","type":"personal-project","keywords":["example","test"],"dependencies":{"a-dependency":{"name":"A Dependency","version":"v12"}}}'
 >>> config.dumps_pickle()
 b'\x80\x04\x95\xbb\x00\x00\x00\x00\x00\x00\x00\x8c\x0bcollections\x94\x8c\x0bOrderedDict\x94\x93\x94)R\x94(\x8c\x04name\x94\x8c\nMy Project\x94\x8c\x04type\x94\x8c\x10personal-project\x94\x8c\x08keywords\x94]\x94(\x8c\x07example\x94\x8c\x04test\x94e\x8c\x0cdependencies\x94}\x94\x8c\x0ca-dependency\x94h\x02)R\x94(h\x04\x8c\x0cA Dependency\x94\x8c\x07version\x94\x8c\x03v12\x94usu.'
+
+
+Handler Preference
+------------------
+
+There are usually multiple handlers that can deal with serialization / deserialization of a specific format (e.g. ``json`` and ``ujson``).
+You can declare a preference by setting the ``prefer`` keyword argument...
+
+>>> file_config.dumps_json(prefer="json")
+'{"name":"My Project","type":"personal-project","keywords":["example","test"],"dependencies":{"a-dependency":{"name":"A Dependency","version":"v12"}}}'
+
+This will prefer ``json`` over ``ujson`` if both are present.
+
+
+Dumping Options
+---------------
+
+Some dumping handlers have special options that are not immediately present on the ``dumps`` or ``dump`` methods.
+For example, the ``json`` handler has the ability to dump with a specific indentation level by passing in the ``indent`` keyword argument to the ``dumps_json`` method...
+
+>>> config.dumps_json(indent=2)
+{
+  "name":"My Project",
+  "type":"personal-project",
+  "keywords":[
+    "example",
+    "test"
+  ],
+  "dependencies":{
+    "a-dependency":{
+      "name":"A Dependency",
+      "version":"v12"
+    }
+  }
+}
+
+
+Unfortunately, some serialization packages (that handle the same format) do not have the ability to implement the same features.
+For example, ``tomlkit`` can support inline tables, but ``pytoml`` can not.
+You will notice that if you try to use the ``inline_table`` argument using ``pytoml`` you will get a warning similar to this...
+
+>>> config.dumps_toml(prefer="pytoml", inline_tables=["dependencies.*"])
+/home/stephen-bunn/Git/file-config/file_config/handlers/toml.py:72: UserWarning: pytoml does not support 'inline_tables' argument, use tomlkit instead
+  "pytoml does not support 'inline_tables' argument, use tomlkit instead"
+name = "My Project"
+type = "personal-project"
+keywords = ["example", "test"]
+[dependencies]
+[dependencies.a-dependency]
+name = "A Dependency"
+version = "v12"
+
+Whereas using ``tomlkit`` will handle the argument appropriately...
+
+>>> config.dumps_toml(prefer="tomlkit", inline_tables=["dependencies.*"])
+name = "My Project"
+type = "personal-project"
+keywords = ["example", "test"]
+[dependencies]
+a-dependency = {name = "A Dependency",version = "v12"}
+

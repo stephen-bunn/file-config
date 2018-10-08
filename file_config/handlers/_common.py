@@ -3,6 +3,7 @@
 
 import abc
 import sys
+import warnings
 import importlib
 
 
@@ -89,7 +90,15 @@ class BaseHandler(abc.ABC):
                 return module_name
         raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
 
-    def dumps(self, instance, **kwargs):
+    def _prefer_package(self, package):
+        if package not in self.packages:
+            raise ValueError(
+                f"prefered package {package!r} does not exist, "
+                f"allowed are {self.packages!r}"
+            )
+        self.packages = (package,)
+
+    def dumps(self, instance, prefer=None, **kwargs):
         """ An abstract dumps method which dumps an instance into the subclasses format.
 
         :param object instance: The instance to dump
@@ -97,6 +106,9 @@ class BaseHandler(abc.ABC):
         :return: The dumped content
         :rtype: str
         """
+
+        if isinstance(prefer, str):
+            self._prefer_package(prefer)
 
         dumps_hook_name = f"on_{self.imported}_dumps"
         dumps_hook = getattr(self, dumps_hook_name, None)
@@ -107,10 +119,16 @@ class BaseHandler(abc.ABC):
             )
 
         extras = self.options.copy()
-        extras.update(kwargs)
+        for (key, value) in kwargs.items():
+            if key not in extras.keys():
+                warnings.warn(
+                    f"handler 'dumps_{self.name!s}' does not support {key!r} argument"
+                )
+            else:
+                extras[key] = value
         return dumps_hook(self.handler, instance, **extras)
 
-    def loads(self, content):
+    def loads(self, content, prefer=None):
         """ An abstract loads method which loads an instance from some content.
 
         :param str content: The content to load from
@@ -118,6 +136,9 @@ class BaseHandler(abc.ABC):
         :return: A dictionary converted from the given content
         :rtype: dict
         """
+
+        if isinstance(prefer, str):
+            self._prefer_package(prefer)
 
         loads_hook_name = f"on_{self.imported}_loads"
         loads_hook = getattr(self, loads_hook_name, None)
@@ -128,16 +149,16 @@ class BaseHandler(abc.ABC):
             )
         return loads_hook(self.handler, content)
 
-    def dump(self, instance, file_object):
+    def dump(self, instance, file_object, prefer=None):
         """ An abstract method that dumps to a given file object.
 
         :param object instance: The instance to dump
         :param file file_object: The file object to dump to
         """
 
-        file_object.write(self.dumps(instance))
+        file_object.write(self.dumps(instance, prefer=prefer))
 
-    def load(self, file_object):
+    def load(self, file_object, prefer=None):
         """ An abstract method that loads from a given file object.
 
         :param file file_object: The file object to load from
@@ -145,4 +166,4 @@ class BaseHandler(abc.ABC):
         :rtype: dict
         """
 
-        return self.loads(file_object.read())
+        return self.loads(file_object.read(), prefer=prefer)

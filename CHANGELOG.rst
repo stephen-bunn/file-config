@@ -6,8 +6,13 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
-`0.0.6`_ (*2018-10-8*)
+**0.0.7** (*work in progress*)
 ------------------------------
+- adding ``prefer`` keyword to use specific serialization handler
+- adding ``inline_tables`` argument for ``toml`` handlers (takes a list of fnmatch patterns)
+
+`0.0.6`_ (*2018-10-8*)
+----------------------
 - fixing ``make_config`` not using any passed in ``file_config.var`` instances
 - added ``indent`` dumping argument for ``JSONHandler``
 - improved documentation in ``file_config.schema_builder``
