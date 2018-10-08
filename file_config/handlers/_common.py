@@ -58,7 +58,6 @@ class BaseHandler(abc.ABC):
 
         raise NotImplementedError(f"subclasses must implement 'options'")
 
-
     @classmethod
     def available(self):
         """ True if any of the supported modules from ``packages`` is available for use.
