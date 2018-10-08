@@ -14,12 +14,22 @@ class PickleHandler(BaseHandler):
 
     def on_pickle_dumps(self, pickle, dictionary):
         """ The :mod:`pickle` dumps method.
+
+        :param module pickle: The ``pickle`` module
+        :param dict dictionary: The dictionary instance to serailize
+        :returns: The serialized content
+        :rtype: str
         """
 
         return pickle.dumps(dictionary, protocol=pickle.HIGHEST_PROTOCOL)
 
     def on_pickle_loads(self, pickle, content):
         """ The :mod:`pickle` loads method.
+
+        :param module pickle: The ``pickle`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
         """
 
         return pickle.loads(content)

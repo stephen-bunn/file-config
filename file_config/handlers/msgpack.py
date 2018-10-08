@@ -14,12 +14,22 @@ class MsgpackHandler(BaseHandler):
 
     def on_msgpack_dumps(self, msgpack, dictionary):
         """ The `msgpack <https://pypi.org/project/msgpack/>`_ dumps method.
+
+        :param module msgpack: The ``msgpack`` module
+        :param dict dictionary: The dictionary instance to serialize
+        :returns: The serialized content
+        :rtype: str
         """
 
         return msgpack.dumps(dictionary)
 
     def on_msgpack_loads(self, msgpack, content):
         """ The `msgpack <https://pypi.org/project/msgpack/>`_ loads method.
+
+        :param module msgpack: The ``msgpack`` module
+        :param dict content: The serialized content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
         """
 
         return msgpack.loads(content, raw=False)

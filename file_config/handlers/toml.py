@@ -17,6 +17,36 @@ class TOMLHandler(BaseHandler):
 
     def on_tomlkit_dumps(self, tomlkit, dictionary, **kwargs):
         """ The `tomlkit <https://pypi.org/project/tomlkit/>`_ dumps method.
+
+        :param module tomlkit: The ``tomlkit`` module
+        :param dict dictionary: The dictionary to serialize
+        :param list inline_tables: A list glob patterns to use for derminining which
+            dictionaries should be rendered as inline tables, defaults to [], optional
+        :returns: The TOML serialization
+        :rtype: str
+
+        Dumping inline tables uses :mod:`fnmatch` to compare ``.`` delimited dictionary
+        path glob patterns to filter tables
+
+        >>> config.dumps_toml()
+        name = "My Project"
+        type = "personal-project"
+        keywords = ["example", "test"]
+        [dependencies]
+        [dependencies.a-dependency]
+        name = "A Dependency"
+        version = "v12"
+        >>> config.dumps_toml(inline_tables=["dependencies"])
+        name = "My Project"
+        type = "personal-project"
+        keywords = ["example", "test"]
+        dependencies = {a-dependency = {name = "A Dependency",version = "v12"}}
+        >>> config.dumps_toml(inline_tables=["dependencies.*"])
+        name = "My Project"
+        type = "personal-project"
+        keywords = ["example", "test"]
+        [dependencies]
+        a-dependency = {name = "A Dependency",version = "v12"}
         """
 
         inline_tables = set(kwargs.get("inline_tables", []))
@@ -58,12 +88,22 @@ class TOMLHandler(BaseHandler):
 
     def on_tomlkit_loads(self, tomlkit, content):
         """ The `tomlkit <https://pypi.org/project/tomlkit/>`_ loads method.
+
+        :param module tomlkit: The ``tomlkit`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
         """
 
         return tomlkit.parse(content)
 
     def on_pytoml_dumps(self, pytoml, dictionary, **kwargs):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ dumps method.
+
+        :param module pytoml: The ``pytoml`` module
+        :param dict dictionary: The dictionary to serialize
+        :returns: The TOML serialization
+        :rtype: str
         """
 
         inline_tables = set(kwargs.get("inline_tables", []))
@@ -75,6 +115,11 @@ class TOMLHandler(BaseHandler):
 
     def on_pytoml_loads(self, pytoml, content):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ loads method.
+
+        :param module pytoml: The ``pytoml`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
         """
 
         return pytoml.loads(content)

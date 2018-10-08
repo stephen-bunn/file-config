@@ -16,6 +16,8 @@ class YAMLHandler(BaseHandler):
 
     def on_yaml_imported(self, yaml):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ import hook.
+
+        :param module yaml: The ``yaml`` module
         """
 
         def represent_ordereddict(dumper, data):
@@ -38,14 +40,24 @@ class YAMLHandler(BaseHandler):
 
         yaml.add_representer(OrderedDict, represent_ordereddict)
 
-    def on_yaml_dumps(self, yaml, instance):
+    def on_yaml_dumps(self, yaml, dictionary):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ dumps method.
+
+        :param module yaml: The ``yaml`` module
+        :param dict dictionary: The dictionary to seralize
+        :returns: The serialized content
+        :rtype: str
         """
 
-        return yaml.dump(instance)
+        return yaml.dump(dictionary)
 
     def on_yaml_loads(self, yaml, content):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ loads method.
+
+        :param module yaml: The ``yaml`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
         """
 
         return yaml.load(content)
