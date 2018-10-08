@@ -58,7 +58,6 @@ def test_var_metadata(config_name, title, description):
 
 @given(class_name(), attribute_name(), config(config_vars={}))
 def test_nested_empty_config(config_name, nested_config_name, nested_config):
-    print(nested_config)
     config = file_config.make_config(
         config_name, {nested_config_name: file_config.var(nested_config)}
     )
