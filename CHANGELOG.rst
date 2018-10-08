@@ -6,7 +6,7 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
-**0.0.6** (*work in progress*)
+`0.0.6`_ (*2018-10-8*)
 ------------------------------
 - fixing ``make_config`` not using any passed in ``file_config.var`` instances
 - added ``indent`` dumping argument for ``JSONHandler``
@@ -26,5 +26,6 @@ Changelog
 - fixing dynamic type casting for config var typing types
 
 
+.. _0.0.6: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.6
 .. _0.0.5: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.5
 .. _0.0.4: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.4
