@@ -174,4 +174,4 @@ def typecast(type_, value):
         else:
             return base_type(value)
     else:
-        raise ValueError(f"unsure how to cast from type {type_!r} for value {value!r}")
+        return value

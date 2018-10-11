@@ -13,6 +13,7 @@ VERSION = "0.0.6"
 INSTALL_REQUIRES = ["attrs", "jsonschema"]
 SETUP_REQUIRES = []
 EXTRAS_REQUIRE = {
+    "toml": ["toml"],
     "pytoml": ["pytoml"],
     "tomlkit": ["tomlkit"],
     "ujson": ["ujson"],

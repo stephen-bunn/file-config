@@ -12,7 +12,7 @@ class TOMLHandler(BaseHandler):
     """
 
     name = "toml"
-    packages = ("tomlkit", "pytoml")
+    packages = ("tomlkit", "toml", "pytoml")
     options = {"inline_tables": []}
 
     def on_tomlkit_dumps(self, tomlkit, dictionary, **kwargs):
@@ -96,6 +96,34 @@ class TOMLHandler(BaseHandler):
         """
 
         return tomlkit.parse(content)
+
+    def on_toml_dumps(self, toml, dictionary, **kwargs):
+        """ The `toml <https://pypi.org/project/toml/>`_ dumps method.
+
+        :param module toml: The ``toml`` module
+        :param dict dictionary: The dictionary to serialize
+        :returns: The TOML serialization
+        :rtype: str
+        """
+
+        inline_tables = set(kwargs.get("inline_tables", []))
+        if len(inline_tables) > 0:
+            warnings.warn(
+                "toml does not support 'inline_tables' argument, use tomlkit instead"
+            )
+        encoder = toml.TomlEncoder(preserve=True)
+        return toml.dumps(dictionary, encoder=encoder)
+
+    def on_toml_loads(self, toml, content):
+        """ The `toml <https://pypi.org/project/toml/>`_ loads method.
+
+        :param module toml: The ``toml`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
+        """
+
+        return toml.loads(content)
 
     def on_pytoml_dumps(self, pytoml, dictionary, **kwargs):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ dumps method.

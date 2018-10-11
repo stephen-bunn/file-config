@@ -23,6 +23,7 @@ pytest-sugar = "*"
 hypothesis = "*"
 sphinx = "*"
 pytoml = "*"
+toml = "*"
 
 [requires]
 python_version = "3.6"
