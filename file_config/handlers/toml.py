@@ -28,7 +28,7 @@ class TOMLHandler(BaseHandler):
         Dumping inline tables uses :mod:`fnmatch` to compare ``.`` delimited dictionary
         path glob patterns to filter tables
 
-        >>> config.dumps_toml()
+        >>> config.dumps_toml(prefer="tomlkit")
         name = "My Project"
         type = "personal-project"
         keywords = ["example", "test"]
@@ -36,12 +36,12 @@ class TOMLHandler(BaseHandler):
         [dependencies.a-dependency]
         name = "A Dependency"
         version = "v12"
-        >>> config.dumps_toml(inline_tables=["dependencies"])
+        >>> config.dumps_toml(prefer="tomlkit", inline_tables=["dependencies"])
         name = "My Project"
         type = "personal-project"
         keywords = ["example", "test"]
         dependencies = {a-dependency = {name = "A Dependency",version = "v12"}}
-        >>> config.dumps_toml(inline_tables=["dependencies.*"])
+        >>> config.dumps_toml(prefer="tomlkit", inline_tables=["dependencies.*"])
         name = "My Project"
         type = "personal-project"
         keywords = ["example", "test"]
@@ -104,15 +104,55 @@ class TOMLHandler(BaseHandler):
         :param dict dictionary: The dictionary to serialize
         :returns: The TOML serialization
         :rtype: str
+
+        Dumping inline tables uses :mod:`fnmatch` to compare ``.`` delimited dictionary
+        path glob patterns to filter tables
+
+        >>> config.dumps_toml(prefer="toml")
+        name = "My Project"
+        type = "personal-project"
+        keywords = [ "example", "test",]
+        [dependencies.a-dependency]
+        name = "A Dependency"
+        version = "v12"
+        >>> config.dumps_toml(prefer="toml", inline_tables=["dependencies"])
+        name = "My Project"
+        type = "personal-project"
+        keywords = [ "example", "test",]
+        dependencies = {a-dependency = {name = "A Dependency",version = "v12"}
+        }
+        >>> config.dumps_toml(prefer="toml", inline_tables=["dependencies.*"])
+        name = "My Project"
+        type = "personal-project"
+        keywords = [ "example", "test",]
+        [dependencies]
+        a-dependency = { name = "A Dependency", version = "v12" }
         """
 
         inline_tables = set(kwargs.get("inline_tables", []))
-        if len(inline_tables) > 0:
-            warnings.warn(
-                "toml does not support 'inline_tables' argument, use tomlkit instead"
-            )
+
+        def _dump_dict(dictionary, source, source_path=[]):
+            for (key, value) in dictionary.items():
+                if isinstance(value, dict):
+                    is_inline = any(
+                        [
+                            fnmatch.fnmatch(".".join(source_path + [key]), pattern)
+                            for pattern in inline_tables
+                        ]
+                    )
+                    if is_inline:
+                        source[key] = toml.TomlDecoder().get_empty_inline_table()
+                    else:
+                        source[key] = {}
+                    source[key].update(
+                        _dump_dict(value, {}, source_path=source_path + [key])
+                    )
+                else:
+                    source[key] = value
+            return source
+
         encoder = toml.TomlEncoder(preserve=True)
-        return toml.dumps(dictionary, encoder=encoder)
+        return toml.dumps(_dump_dict(dictionary, {}), encoder=encoder)
 
     def on_toml_loads(self, toml, content):
         """ The `toml <https://pypi.org/project/toml/>`_ loads method.
@@ -136,9 +176,7 @@ class TOMLHandler(BaseHandler):
 
         inline_tables = set(kwargs.get("inline_tables", []))
         if len(inline_tables) > 0:
-            warnings.warn(
-                "pytoml does not support 'inline_tables' argument, use tomlkit instead"
-            )
+            warnings.warn("pytoml does not support 'inline_tables' argument")
         return pytoml.dumps(dictionary)
 
     def on_pytoml_loads(self, pytoml, content):

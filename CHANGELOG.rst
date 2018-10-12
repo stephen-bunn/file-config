@@ -10,7 +10,7 @@ Changelog
 ------------------------------
 - adding ``prefer`` keyword to use specific serialization handler
 - adding ``inline_tables`` argument for ``toml`` handlers (takes a list of fnmatch patterns)
-- adding basic support for `toml <https://github.com/uiri/toml>`_
+- adding support for `toml <https://github.com/uiri/toml>`_
 
 `0.0.6`_ (*2018-10-8*)
 ----------------------
