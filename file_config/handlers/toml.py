@@ -102,6 +102,8 @@ class TOMLHandler(BaseHandler):
 
         :param module toml: The ``toml`` module
         :param dict dictionary: The dictionary to serialize
+        :param list inline_tables: A list glob patterns to use for derminining which
+            dictionaries should be rendered as inline tables, defaults to [], optional
         :returns: The TOML serialization
         :rtype: str
 
