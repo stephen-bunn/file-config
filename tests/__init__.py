@@ -32,7 +32,7 @@ from hypothesis.strategies import (
 
 import file_config
 
-CONFIG_VAR_MIN_COUNT = 1
+CONFIG_VAR_MIN_COUNT = 0
 CONFIG_VAR_MAX_COUNT = 10
 
 
