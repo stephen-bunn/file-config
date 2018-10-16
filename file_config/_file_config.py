@@ -273,7 +273,6 @@ def _build(config_cls, dictionary):
         elif is_config_type(entry.type):
             kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
         else:
-            # TODO: handle correct type casting logic based on builtin or typing types
             kwargs[var.name] = typecast(
                 entry.type, dictionary.get(arg_key, arg_default)
             )
