@@ -114,8 +114,8 @@ def build_type(draw, type_):
     elif file_config.utils.is_number_type(type_):
         if type_ == float:
             return draw(floats())
-        elif type_ == complex:
-            return draw(complex_numbers())
+        # elif type_ == complex:
+        #     return draw(complex_numbers())
 
 
 @composite

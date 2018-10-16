@@ -9,6 +9,8 @@ Changelog
 **0.0.8** (*work in progress*)
 ------------------------------
 - adding ``sort_keys`` support for ``json`` dumpers
+- improved tests via a hypothesis dynmaic config instance builder
+- removing support for `complex <https://docs.python.org/3.8/library/functions.html#complex>`_ vars since no serializers support them
 
 `0.0.7`_ (*2018-10-12*)
 ----------------------

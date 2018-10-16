@@ -108,7 +108,7 @@ def is_integer_type(type_):
 
 def is_number_type(type_):
     if is_builtin_type(type_):
-        return type_ in (float, complex)
+        return type_ in (float,)
     return False
 
 

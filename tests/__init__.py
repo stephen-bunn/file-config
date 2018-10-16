@@ -60,7 +60,7 @@ def random_builtin(draw, ignore: list = []):
             characters(),
             builds(frozenset),
             # timedeltas(),
-            complex_numbers(),
+            # complex_numbers(),
         ).filter(lambda x: not isinstance(x, ignore))
     )
 
