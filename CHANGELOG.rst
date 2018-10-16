@@ -6,8 +6,8 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
-**0.0.8** (*work in progress*)
-------------------------------
+`0.0.8`_ (*2018-10-16*)
+-----------------------
 - adding ``sort_keys`` support for ``json`` dumpers
 - adding conditional ``validate`` boolean flag for ``load_<json,toml,yaml,etc...>`` config method (performs pre-validation of loaded dictionary)
 - fixing typecasting of loaded content when var is missing in content, now sets var to None
@@ -40,6 +40,7 @@ Changelog
 - fixing dynamic type casting for config var typing types
 
 
+.. _0.0.8: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.8
 .. _0.0.7: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.7
 .. _0.0.6: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.6
 .. _0.0.5: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.5
