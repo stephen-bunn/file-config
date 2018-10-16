@@ -39,3 +39,9 @@ def test_to_dict(config):
     dict_ = file_config.to_dict(config())
     assert isinstance(dict_, dict)
 
+
+@given(class_name())
+def test_from_dict(config_name):
+    config = file_config.make_config(config_name, {})
+    instance = file_config.from_dict(config, {})
+    assert file_config.utils.is_config(instance)
