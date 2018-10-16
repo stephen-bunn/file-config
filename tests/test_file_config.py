@@ -7,7 +7,7 @@ from hypothesis import given
 
 import file_config
 
-from . import config, config_var, class_name
+from . import config, class_name, config_var
 
 
 @given(config_var())

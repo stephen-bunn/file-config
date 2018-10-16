@@ -88,7 +88,7 @@ def test_integer_var(config_name):
 
 @given(class_name())
 def test_number_var(config_name):
-    for type_ in (float, complex):
+    for type_ in (float,):
         config = file_config.make_config(config_name, {"test": file_config.var(type_)})
         schema = file_config.build_schema(config)
         assert schema["properties"]["test"]["type"] == "number"

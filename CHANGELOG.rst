@@ -9,6 +9,8 @@ Changelog
 **0.0.8** (*work in progress*)
 ------------------------------
 - adding ``sort_keys`` support for ``json`` dumpers
+- adding conditional ``validate`` boolean flag for ``load_<json,toml,yaml,etc...>`` config method (performs pre-validation of loaded dictionary)
+- fixing typecasting of loaded content when var is missing in content, now sets var to None
 - improved tests via a hypothesis dynmaic config instance builder
 - removing support for `complex <https://docs.python.org/3.8/library/functions.html#complex>`_ vars since no serializers support them
 

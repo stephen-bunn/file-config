@@ -37,7 +37,7 @@ CONFIG_VAR_MAX_COUNT = 10
 
 
 @composite
-def random_builtin(draw, ignore: list = []):
+def random_builtin(draw, ignore=[]):
     ignore = tuple(ignore)
     return draw(
         one_of(
@@ -84,10 +84,10 @@ def attribute_name(draw):
 
 
 @composite
-def config_var(draw, var_type=None, var_default=None, **kwargs):
+def config_var(draw, var_type=None, var_default=None, ignore_types=[], **kwargs):
     if not var_type:
         if not var_default:
-            var_default = draw(random_builtin())
+            var_default = draw(random_builtin(ignore=ignore_types))
         var_type = type(var_default)
     return file_config.var(type=var_type, default=var_default, **kwargs)
 
@@ -97,6 +97,7 @@ def config(
     draw,
     config_name=None,
     config_vars=None,
+    ignore_types=[],
     min_vars=CONFIG_VAR_MIN_COUNT,
     max_vars=CONFIG_VAR_MAX_COUNT,
 ):
@@ -104,7 +105,7 @@ def config(
         config_vars = {}
         for _ in range(random.randint(min_vars, max_vars)):
             var_name = draw(attribute_name())
-            config_vars[var_name] = draw(config_var())
+            config_vars[var_name] = draw(config_var(ignore_types=ignore_types))
 
     if not config_name:
         config_name = draw(class_name())

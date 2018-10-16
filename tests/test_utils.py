@@ -2,7 +2,6 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import attr
-
 from hypothesis import given
 
 import file_config

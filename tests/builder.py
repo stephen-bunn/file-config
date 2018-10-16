@@ -6,15 +6,15 @@ import random
 import attr
 from hypothesis.strategies import (
     data,
-    builds,
     none,
+    builds,
+    floats,
+    one_of,
     booleans,
+    integers,
     composite,
     characters,
     from_regex,
-    one_of,
-    integers,
-    floats,
     complex_numbers,
 )
 

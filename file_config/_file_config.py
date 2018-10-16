@@ -65,29 +65,33 @@ def _handle_dump(self, handler, file_object, **kwargs):
 
 
 @classmethod
-def _handle_loads(cls, handler, content):
+def _handle_loads(cls, handler, content, validate=False, **kwargs):
     """ Loads caller, used by partial method for dynamic handler assignments.
 
     :param object handler: The loads handler
     :param str content: The content to load from
+    :param bool validate: Performs content validation before loading,
+        defaults to False, optional
     :return: The loaded instance
     :rtype: object
     """
 
-    return from_dict(cls, handler.loads(content))
+    return from_dict(cls, handler.loads(content, **kwargs), validate=validate)
 
 
 @classmethod
-def _handle_load(cls, handler, file_object):
+def _handle_load(cls, handler, file_object, validate=False, **kwargs):
     """ Loads caller, used by partial method for dynamic handler assignments.
 
     :param object handler: The loads handler
     :param file file_object: The file object to load from
+    :param bool validate: Performs content validation before loading,
+        defaults to False, optional
     :return: The loaded instance
     :rtype: object
     """
 
-    return from_dict(cls, handler.load(file_object))
+    return from_dict(cls, handler.load(file_object, **kwargs), validate=validate)
 
 
 def config(maybe_cls=None, these=None, title=None, description=None):
@@ -220,11 +224,13 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
     )
 
 
-def _build(config_cls, dictionary):
+def _build(config_cls, dictionary, validate=False):
     """ Builds an instance of ``config_cls`` using ``dictionary``.
 
     :param type config_cls: The class to use for building
     :param dict dictionary: The dictionary to use for building ``config_cls``
+    :param bool validate: Performs validation before building ``config_cls``,
+        defaults to False, optional
     :return: An instance of ``config_cls``
     :rtype: object
     """
@@ -237,7 +243,8 @@ def _build(config_cls, dictionary):
 
     # perform jsonschema validation on the given dictionary
     # (simplifys dynamic typecasting)
-    jsonschema.validate(dictionary, build_schema(config_cls))
+    if validate:
+        jsonschema.validate(dictionary, build_schema(config_cls))
 
     kwargs = {}
     for var in attr.fields(config_cls):
@@ -273,9 +280,12 @@ def _build(config_cls, dictionary):
         elif is_config_type(entry.type):
             kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
         else:
-            kwargs[var.name] = typecast(
-                entry.type, dictionary.get(arg_key, arg_default)
-            )
+            if arg_key not in dictionary:
+                kwargs[var.name] = None
+            else:
+                kwargs[var.name] = typecast(
+                    entry.type, dictionary.get(arg_key, arg_default)
+                )
 
     return config_cls(**kwargs)
 
@@ -346,16 +356,18 @@ def validate(instance):
     )
 
 
-def from_dict(config_cls, dictionary):
+def from_dict(config_cls, dictionary, validate=False):
     """ Loads an instance of ``config_cls`` from a dictionary.
 
     :param type config_cls: The class to build an instance of
     :param dict dictionary: The dictionary to load from
+    :param bool validate: Preforms validation before building ``config_cls``,
+        defaults to False, optional
     :return: An instance of ``config_cls``
     :rtype: object
     """
 
-    return _build(config_cls, dictionary)
+    return _build(config_cls, dictionary, validate=validate)
 
 
 def to_dict(instance, dict_type=OrderedDict):
