@@ -35,6 +35,8 @@ class _ConfigEntry(object):
     description = attr.ib(type=str, default=None)
     required = attr.ib(type=bool, default=True)
     examples = attr.ib(type=list, default=None)
+    encoder = attr.ib(default=None)
+    decoder = attr.ib(default=None)
     min = attr.ib(type=int, default=None)
     max = attr.ib(type=int, default=None)
     unique = attr.ib(type=bool, default=None)
@@ -156,6 +158,8 @@ def var(
     description=None,
     required=True,
     examples=None,
+    encoder=None,
+    decoder=None,
     min=None,
     max=None,
     unique=None,
@@ -174,6 +178,8 @@ def var(
         defaults to True, optional
     :param list examples: A list of validation examples, if necessary,
         defaults to None, optional
+    :param encoder: The encoder to use for the var, defaults to None, optional
+    :param decoder: The decoder to use for the var, defaults to None, optional
     :param int min: The minimum constraint of the variable, defaults to None, optional
     :param int max: The maximum constraint of the variable, defaults to None, optional
     :param bool unique: Flag to indicate if variable should be unique,
@@ -195,6 +201,8 @@ def var(
                 description=description,
                 required=required,
                 examples=examples,
+                encoder=encoder,
+                decoder=decoder,
                 min=min,
                 max=max,
                 unique=unique,
@@ -255,6 +263,10 @@ def _build(config_cls, dictionary, validate=False):
         arg_key = entry.name if entry.name else var.name
         arg_default = var.default if var.default else None
 
+        if callable(entry.decoder):
+            kwargs[var.name] = entry.decoder(dictionary.get(arg_key, arg_default))
+            continue
+
         if is_array_type(entry.type):
             if is_typing_type(entry.type) and len(entry.type.__args__) > 0:
                 nested_type = entry.type.__args__[0]
@@ -313,6 +325,12 @@ def _dump(config_instance, dict_type=OrderedDict):
         entry = var.metadata[CONFIG_KEY]
         dump_key = entry.name if entry.name else var.name
         dump_default = var.default if var.default else None
+
+        if callable(entry.encoder):
+            result[dump_key] = entry.encoder(
+                getattr(config_instance, var.name, dump_default)
+            )
+            continue
 
         if is_array_type(entry.type):
             items = getattr(config_instance, var.name, [])
