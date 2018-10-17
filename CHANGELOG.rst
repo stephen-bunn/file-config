@@ -19,7 +19,7 @@ Changelog
 - removing support for `complex <https://docs.python.org/3.8/library/functions.html#complex>`_ vars since no serializers support them
 
 `0.0.7`_ (*2018-10-12*)
-----------------------
+-----------------------
 - adding ``prefer`` keyword to use specific serialization handler
 - adding ``inline_tables`` argument for ``toml`` handlers (takes a list of fnmatch patterns)
 - adding support for `toml <https://github.com/uiri/toml>`_

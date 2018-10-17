@@ -402,6 +402,35 @@ On instance['dependencies']['A Dependency']:
 
    Without start and end terminators in the regular expression JSONSchema will not fully match the string and assume that it is correct.
 
+
+Encoder and Decoder
+-------------------
+
+Since not all types are supported by all serializers, you can specify a custom encoder callable and decoder callable.
+For example, :mod:`json` doesn't support the serialization of :class:`datetime.datetime` instances.
+You can get around this by using the ``encoder`` and ``decoder`` arguments...
+
+.. code-block:: python
+
+   import datetime
+
+   @file_config.config
+   class ProjectConfig(object):
+      updated = file_config.var(
+         datetime.datetime,
+         encoder=lambda x: x.timestamp(),
+         decoder=datetime.datetime.fromtimestamp
+      )
+
+
+This is a simple solution to deal with :class:`datetime.datetime` but works for all serializers.
+
+.. note:: Trying to do validation with a variable with a type not supported by `jsonschema <https://json-schema.org/>`_ (e.g. :class:`datetime.datetime`) will always raise a :class:`warnings.UserWarning` similar to the following...
+
+   >>> file_validate.validate(config)
+   /home/stephen-bunn/Git/file-config/file_config/schema_builder.py:195: UserWarning: unhandled translation for type <class 'datetime.datetime'> with value Attribute(name='updated', default=None, validator=None, repr=True, cmp=True, hash=None, init=True, metadata=mappingproxy({'__file_config_metadata': _ConfigEntry(type=<class 'datetime.datetime'>, default=None, name=None, title=None, description=None, required=True, examples=None, encoder=<function ProjectConfig.<lambda> at 0x7f7ef9c80d08>, decoder=<built-in method fromtimestamp of type object at 0xa05540>, min=None, max=None, unique=None, contains=None)}), type=<class 'datetime.datetime'>, converter=None, kw_only=False)
+   warnings.warn(f"unhandled translation for type {type_!r} with value {value!r}")
+
 Extras
 ------
 
