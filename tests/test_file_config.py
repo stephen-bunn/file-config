@@ -4,10 +4,11 @@
 import typing
 
 from hypothesis import given
+from hypothesis.strategies import data
 
 import file_config
 
-from . import config, class_name, config_var
+from . import config, builder, class_name, config_var
 
 
 @given(config_var())
@@ -40,8 +41,9 @@ def test_to_dict(config):
     assert isinstance(dict_, dict)
 
 
-@given(class_name())
-def test_from_dict(config_name):
-    config = file_config.make_config(config_name, {})
-    instance = file_config.from_dict(config, {})
+@given(config(), data())
+def test_from_dict(config, data):
+    instance = file_config.from_dict(
+        config, data.draw(builder.build_config_dict(config))
+    )
     assert file_config.utils.is_config(instance)
