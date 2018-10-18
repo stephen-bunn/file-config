@@ -425,11 +425,15 @@ You can get around this by using the ``encoder`` and ``decoder`` arguments...
 
 This is a simple solution to deal with :class:`datetime.datetime` but works for all serializers.
 
-.. note:: Trying to do validation with a variable with a type not supported by `jsonschema <https://json-schema.org/>`_ (e.g. :class:`datetime.datetime`) will always raise a :class:`warnings.UserWarning` similar to the following...
+.. note:: Trying to do validation on a variable with a type not supported by `jsonschema <https://json-schema.org/>`_ (e.g. :class:`datetime.datetime`) will always raise a :class:`UserWarning` similar to the following...
 
    >>> file_validate.validate(config)
    /home/stephen-bunn/Git/file-config/file_config/schema_builder.py:195: UserWarning: unhandled translation for type <class 'datetime.datetime'> with value Attribute(name='updated', default=None, validator=None, repr=True, cmp=True, hash=None, init=True, metadata=mappingproxy({'__file_config_metadata': _ConfigEntry(type=<class 'datetime.datetime'>, default=None, name=None, title=None, description=None, required=True, examples=None, encoder=<function ProjectConfig.<lambda> at 0x7f7ef9c80d08>, decoder=<built-in method fromtimestamp of type object at 0xa05540>, min=None, max=None, unique=None, contains=None)}), type=<class 'datetime.datetime'>, converter=None, kw_only=False)
    warnings.warn(f"unhandled translation for type {type_!r} with value {value!r}")
+
+   This warning is raised whenever the :mod:`~file_config.schema_builder` cannot handle the given type of a config var.
+   The resulting JSONSchema will define the config var as a property but will **not** specify a type.
+   Essentially, the built JSONSchema will just validate that the property exists as long as the ``required`` flag is set to ``True``.
 
 Extras
 ------
