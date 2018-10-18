@@ -2,10 +2,12 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import re
+import typing
+import collections
 
 import attr
 from hypothesis import given
-from hypothesis.strategies import characters
+from hypothesis.strategies import characters, one_of, from_type
 
 import file_config
 

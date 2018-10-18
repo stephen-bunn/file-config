@@ -1,12 +1,13 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
+import pytest
 from hypothesis import given
 from hypothesis.strategies import characters
 
 import file_config
 
-from . import config, class_name, attribute_name
+from . import config, class_name, attribute_name, random_builtin
 
 
 @given(config(min_vars=0, max_vars=0))
@@ -15,6 +16,12 @@ def test_empty_config(config):
     assert schema["type"] == "object"
     assert len(schema["properties"]) == 0
     assert len(schema["required"]) == 0
+
+
+@given(random_builtin())
+def test_not_config(config):
+    with pytest.raises(ValueError):
+        file_config.build_schema(config)
 
 
 @given(class_name(), characters(), characters())

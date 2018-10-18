@@ -13,11 +13,13 @@ from . import config, builder, class_name, config_var
 
 @given(config_var())
 def test_config_var(var):
+    assert not callable(var)
     assert file_config.utils.is_config_var(var)
 
 
 @given(config())
 def test_config(config):
+    assert callable(config)
     assert file_config.utils.is_config_type(config)
     assert file_config.utils.is_config(config())
 
