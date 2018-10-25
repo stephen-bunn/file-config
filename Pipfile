@@ -26,6 +26,7 @@ pytoml = "*"
 toml = "*"
 codacy-coverage = "*"
 pytest-cov = "*"
+python-rapidjson = "*"
 
 [requires]
 python_version = "3.6"

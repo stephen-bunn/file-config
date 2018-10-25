@@ -9,8 +9,8 @@ class JSONHandler(BaseHandler):
     """
 
     name = "json"
-    packages = ("ujson", "json")
-    options = {"indent": 0, "sort_keys": False}
+    packages = ("rapidjson", "ujson", "json")
+    options = {"indent": None, "sort_keys": False}
 
     def on_json_dumps(self, json, dictionary, **kwargs):
         """ The :mod:`json` dumps method.
@@ -47,6 +47,8 @@ class JSONHandler(BaseHandler):
         :rtype: str
         """
 
+        if not kwargs.get("indent", None):
+            kwargs["indent"] = 0
         return ujson.dumps(dictionary, **kwargs)
 
     def on_ujson_loads(self, ujson, content):
@@ -59,3 +61,27 @@ class JSONHandler(BaseHandler):
         """
 
         return ujson.loads(content)
+
+    def on_rapidjson_dumps(self, rapidjson, dictionary, **kwargs):
+        """ The `rapidjson <https://pypi.org/project/python-rapidjson/>`_ dumps method.
+
+        :param module rapidjson: The ``rapidjson`` module
+        :param dict dictionary: The dictionary instance to serialize
+        :param int indent: The amount of spaces to use for indentation,
+            defaults to 0, optional
+        :returns: The json serialization of the given ``dictionary``
+        :rtype: str
+        """
+
+        return rapidjson.dumps(dictionary, **kwargs)
+
+    def on_rapidjson_loads(self, rapidjson, content):
+        """ The `rapidjson <https://pypi.org/project/python-rapidjson/>`_ loads method.
+
+        :param module rapidjson: The ``rapidjson`` module
+        :param str content: The content to deserialize
+        :returns: The deserialized dictionary
+        :rtype: dict
+        """
+
+        return rapidjson.loads(content)
