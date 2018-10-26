@@ -7,7 +7,7 @@ import collections
 
 import attr
 from hypothesis import given
-from hypothesis.strategies import characters, one_of, from_type
+from hypothesis.strategies import one_of, from_type, characters
 
 import file_config
 

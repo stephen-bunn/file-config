@@ -22,5 +22,9 @@ install:
 script:
   - tox
 
+after_success:
+  - coverage xml -o coverage.xml
+  - python-codacy-coverage -r coverage.xml
+
 notifications:
   email: false
