@@ -8,7 +8,7 @@ import shutil
 
 import setuptools
 
-VERSION = "0.0.8"
+VERSION = "0.1.0"
 
 INSTALL_REQUIRES = ["attrs", "jsonschema"]
 SETUP_REQUIRES = []
@@ -19,6 +19,7 @@ EXTRAS_REQUIRE = {
     "ujson": ["ujson"],
     "pyyaml": ["pyyaml"],
     "msgpack": ["msgpack"],
+    "python-rapidjson": ["python-rapidjson"],
 }
 
 all_extras = list(set().union(*[packages for packages in EXTRAS_REQUIRE.values()]))
@@ -29,6 +30,7 @@ EXTRAS_REQUIRE["test"] = all_extras + [
     "pytest-flake8",
     "pytest-sugar",
     "pytest-xdist",
+    "pytest-cov",
     "hypothesis",
 ]
 EXTRAS_REQUIRE["dev"] = (

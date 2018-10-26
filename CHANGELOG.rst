@@ -6,9 +6,10 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
-**0.0.9** (*work in progress*)
+`0.1.0`_ (*2018-10-26*)
 ------------------------------
 - adding ``encoder`` and ``decoder`` var kwargs for customizing how a specific var is serialized/deserialized
+- adding support for `python-rapidjson <https://pypi.org/project/python-rapidjson/>`_ as json serializer
 
 `0.0.8`_ (*2018-10-16*)
 -----------------------
@@ -44,6 +45,7 @@ Changelog
 - fixing dynamic type casting for config var typing types
 
 
+.. _0.1.0: https://github.com/stephen-bunn/file-config/releases/tag/v0.1.0
 .. _0.0.8: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.8
 .. _0.0.7: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.7
 .. _0.0.6: https://github.com/stephen-bunn/file-config/releases/tag/v0.0.6
