@@ -5,6 +5,10 @@ File Config
    :target: https://pypi.org/project/file-config/
    :alt: Supported Versions
 
+.. image:: https://api.codacy.com/project/badge/Grade/56595a983d0645e08cd877613162cd17
+   :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
+   :alt: Codacy Grade
+
 .. image:: https://travis-ci.org/stephen-bunn/file-config.svg?branch=master
    :target: https://travis-ci.org/stephen-bunn/file-config
    :alt: Travis CI
