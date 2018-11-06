@@ -342,11 +342,9 @@ def _dump(config_instance, dict_type=OrderedDict):
                 ]
         elif is_enum_type(entry.type):
             dump_value = getattr(config_instance, var.name, dump_default)
-            if dump_value in entry.type:
-                result[dump_key] = dump_value.value
-            else:
-                result[dump_key] = entry.type(dump_value)
-            # result[dump_key] = getattr(config_instance, var.name, dump_default).value
+            result[dump_key] = (
+                dump_value.value if dump_value in entry.type else dump_value
+            )
         else:
             if is_config_type(entry.type):
                 result[dump_key] = _dump(
