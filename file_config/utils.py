@@ -4,6 +4,8 @@
 import re
 import typing
 import collections
+from enum import Enum
+from functools import lru_cache
 
 import attr
 
@@ -32,10 +34,12 @@ def is_config(config_instance):
     return isinstance(config_instance, object) and is_config_type(type(config_instance))
 
 
+@lru_cache()
 def is_compiled_pattern(compiled_pattern):
     return isinstance(compiled_pattern, COMPILED_PATTERN_TYPE)
 
 
+@lru_cache()
 def is_builtin_type(type_):
     return isinstance(type_, type) and type_ in (
         bool,
@@ -50,19 +54,23 @@ def is_builtin_type(type_):
         set,
         frozenset,
         dict,
+        Enum,
     )
 
 
+@lru_cache()
 def is_typing_type(type_):
     return isinstance(type_, type) and getattr(type_, "__module__", None) == "typing"
 
 
+@lru_cache()
 def is_collections_type(type_):
     return (
         isinstance(type_, type) and getattr(type_, "__module__", None) == "collections"
     )
 
 
+@lru_cache()
 def is_regex_type(type_):
     return (
         callable(type_)
@@ -72,22 +80,26 @@ def is_regex_type(type_):
     )
 
 
+@lru_cache()
 def is_union_type(type_):
     return isinstance(type_, typing._Union)
 
 
+@lru_cache()
 def is_null_type(type_):
     if type_ in (type(None),):
         return True
     return False
 
 
+@lru_cache()
 def is_bool_type(type_):
     if is_builtin_type(type_):
         return type_ in (bool,)
     return False
 
 
+@lru_cache()
 def is_string_type(type_):
     if is_builtin_type(type_):
         return type_ in (str,)
@@ -100,18 +112,21 @@ def is_string_type(type_):
     return False
 
 
+@lru_cache()
 def is_integer_type(type_):
     if is_builtin_type(type_):
         return type_ in (int,)
     return False
 
 
+@lru_cache()
 def is_number_type(type_):
     if is_builtin_type(type_):
         return type_ in (float,)
     return False
 
 
+@lru_cache()
 def is_array_type(type_):
     if is_builtin_type(type_):
         return type_ in (list, tuple, set, frozenset)
@@ -143,10 +158,16 @@ def is_object_type(type_):
     return False
 
 
+@lru_cache()
+def is_enum_type(type_):
+    if isinstance(type_, type):
+        return issubclass(type_, Enum)
+
+
 def typecast(type_, value):
     # NOTE: does not do any special validation of types before casting
     # will just raise errors on type casting failures
-    if is_builtin_type(type_) or is_collections_type(type_):
+    if is_builtin_type(type_) or is_collections_type(type_) or is_enum_type(type_):
         return type_(value)
     elif is_regex_type(type_):
         return typecast(str, value)

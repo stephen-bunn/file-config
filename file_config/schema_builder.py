@@ -11,6 +11,7 @@ import attr
 
 from .utils import (
     is_bool_type,
+    is_enum_type,
     is_null_type,
     is_array_type,
     is_config_var,
@@ -77,6 +78,24 @@ def _build_attribute_modifiers(
 
 def _build_null_type(var, property_path=[]):
     return {"type": "null"}
+
+
+def _build_enum_type(var, property_path=[]):
+    entry = var.metadata[CONFIG_KEY]
+    enum_values = [member.value for member in entry.type.__members__.values()]
+    schema = {"enum": enum_values}
+
+    for (type_name, check) in dict(
+        bool=is_bool_type,
+        string=is_string_type,
+        number=is_number_type,
+        integer=is_integer_type,
+    ).items():
+        if all(check(type(_)) for _ in enum_values):
+            schema["type"] = type_name
+            break
+
+    return schema
 
 
 def _build_bool_type(var, property_path=[]):
@@ -179,6 +198,7 @@ def _build_object_type(var, property_path=[]):
 
 def _build_type(type_, value, property_path=[]):
     for (type_check, builder) in (
+        (is_enum_type, _build_enum_type),
         (is_null_type, _build_null_type),
         (is_bool_type, _build_bool_type),
         (is_string_type, _build_string_type),
