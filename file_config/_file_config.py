@@ -12,6 +12,7 @@ from . import handlers
 from .utils import (
     typecast,
     is_config,
+    is_enum_type,
     is_array_type,
     is_config_var,
     is_config_type,
@@ -339,6 +340,11 @@ def _dump(config_instance, dict_type=OrderedDict):
                     (_dump(item, dict_type=dict_type) if is_config(item) else item)
                     for item in items
                 ]
+        elif is_enum_type(entry.type):
+            dump_value = getattr(config_instance, var.name, dump_default)
+            result[dump_key] = (
+                dump_value.value if dump_value in entry.type else dump_value
+            )
         else:
             if is_config_type(entry.type):
                 result[dump_key] = _dump(

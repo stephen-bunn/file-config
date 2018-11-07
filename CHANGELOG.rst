@@ -6,8 +6,12 @@ Changelog
 | The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 |
 
+`0.2.0`_ (*2018-11-07*)
+-----------------------
+- adding serialization and deserialization support for enums
+
 `0.1.0`_ (*2018-10-26*)
-------------------------------
+-----------------------
 - adding ``encoder`` and ``decoder`` var kwargs for customizing how a specific var is serialized/deserialized
 - adding support for `python-rapidjson <https://pypi.org/project/python-rapidjson/>`_ as json serializer
 
