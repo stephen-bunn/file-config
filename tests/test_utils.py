@@ -2,6 +2,7 @@
 # MIT License <https://opensource.org/licenses/MIT>
 
 import re
+import enum
 import typing
 import collections
 
@@ -41,3 +42,12 @@ def test_is_compiled_pattern(string):
 @given(characters())
 def test_is_regex_type(string):
     assert file_config.utils.is_regex_type(file_config.Regex(re.escape(string)))
+
+
+def test_is_enum_type():
+    class TestEnum(enum.Enum):
+        A = 0
+        B = 1
+
+    assert file_config.utils.is_enum_type(TestEnum)
+    assert not file_config.utils.is_enum_type(TestEnum.A)
