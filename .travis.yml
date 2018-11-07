@@ -20,7 +20,7 @@ matrix:
 install:
   - pip install tox
   - pip install pipenv
-  - pipenv install --dev --skip-lock
+  - pipenv install --dev --system --skip-lock
 
 script:
   - tox
