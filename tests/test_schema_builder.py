@@ -1,6 +1,8 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # MIT License <https://opensource.org/licenses/MIT>
 
+import enum
+
 import pytest
 from hypothesis import given
 from hypothesis.strategies import characters
@@ -99,3 +101,42 @@ def test_number_var(config_name):
         config = file_config.make_config(config_name, {"test": file_config.var(type_)})
         schema = file_config.build_schema(config)
         assert schema["properties"]["test"]["type"] == "number"
+
+
+@given(class_name())
+def test_enum_var(config_name):
+    class IntTestEnum(enum.Enum):
+        A = 0
+        B = 1
+
+    class StrTestEnum(enum.Enum):
+        A = "0"
+        B = "1"
+
+    class FloatTestEnum(enum.Enum):
+        A = 0.0
+        B = 1.0
+
+    config = file_config.make_config(
+        config_name, {"test": file_config.var(IntTestEnum)}
+    )
+    schema = file_config.build_schema(config)
+    assert schema["properties"]["test"]["type"] == "integer"
+    assert "enum" in schema["properties"]["test"]
+    assert [0, 1] == schema["properties"]["test"]["enum"]
+
+    config = file_config.make_config(
+        config_name, {"test": file_config.var(StrTestEnum)}
+    )
+    schema = file_config.build_schema(config)
+    assert schema["properties"]["test"]["type"] == "string"
+    assert "enum" in schema["properties"]["test"]
+    assert ["0", "1"] == schema["properties"]["test"]["enum"]
+
+    config = file_config.make_config(
+        config_name, {"test": file_config.var(FloatTestEnum)}
+    )
+    schema = file_config.build_schema(config)
+    assert schema["properties"]["test"]["type"] == "number"
+    assert "enum" in schema["properties"]["test"]
+    assert [0.0, 1.0] == schema["properties"]["test"]["enum"]
