@@ -2,6 +2,7 @@
 alabaster==0.7.12
 apipkg==1.5
 appdirs==1.4.3
+arpeggio==1.9.0
 atomicwrites==1.2.1
 attrs==18.2.0
 babel==2.6.0
@@ -18,6 +19,8 @@ flake8==3.6.0
 hypothesis==3.82.1
 idna==2.7
 imagesize==1.1.0
+incremental==17.5.0
+invoke==1.2.0
 isort==4.3.4
 jinja2==2.10
 markupsafe==1.1.0
@@ -25,6 +28,7 @@ mccabe==0.6.1
 more-itertools==4.3.0
 msgpack==0.5.6
 packaging==18.0
+parver==0.1.1
 pluggy==0.8.0
 py==1.7.0
 pycodestyle==2.4.0
@@ -49,6 +53,7 @@ sphinxcontrib-websupport==1.1.0
 termcolor==1.1.0
 toml==0.10.0
 tomlkit==0.5.0
+towncrier==18.6.0
 tox==3.5.3
 ujson==1.35
 urllib3==1.24.1
