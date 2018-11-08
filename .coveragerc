@@ -1,7 +1,8 @@
 [run]
-branch=True
-include=
-    file_config/*
+branch = True
+parallel = True
+source =
+    src/file_config/
 
 [report]
-show_missing=True
+show_missing = True

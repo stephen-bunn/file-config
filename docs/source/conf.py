@@ -14,22 +14,35 @@
 
 import os
 import sys
+import pathlib
+import configparser
 
-sys.path.insert(0, os.path.abspath("../.."))
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 
-from file_config import __version__
+# parse setup.cfg to gather metadata info (reduce redundancy of static info)
+config = configparser.ConfigParser()
+config.read(BASE_DIR.joinpath("setup.cfg").as_posix())
 
+try:
+    metadata = config["metadata"]
+except KeyError:
+    raise KeyError(f"cannot run sphinx if setup.cfg is missing [metadata] section")
+
+title = metadata["name"].title().replace("_", " ").replace("-", " ")
+title_filename = title.replace(" ", "")
+
+sys.path.insert(0, BASE_DIR.joinpath("src").as_posix())
 
 # -- Project information -----------------------------------------------------
 
-project = "File Config"
-copyright = f"2018, {__version__.__author__}"
-author = __version__.__author__
+project = title
+copyright = f"2018, {metadata['author']}"
+author = metadata["author"]
 
 # The short X.Y version
-version = __version__.__version__
+version = metadata["version"]
 # The full version, including alpha/beta/rc tags
-release = __version__.__author__
+release = metadata["version"]
 
 
 # -- General configuration ---------------------------------------------------
@@ -83,7 +96,7 @@ html_theme = "alabaster"
 # documentation.
 #
 html_theme_options = {
-    "description": __version__.__description__,
+    "description": metadata["description"],
     "github_user": "stephen-bunn",
     "github_repo": "file-config",
     "github_type": "star",
@@ -111,7 +124,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "FileConfigdoc"
+htmlhelp_basename = f"doc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -137,9 +150,9 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "FileConfig.tex",
-        "File Config Documentation",
-        "Stephen Bunn",
+        f"{title_filename}.tex",
+        f"{title} Documentation",
+        metadata["author"],
         "manual",
     )
 ]
@@ -149,7 +162,15 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "fileconfig", "File Config Documentation", [author], 1)]
+man_pages = [
+    (
+        master_doc,
+        metadata["name"].replace("_", "").replace("-", ""),
+        f"{title} Documentation",
+        [author],
+        1,
+    )
+]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -160,11 +181,11 @@ man_pages = [(master_doc, "fileconfig", "File Config Documentation", [author], 1
 texinfo_documents = [
     (
         master_doc,
-        "FileConfig",
-        "File Config Documentation",
+        title_filename,
+        f"{title} Documentation",
         author,
-        "FileConfig",
-        "One line description of project.",
+        title_filename,
+        metadata["description"],
         "Miscellaneous",
     )
 ]
