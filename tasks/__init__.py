@@ -8,7 +8,7 @@ import invoke
 import parver
 
 from . import docs, package
-from .utils import get_previous_version, get_tag_content, get_artifact_paths
+from .utils import report, get_previous_version, get_tag_content, get_artifact_paths
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -29,7 +29,7 @@ def build(ctx):
     """ Build the project.
     """
 
-    print(f"[build] ... building project {ctx.directory!s}")
+    report.success(ctx, "build", f"building project {ctx.metadata['name']!r}")
 
 
 @invoke.task(post=[package.clean, docs.clean])
@@ -37,10 +37,10 @@ def clean(ctx):
     """ Clean the project.
     """
 
-    print(f"[clean] ... cleaning project {ctx.directory!s}")
+    report.success(ctx, "clean", f"cleaning project {ctx.metadata['name']!r}")
 
 
-@invoke.task(pre=[clean, build])
+@invoke.task(pre=[clean, docs.build_news, build])
 def publish(ctx, test=False):
     """ Publish the project.
 
@@ -51,54 +51,67 @@ def publish(ctx, test=False):
     current_version = parver.Version.parse(metadata["version"])
 
     if current_version <= previous_version:
-        raise ValueError(
+        error_message = (
             f"current version ({current_version!s}) is <= to previous version "
             f"({previous_version!s}), use 'package.version' to update current version"
         )
+        report.error(ctx, "publish", error_message)
+        raise ValueError(error_message)
 
-    print(f"[publish] ... publishing project {ctx.directory!s}")
-    git_ammend_command = f"git commit -am 'Release {current_version!s}'"
-    print(f"[publish] ... run {git_ammend_command!r}")
-    # ctx.run(git_ammend_command, hide=ctx.hide)
+    report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!r}")
+
+    commit_message = f"Release {current_version!s}"
+    report.info(ctx, "publish", f"git commiting release {commit_message!r}")
+    git_commit_command = f"git commit -asm {commit_message!r}"
+    ctx.run(git_commit_command)
 
     tag_content = get_tag_content(ctx).replace('"', '\\"')
     git_tag_command = (
         f'git tag -a "{current_version!s}" -m '
         f'"Version {current_version!s}\n\n{tag_content}"'
     )
-    print(f"[publish] ... run {git_tag_command!r}")
-    # ctx.run(git_tag_command, hide=ctx.hide)
+    report.info(
+        ctx, "publish", f"git tagging commit as release for version {current_version!s}"
+    )
+    ctx.run(git_tag_command)
 
     artifact_paths = [f"{_.as_posix()!r}" for _ in get_artifact_paths(ctx)]
     publish_command = f"twine upload {' '.join(artifact_paths)}"
     if test:
         publish_command += " --repository 'https://test.pypi.org/legacy/'"
-    print(f"[publish] ... run {publish_command!r}")
 
     # get user to confirm publish
     try:
         input(
-            f"[publish] ... about to publish, [ENTER] to confirm, [CTRL-C] to abort: "
+            report._get_text(
+                ctx,
+                "success",
+                "publish",
+                "about to publish, [Enter] to config, [Ctrl-C] to abort: ",
+            )
         )
+        report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!s}")
+        ctx.run(publish_command)
+        git_push_command = "git push --tags"
+        report.info(ctx, "publish", f"pushing git tags")
+        ctx.run(git_push_command)
     except KeyboardInterrupt:
-        print("[publish] ... aborting publish")
-        # TODO: cleanup git stuff
-
-    # ctx.run(publish_command, hide=ctx.hide)
-
-    git_push_command = "git push --tags"
-    print(f"[publish] ... run {git_push_command!r}")
-    # ctx.run(git_push_command, hide=ctx.hide)
+        print()
+        report.error(ctx, "publish", "aborting publish!")
+        git_remove_tag_command = f"git tag -d {current_version!s}"
+        report.warn(ctx, "publish", "removing git tags")
+        ctx.run(git_remove_tag_command)
+        git_reset_command = f"git reset --soft HEAD^"
+        report.warn(ctx, "publish", "softly reseting commit")
+        ctx.run(git_reset_command)
 
 
 namespace = invoke.Collection(build, clean, publish, docs, package)
-package_name = metadata["name"].replace("-", "_")
 namespace.configure(
     {
         "metadata": metadata,
         "directory": BASE_DIR,
-        "hide": None,
-        "package": {"directory": BASE_DIR / "src" / package_name},
+        "package": {"directory": BASE_DIR / "src" / metadata["package_name"]},
         "docs": {"directory": BASE_DIR / "docs"},
     }
 )

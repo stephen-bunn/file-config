@@ -7,7 +7,7 @@ import shutil
 import invoke
 import parver
 
-from .utils import get_previous_version
+from .utils import report, get_previous_version
 
 
 @invoke.task
@@ -16,14 +16,16 @@ def clean(ctx):
     """
 
     clean_command = "python setup.py clean"
-    print(f"[package.clean] ... run {clean_command!r}")
-    ctx.run(clean_command, hide=ctx.hide)
+    report.info(ctx, "package.clean", "cleaning up built package artifacts")
+    ctx.run(clean_command)
 
-    for artifact in ("dist", "build", f"{ctx.metadata['name']}.egg-info"):
+    egg_name = f"{ctx.metadata['package_name']}.egg-info"
+    report.info(ctx, "pacakge.clean", "removing build directories")
+    for artifact in ("dist", "build", egg_name, f"src/{egg_name}"):
         artifact_dir = ctx.directory / artifact
         if artifact_dir.is_dir():
-            print(f"[package.clean] ... removing {artifact_dir!s}")
-            shutil.rmtree(str(artifact_dir))
+            report.debug(ctx, "package.clean", f"removing directory {artifact_dir!r}")
+            ctx.run(f"rm -rf {artifact_dir!s}")
 
 
 @invoke.task
@@ -34,10 +36,10 @@ def format(ctx):
     isort_command = f"isort -rc {ctx.package.directory!s}"
     black_command = f"black {ctx.package.directory.parent!s}"
 
-    print(f"[package.format] ... run {isort_command!r}")
-    ctx.run(isort_command, hide=ctx.hide)
-    print(f"[package.format] ... run {black_command!r}")
-    ctx.run(black_command, hide=ctx.hide)
+    report.info(ctx, "package.format", "sorting imports")
+    ctx.run(isort_command)
+    report.info(ctx, "package.format", "formatting code")
+    ctx.run(black_command)
 
 
 @invoke.task(pre=[clean, format])
@@ -46,18 +48,19 @@ def build(ctx):
     """
 
     build_command = "python setup.py sdist bdist_wheel"
-    print(f"[package.build] ... run {build_command!s}")
-    ctx.run(build_command, hide=ctx.hide)
+    report.info(ctx, "package.build", "building package")
+    ctx.run(build_command)
 
 
 @invoke.task
-def version(ctx, version=None):
+def version(ctx, version=None, force=False):
     """ Specify a new version for the package.
 
     .. important:: If no version is specified, will take the most recent parsable git
         tag and bump the patch number.
 
     :param str version: The new version of the package.
+    :param bool force: If True, skips version check
     """
 
     # define replacement strategies for files where the version needs to be in sync
@@ -73,21 +76,24 @@ def version(ctx, version=None):
     previous_version = get_previous_version(ctx)
     if isinstance(version, str):
         version = parver.Version.parse(version)
-        if version <= previous_version:
-            raise ValueError(
+        if not force and version <= previous_version:
+            error_message = (
                 f"version {version!s} is <= to previous version {previous_version!s}"
             )
+            report.error(ctx, "package.version", error_message)
+            raise ValueError(error_message)
     else:
         version = previous_version.bump_release(len(previous_version.release) - 1)
 
-    print(f"[package.version] ... updating version to {version!s}")
+    report.info(ctx, "package.version", f"updating version to {version!s}")
     for (path, replacements) in updates.items():
         if path.is_file():
             content = path.read_text()
             for (pattern, sub) in replacements:
-                print(
-                    f"[package.version] ... applying replacement "
-                    f"({pattern!r}, {sub!r}) to {path!s}"
+                report.debug(
+                    ctx,
+                    "package.version",
+                    f"applying replacement ({pattern!r}, {sub!r}) to {path!s}",
                 )
                 content = re.sub(pattern, sub.format(version=version), content, re.M)
             path.write_text(content)

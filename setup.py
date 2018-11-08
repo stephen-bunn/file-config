@@ -17,13 +17,8 @@ try:
 except KeyError:
     raise KeyError(f"cannot run setup.py if setup.cfg is missing [metadata] section")
 
-long_description = ""
-with codecs.open("README.rst", encoding="utf-8") as fp:
-    long_description = "\n" + fp.read()
-
 setuptools.setup(
     package_dir={"": "src"},
-    long_description=long_description,
     packages=setuptools.find_packages("src"),
     package_data={"": ["LICENSE*", "README*"]},
     version=metadata["version"],
