@@ -98,9 +98,10 @@ class BaseHandler(abc.ABC):
             )
         self.packages = (package,)
 
-    def dumps(self, instance, prefer=None, **kwargs):
+    def dumps(self, config, instance, prefer=None, **kwargs):
         """ An abstract dumps method which dumps an instance into the subclasses format.
 
+        :param class config: The config class of the instance
         :param object instance: The instance to dump
         :raises ValueError: If dump handler does not provide handler method
         :return: The dumped content
@@ -126,11 +127,12 @@ class BaseHandler(abc.ABC):
                 )
             else:
                 extras[key] = value
-        return dumps_hook(self.handler, instance, **extras)
+        return dumps_hook(self.handler, config, instance, **extras)
 
-    def loads(self, content, prefer=None):
+    def loads(self, config, content, prefer=None):
         """ An abstract loads method which loads an instance from some content.
 
+        :param class config: The config class to load into
         :param str content: The content to load from
         :raises ValueError: If load handler does not provided handler method
         :return: A dictionary converted from the given content
@@ -147,7 +149,7 @@ class BaseHandler(abc.ABC):
                 f"no loads handler for {self.imported!r}, requires method "
                 f"{loads_hook_name!r} in {self!r}"
             )
-        return loads_hook(self.handler, content)
+        return loads_hook(self.handler, config, content)
 
     def dump(self, instance, file_object, prefer=None):
         """ An abstract method that dumps to a given file object.

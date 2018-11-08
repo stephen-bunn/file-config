@@ -52,7 +52,7 @@ def _handle_dumps(self, handler, **kwargs):
     :rtype: str
     """
 
-    return handler.dumps(to_dict(self), **kwargs)
+    return handler.dumps(self.__class__, to_dict(self), **kwargs)
 
 
 def _handle_dump(self, handler, file_object, **kwargs):
@@ -64,7 +64,7 @@ def _handle_dump(self, handler, file_object, **kwargs):
     :rtype: str
     """
 
-    return handler.dump(to_dict(self), file_object, **kwargs)
+    return handler.dump(self.__class__, to_dict(self), file_object, **kwargs)
 
 
 @classmethod
@@ -79,7 +79,7 @@ def _handle_loads(cls, handler, content, validate=False, **kwargs):
     :rtype: object
     """
 
-    return from_dict(cls, handler.loads(content, **kwargs), validate=validate)
+    return from_dict(cls, handler.loads(cls, content, **kwargs), validate=validate)
 
 
 @classmethod
@@ -94,7 +94,7 @@ def _handle_load(cls, handler, file_object, validate=False, **kwargs):
     :rtype: object
     """
 
-    return from_dict(cls, handler.load(file_object, **kwargs), validate=validate)
+    return from_dict(cls, handler.load(cls, file_object, **kwargs), validate=validate)
 
 
 def config(maybe_cls=None, these=None, title=None, description=None):
