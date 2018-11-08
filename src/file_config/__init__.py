@@ -1,5 +1,5 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
-# MIT License <https://opensource.org/licenses/MIT>
+# ISC License <https://choosealicense.com/licenses/isc>
 
 from . import handlers, __version__
 from .constants import CONFIG_KEY

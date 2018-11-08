@@ -17,6 +17,10 @@ File Config
    :target: https://file-config.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
+   :alt: Code Style: Black
+
 
 
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.

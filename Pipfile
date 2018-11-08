@@ -4,8 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-attrs = "*"
-jsonschema = "*"
+file-config = {path = ".", editable = true, extras = ["test", "docs", "dev"]}
 
 [dev-packages]
 tox = "*"
@@ -28,15 +27,13 @@ pytest-cov = "*"
 python-rapidjson = "*"
 coverage = "==4.5.1"
 pytest-sugar = "*"
+invoke = "*"
+parver = "*"
+towncrier = "*"
+colorama = "*"
 
 [requires]
 python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
-
-[scripts]
-tests = "pytest -rc ./tests"
-make-docs = "make -C ./docs html"
-clean-docs = "make -C ./docs clean"
-open-docs = "python -m webbrowser -t ./docs/build/html/index.html"
