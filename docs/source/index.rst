@@ -5,6 +5,7 @@
       <a href="https://pypi.org/project/file-config/" target="_blank"><img alt="Supported Versions" src="https://img.shields.io/pypi/pyversions/file-config.svg"></a>
       <a class="badge-align" href="https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade" target="_blank"><img src="https://api.codacy.com/project/badge/Grade/56595a983d0645e08cd877613162cd17"/></a>
       <a href="https://travis-ci.org/stephen-bunn/file-config" target="_blank"><img alt="Travis CI" src="https://travis-ci.org/stephen-bunn/file-config.svg?branch=master"></a>
+      <a href="https://github.com/ambv/black" target="_blank"><img alt="Code Style: Black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
    </p>
 
 
