@@ -5,7 +5,7 @@ File Config
    :target: https://pypi.org/project/file-config/
    :alt: Supported Versions
 
-.. image:: https://api.codacy.com/project/badge/Grade/56595a983d0645e08cd877613162cd17
+.. image:: https://api.codacy.com/project/badge/Grade/3908ae20f86c4ed0ba9617846ed5419c
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
 
