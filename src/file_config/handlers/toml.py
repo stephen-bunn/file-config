@@ -15,10 +15,11 @@ class TOMLHandler(BaseHandler):
     packages = ("tomlkit", "toml", "pytoml")
     options = {"inline_tables": []}
 
-    def on_tomlkit_dumps(self, tomlkit, dictionary, **kwargs):
+    def on_tomlkit_dumps(self, tomlkit, config, dictionary, **kwargs):
         """ The `tomlkit <https://pypi.org/project/tomlkit/>`_ dumps method.
 
         :param module tomlkit: The ``tomlkit`` module
+        :param class config: The instance's config class
         :param dict dictionary: The dictionary to serialize
         :param list inline_tables: A list glob patterns to use for derminining which
             dictionaries should be rendered as inline tables, defaults to [], optional
@@ -86,10 +87,11 @@ class TOMLHandler(BaseHandler):
 
         return tomlkit.dumps(_dump_dict(dictionary, tomlkit.document()))
 
-    def on_tomlkit_loads(self, tomlkit, content):
+    def on_tomlkit_loads(self, tomlkit, config, content, **kwargs):
         """ The `tomlkit <https://pypi.org/project/tomlkit/>`_ loads method.
 
         :param module tomlkit: The ``tomlkit`` module
+        :param class config: The loading config class
         :param str content: The content to deserialize
         :returns: The deserialized dictionary
         :rtype: dict
@@ -97,10 +99,11 @@ class TOMLHandler(BaseHandler):
 
         return tomlkit.parse(content)
 
-    def on_toml_dumps(self, toml, dictionary, **kwargs):
+    def on_toml_dumps(self, toml, config, dictionary, **kwargs):
         """ The `toml <https://pypi.org/project/toml/>`_ dumps method.
 
         :param module toml: The ``toml`` module
+        :param class config: The instance's config class
         :param dict dictionary: The dictionary to serialize
         :param list inline_tables: A list glob patterns to use for derminining which
             dictionaries should be rendered as inline tables, defaults to [], optional
@@ -156,10 +159,11 @@ class TOMLHandler(BaseHandler):
         encoder = toml.TomlEncoder(preserve=True)
         return toml.dumps(_dump_dict(dictionary, {}), encoder=encoder)
 
-    def on_toml_loads(self, toml, content):
+    def on_toml_loads(self, toml, config, content, **kwargs):
         """ The `toml <https://pypi.org/project/toml/>`_ loads method.
 
         :param module toml: The ``toml`` module
+        :param class config: The loading config class
         :param str content: The content to deserialize
         :returns: The deserialized dictionary
         :rtype: dict
@@ -167,10 +171,11 @@ class TOMLHandler(BaseHandler):
 
         return toml.loads(content)
 
-    def on_pytoml_dumps(self, pytoml, dictionary, **kwargs):
+    def on_pytoml_dumps(self, pytoml, config, dictionary, **kwargs):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ dumps method.
 
         :param module pytoml: The ``pytoml`` module
+        :param class config: The instance's config class
         :param dict dictionary: The dictionary to serialize
         :returns: The TOML serialization
         :rtype: str
@@ -181,10 +186,11 @@ class TOMLHandler(BaseHandler):
             warnings.warn("pytoml does not support 'inline_tables' argument")
         return pytoml.dumps(dictionary)
 
-    def on_pytoml_loads(self, pytoml, content):
+    def on_pytoml_loads(self, pytoml, config, content, **kwargs):
         """ The `pytoml <https://pypi.org/project/pytoml/>`_ loads method.
 
         :param module pytoml: The ``pytoml`` module
+        :param class config: The loading config class
         :param str content: The content to deserialize
         :returns: The deserialized dictionary
         :rtype: dict
