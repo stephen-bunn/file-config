@@ -107,13 +107,13 @@ def build_type(draw, type_):
         if file_config.utils.is_regex_type(type_):
             # NOTE: hypothesis treats regexes differently than jsonschema
             # and that needs to be handled here
-            return draw(from_regex(f"\A{type_.__supertype__.pattern}\Z"))
+            return draw(from_regex(f"^{type_.__supertype__.pattern}$"))
         return draw(characters())
     elif file_config.utils.is_integer_type(type_):
         return draw(integers())
     elif file_config.utils.is_number_type(type_):
         if type_ == float:
-            return draw(floats())
+            return draw(floats().filter(lambda x: x == float('nan')))
         # elif type_ == complex:
         #     return draw(complex_numbers())
 

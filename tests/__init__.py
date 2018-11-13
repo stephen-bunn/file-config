@@ -35,7 +35,6 @@ import file_config
 CONFIG_VAR_MIN_COUNT = 0
 CONFIG_VAR_MAX_COUNT = 10
 
-
 @composite
 def random_builtin(draw, ignore=[]):
     ignore = tuple(ignore)

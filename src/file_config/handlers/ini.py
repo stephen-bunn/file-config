@@ -2,6 +2,7 @@
 # ISC License <https://opensource.org/licenses/isc>
 
 import io
+import warnings
 import functools
 import collections
 
@@ -15,7 +16,7 @@ class INIHandler(BaseHandler):
 
     name = "ini"
     packages = ("configparser",)
-    options = {"root_section": None, "delimiter": ":", "empty_sections": False}
+    options = {"root": None, "delimiter": ":", "empty_sections": False}
 
     def on_configparser_dumps(self, configparser, config, dictionary, **kwargs):
         """ The :mod:`configparser` dumps method.
@@ -23,7 +24,7 @@ class INIHandler(BaseHandler):
         :param module configparser: The ``configparser`` module
         :param class config: The instance's config class
         :param dict dictionary: The dictionary instance to serialize
-        :param str root_section: The top-level section of the ini file,
+        :param str root: The top-level section of the ini file,
             defaults to ``config.__name__``, optional
         :param str delimiter: The delimiter character used for representing nested
             dictionaries, defaults to ":", optional
@@ -31,9 +32,16 @@ class INIHandler(BaseHandler):
         :rtype: str
         """
 
-        root_section = kwargs.pop("root_section")
+        root_section = kwargs.pop("root")
         if not isinstance(root_section, str):
             root_section = config.__name__
+
+        delimiter = kwargs.pop("delimiter", ":")
+        if delimiter in root_section:
+            warnings.warn(
+                f"root section {root_section!r} contains delimiter character "
+                f"{delimiter!r}, loading from the resulting content will likely fail"
+            )
 
         return INIParser.from_dict(
             dictionary,

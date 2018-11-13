@@ -12,16 +12,20 @@ from .. import config, builder
 
 
 @given(config(), data())
-def test_json_dumps(config, data):
+def test_json_reflective(config, data):
     instance = data.draw(builder.build_config(config))
-    json_content = instance.dumps_json(prefer="json")
-    assert isinstance(json_content, str)
-    json.loads(json_content)
+    content = instance.dumps_json(prefer="json")
+    assert isinstance(content, str)
+    new_instance = config.loads_json(content, prefer="json")
+    assert isinstance(new_instance, config)
+    assert new_instance == instance
 
 
 @given(config(), data())
-def test_json_loads(config, data):
+def test_rapidjson_reflective(config, data):
     instance = data.draw(builder.build_config(config))
-    json_content = instance.dumps_json(prefer="json")
-    new_instance = config.loads_json(json_content, prefer="json")
+    content = instance.dumps_json(prefer="rapidjson")
+    assert isinstance(content, str)
+    new_instance = config.loads_json(content, prefer="rapidjson")
     assert isinstance(new_instance, config)
+    assert new_instance == instance

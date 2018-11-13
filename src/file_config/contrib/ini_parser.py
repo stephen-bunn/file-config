@@ -1,8 +1,8 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-import re
 import io
+import re
 import collections
 import configparser
 
@@ -133,7 +133,7 @@ class INIParser(configparser.ConfigParser):
                     section_name, key, "\n".join(cls._encode_var(_) for _ in value)
                 )
             else:
-                parser.set(section_name, key, str(cls._encode_var(value)))
+                parser.set(section_name, key, cls._encode_var(value))
         return parser
 
     @classmethod
