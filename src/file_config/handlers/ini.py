@@ -1,10 +1,7 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-import io
 import warnings
-import functools
-import collections
 
 from ._common import BaseHandler
 from ..contrib.ini_parser import INIParser
