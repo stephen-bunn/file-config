@@ -12,6 +12,15 @@ from ..contrib.ini_parser import INIParser
 
 class INIHandler(BaseHandler):
     """ The INI serialization handler.
+
+    .. important:: INI files **cannot** support arrays of mappings.
+        Using these in your config and trying to dump to ini will throw a
+        :class:`ValueError` and will fail serialization.
+
+        If you need to use a config with arrays of mappings use
+        `toml <https://github.com/toml-lang/toml>`_ instead.
+        This use case is one of the many things toml does better than traditional
+        config files.
     """
 
     name = "ini"
