@@ -129,6 +129,11 @@ class INIParser(configparser.ConfigParser):
                     parser.add_section(nested_section)
                 cls._build_parser(value, parser, nested_section, delimiter=delimiter)
             elif isinstance(value, (list, tuple, set, frozenset)):
+                if any(isinstance(_, dict) for _ in value):
+                    raise ValueError(
+                        f"INI files cannot support arrays with mappings, "
+                        f"found in key {key!r}"
+                    )
                 parser.set(
                     section_name, key, "\n".join(cls._encode_var(_) for _ in value)
                 )

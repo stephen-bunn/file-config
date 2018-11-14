@@ -43,12 +43,15 @@ class INIHandler(BaseHandler):
                 f"{delimiter!r}, loading from the resulting content will likely fail"
             )
 
-        return INIParser.from_dict(
-            dictionary,
-            root_section=root_section,
-            delimiter=kwargs.pop("delimiter", ":"),
-            empty_sections=kwargs.pop("empty_sections", False),
-        ).to_ini()
+        try:
+            return INIParser.from_dict(
+                dictionary,
+                root_section=root_section,
+                delimiter=kwargs.pop("delimiter", ":"),
+                empty_sections=kwargs.pop("empty_sections", False),
+            ).to_ini()
+        except ValueError:
+            raise ValueError("INI cannot handle this config, try using toml instead")
 
     def on_configparser_loads(self, configparser, config, content, **kwargs):
         """ The :mod:`configparser` loads method.
