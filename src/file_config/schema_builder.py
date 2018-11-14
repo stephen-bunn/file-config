@@ -24,7 +24,6 @@ from .utils import (
     is_typing_type,
     is_builtin_type,
     is_integer_type,
-    is_compiled_pattern,
 )
 from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
@@ -76,11 +75,17 @@ def _build_attribute_modifiers(
     return modifiers
 
 
-def _build_null_type(var, property_path=[]):
+def _build_null_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     return {"type": "null"}
 
 
-def _build_enum_type(var, property_path=[]):
+def _build_enum_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     entry = var.metadata[CONFIG_KEY]
     enum_values = [member.value for member in entry.type.__members__.values()]
     schema = {"enum": enum_values}
@@ -98,11 +103,17 @@ def _build_enum_type(var, property_path=[]):
     return schema
 
 
-def _build_bool_type(var, property_path=[]):
+def _build_bool_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     return {"type": "boolean"}
 
 
-def _build_string_type(var, property_path=[]):
+def _build_string_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     schema = {"type": "string"}
     if is_builtin_type(var):
         return schema
@@ -120,7 +131,10 @@ def _build_string_type(var, property_path=[]):
     return schema
 
 
-def _build_integer_type(var, property_path=[]):
+def _build_integer_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     schema = {"type": "integer"}
     if is_builtin_type(var):
         return schema
@@ -129,7 +143,10 @@ def _build_integer_type(var, property_path=[]):
     return schema
 
 
-def _build_number_type(var, property_path=[]):
+def _build_number_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     schema = {"type": "number"}
     if is_builtin_type(var):
         return schema
@@ -138,7 +155,10 @@ def _build_number_type(var, property_path=[]):
     return schema
 
 
-def _build_array_type(var, property_path=[]):
+def _build_array_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     schema = {"type": "array", "items": {"$id": f"#/{'/'.join(property_path)}/items"}}
     if is_builtin_type(var):
         return schema
@@ -164,7 +184,10 @@ def _build_array_type(var, property_path=[]):
     return schema
 
 
-def _build_object_type(var, property_path=[]):
+def _build_object_type(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     schema = {"type": "object"}
     if is_builtin_type(var):
         return schema
@@ -196,7 +219,10 @@ def _build_object_type(var, property_path=[]):
     return schema
 
 
-def _build_type(type_, value, property_path=[]):
+def _build_type(type_, value, property_path=None):
+    if not property_path:
+        property_path = []
+
     for (type_check, builder) in (
         (is_enum_type, _build_enum_type),
         (is_null_type, _build_null_type),
@@ -216,7 +242,10 @@ def _build_type(type_, value, property_path=[]):
     return {}
 
 
-def _build_var(var, property_path=[]):
+def _build_var(var, property_path=None):
+    if not property_path:
+        property_path = []
+
     if not is_config_var(var):
         raise ValueError(f"var {var!r} is not a config var")
 
@@ -252,7 +281,10 @@ def _build_var(var, property_path=[]):
     return schema
 
 
-def _build_config(config_cls, property_path=[]):
+def _build_config(config_cls, property_path=None):
+    if not property_path:
+        property_path = []
+
     if not is_config_type(config_cls):
         raise ValueError(f"class {config_cls!r} is not a config class")
 
@@ -297,7 +329,10 @@ def _build_config(config_cls, property_path=[]):
     return schema
 
 
-def _build(value, property_path=[]):
+def _build(value, property_path=None):
+    if not property_path:
+        property_path = []
+
     if is_config_type(value):
         return _build_config(value, property_path=property_path)
     elif is_config_var(value):

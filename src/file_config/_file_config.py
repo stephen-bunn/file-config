@@ -17,7 +17,6 @@ from .utils import (
     is_config_var,
     is_config_type,
     is_object_type,
-    is_string_type,
     is_typing_type,
 )
 from .constants import CONFIG_KEY
@@ -281,7 +280,7 @@ def _build(config_cls, dictionary, validate=False):
         elif is_object_type(entry.type):
             item = dictionary.get(arg_key, {})
             if is_typing_type(entry.type) and len(entry.type.__args__) == 2:
-                (key_type, value_type) = entry.type.__args__
+                (_, value_type) = entry.type.__args__
                 kwargs[var.name] = {
                     key: _build(value_type, value)
                     if is_config_type(value_type)

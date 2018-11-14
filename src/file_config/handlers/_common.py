@@ -151,16 +151,16 @@ class BaseHandler(abc.ABC):
             )
         return loads_hook(self.handler, config, content)
 
-    def dump(self, instance, file_object, prefer=None):
+    def dump(self, config, instance, file_object, prefer=None):
         """ An abstract method that dumps to a given file object.
 
         :param object instance: The instance to dump
         :param file file_object: The file object to dump to
         """
 
-        file_object.write(self.dumps(instance, prefer=prefer))
+        file_object.write(self.dumps(config, instance, prefer=prefer))
 
-    def load(self, file_object, prefer=None):
+    def load(self, config, file_object, prefer=None):
         """ An abstract method that loads from a given file object.
 
         :param file file_object: The file object to load from
@@ -168,4 +168,4 @@ class BaseHandler(abc.ABC):
         :rtype: dict
         """
 
-        return self.loads(file_object.read(), prefer=prefer)
+        return self.loads(config, file_object.read(), prefer=prefer)
