@@ -24,6 +24,22 @@ except KeyError:
     )
 
 
+@invoke.task()
+def profile(ctx, filepath):
+    """ Run and profile a given Python script.
+
+    :param str filepath: The filepath of the script to profile
+    """
+
+    filepath = pathlib.Path(filepath)
+    if not filepath.is_file():
+        report.error(ctx, "profile", f"no such script {filepath!s}")
+    else:
+        report.info(ctx, "profile", f"profiling script {filepath!s}")
+        ctx.run(f"vprof -c cmhp {filepath!s}")
+
+
+
 @invoke.task(post=[docs.build, package.build])
 def build(ctx):
     """ Build the project.
@@ -106,7 +122,7 @@ def publish(ctx, test=False):
         ctx.run(git_reset_command)
 
 
-namespace = invoke.Collection(build, clean, publish, docs, package)
+namespace = invoke.Collection(profile, build, clean, publish, docs, package)
 namespace.configure(
     {
         "metadata": metadata,

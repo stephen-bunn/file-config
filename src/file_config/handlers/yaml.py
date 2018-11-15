@@ -40,10 +40,11 @@ class YAMLHandler(BaseHandler):
 
         yaml.add_representer(OrderedDict, represent_ordereddict)
 
-    def on_yaml_dumps(self, yaml, dictionary):
+    def on_yaml_dumps(self, yaml, config, dictionary, **kwargs):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ dumps method.
 
         :param module yaml: The ``yaml`` module
+        :param class config: The instance's config class
         :param dict dictionary: The dictionary to seralize
         :returns: The serialized content
         :rtype: str
@@ -51,10 +52,11 @@ class YAMLHandler(BaseHandler):
 
         return yaml.dump(dictionary)
 
-    def on_yaml_loads(self, yaml, content):
+    def on_yaml_loads(self, yaml, config, content, **kwargs):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ loads method.
 
         :param module yaml: The ``yaml`` module
+        :param class config: The loading config class
         :param str content: The content to deserialize
         :returns: The deserialized dictionary
         :rtype: dict

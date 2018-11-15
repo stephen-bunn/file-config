@@ -17,7 +17,6 @@ from .utils import (
     is_config_var,
     is_config_type,
     is_object_type,
-    is_string_type,
     is_typing_type,
 )
 from .constants import CONFIG_KEY
@@ -52,7 +51,7 @@ def _handle_dumps(self, handler, **kwargs):
     :rtype: str
     """
 
-    return handler.dumps(to_dict(self), **kwargs)
+    return handler.dumps(self.__class__, to_dict(self), **kwargs)
 
 
 def _handle_dump(self, handler, file_object, **kwargs):
@@ -64,7 +63,7 @@ def _handle_dump(self, handler, file_object, **kwargs):
     :rtype: str
     """
 
-    return handler.dump(to_dict(self), file_object, **kwargs)
+    return handler.dump(self.__class__, to_dict(self), file_object, **kwargs)
 
 
 @classmethod
@@ -79,7 +78,7 @@ def _handle_loads(cls, handler, content, validate=False, **kwargs):
     :rtype: object
     """
 
-    return from_dict(cls, handler.loads(content, **kwargs), validate=validate)
+    return from_dict(cls, handler.loads(cls, content, **kwargs), validate=validate)
 
 
 @classmethod
@@ -94,7 +93,7 @@ def _handle_load(cls, handler, file_object, validate=False, **kwargs):
     :rtype: object
     """
 
-    return from_dict(cls, handler.load(file_object, **kwargs), validate=validate)
+    return from_dict(cls, handler.load(cls, file_object, **kwargs), validate=validate)
 
 
 def config(maybe_cls=None, these=None, title=None, description=None):
@@ -281,7 +280,7 @@ def _build(config_cls, dictionary, validate=False):
         elif is_object_type(entry.type):
             item = dictionary.get(arg_key, {})
             if is_typing_type(entry.type) and len(entry.type.__args__) == 2:
-                (key_type, value_type) = entry.type.__args__
+                (_, value_type) = entry.type.__args__
                 kwargs[var.name] = {
                     key: _build(value_type, value)
                     if is_config_type(value_type)

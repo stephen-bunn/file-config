@@ -2,6 +2,8 @@
 # ISC License <https://opensource.org/licenses/isc>
 
 import pathlib
+import webbrowser
+from urllib.request import pathname2url
 
 import invoke
 
@@ -36,7 +38,7 @@ def build_news(ctx, draft=False):
     ctx.run(build_command, hide=None)
 
 
-@invoke.task(pre=[clean])
+@invoke.task()
 def build(ctx, output="html"):
     """ Build docs.
     """
@@ -45,3 +47,14 @@ def build(ctx, output="html"):
         build_command = f"make {output}"
         report.info(ctx, "docs.build", f"building {output!r} documentation")
         ctx.run(build_command)
+
+
+@invoke.task(pre=[build])
+def view(ctx):
+    """ Build and view docs.
+    """
+
+    report.info(ctx, "docs.view", f"viewing documentation")
+    build_path = ctx.docs.directory / "build" / "html" / "index.html"
+    build_path = pathname2url(build_path.as_posix())
+    webbrowser.open(f"file:{build_path!s}")
