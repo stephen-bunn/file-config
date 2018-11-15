@@ -24,7 +24,7 @@ def clean(ctx):
     for artifact in ("dist", "build", egg_name, f"src/{egg_name}"):
         artifact_dir = ctx.directory / artifact
         if artifact_dir.is_dir():
-            report.debug(ctx, "package.clean", f"removing directory {artifact_dir!r}")
+            report.debug(ctx, "package.clean", f"removing directory {artifact_dir!s}")
             ctx.run(f"rm -rf {artifact_dir!s}")
 
 

@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-file-config = {path = ".", editable = true, extras = ["test", "docs", "dev"]}
+file-config = {editable = true, extras = ["dev", "docs", "test"], path = "."}
 
 [dev-packages]
 tox = "*"

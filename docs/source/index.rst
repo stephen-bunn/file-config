@@ -80,6 +80,7 @@ User Documentation
    :maxdepth: 2
 
    getting-started
+   handlers
    contributing
    changelog
 

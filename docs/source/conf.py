@@ -102,6 +102,7 @@ html_theme_options = {
     "github_type": "star",
     "page_width": "1000px",
     "sidebar_width": "220px",
+    "fixed_sidebar": True,
     "sidebar_collapse": True,
 }
 
