@@ -4,7 +4,7 @@
 import warnings
 
 from ._common import BaseHandler
-from ..contrib.ini_parser import INIParser
+from ..contrib import INIParser
 
 
 class INIHandler(BaseHandler):
