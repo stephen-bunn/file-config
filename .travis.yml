@@ -6,6 +6,9 @@ cache:
 
 language: python
 
+env:
+  - CODACY_PROJECT_TOKEN=3f78646c95f7420786ff1007fc59d3fd
+
 matrix:
   include:
     - python: "3.6"
