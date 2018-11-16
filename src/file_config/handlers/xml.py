@@ -2,7 +2,6 @@
 # ISC License <https://opensource.org/licenses/isc>
 
 from ._common import BaseHandler
-from ..contrib import XMLParser
 
 
 class XMLHandler(BaseHandler):
@@ -11,7 +10,12 @@ class XMLHandler(BaseHandler):
 
     name = "xml"
     packages = ("lxml",)
-    options = {"root": None, "pretty": False}
+    options = {
+        "root": None,
+        "pretty": False,
+        "xml_declaration": False,
+        "encoding": "utf-8",
+    }
 
     def on_lxml_dumps(self, lxml, config, dictionary, **kwargs):
         """ The `lxml <https://pypi.org/project/lxml/>`_ dumps method.
@@ -23,16 +27,25 @@ class XMLHandler(BaseHandler):
             instance's name, optional
         :param bool pretty: Pretty format the resulting xml document, defaults to
             False, optional
+        :param bool xml_declaration: Add the xml declaration header to the resulting
+            xml document, defaults to False, optional
+        :param str encoding: The encoding to use for the resulting xml document,
+            defaults to "utf-8", optional
         :returns: The XML serialization
         :rtype: str
         """
+
+        # NOTE: lazy import of XMLParser because class requires lxml to exist on import
+        from ..contrib.xml_parser import XMLParser
 
         root = kwargs.pop("root")
         if not isinstance(root, str):
             root = config.__name__
 
         return XMLParser.from_dict(dictionary, root=root).to_xml(
-            pretty=kwargs.pop("pretty", False)
+            pretty=kwargs.pop("pretty", False),
+            xml_declaration=kwargs.pop("xml_declaration", False),
+            encoding=kwargs.pop("encoding", "utf-8"),
         )
 
     def on_lxml_loads(self, lxml, config, content, **kwargs):
@@ -41,8 +54,15 @@ class XMLHandler(BaseHandler):
         :param module lxml: The ``lxml`` module
         :param class config: The loading config class
         :param str content: The content to deserialize
+        :param str encoding: The encoding to read the given xml document as, defaults to
+            "utf-8", optional
         :returns: The deserialized dictionary
         :rtype: dict
         """
 
-        return XMLParser.from_xml(content).to_dict()
+        # NOTE: lazy import of XMLParser because class requires lxml to exist on import
+        from ..contrib.xml_parser import XMLParser
+
+        return XMLParser.from_xml(
+            content, encoding=kwargs.pop("encoding", "utf-8")
+        ).to_dict()

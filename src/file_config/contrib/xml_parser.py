@@ -136,15 +136,17 @@ class XMLParser(object):
         return cls(cls._build_dict_etree(etree.Element(root), dictionary))
 
     @classmethod
-    def from_xml(cls, content):
+    def from_xml(cls, content, encoding="utf-8"):
         """ Create an instance of ``XMLParser`` from some xml content.
 
         :param str content: The xml content to build from
+        :param str encoding: The encoding to use for reading the xml content
         :return: The new ``XMLParser`` instance
         :rtype: XMLParser
         """
 
-        return cls(etree.fromstring(content))
+        parser = etree.XMLParser(encoding=encoding)
+        return cls(etree.fromstring(content.encode(encoding), parser=parser))
 
     def to_dict(self, dict_type=collections.OrderedDict):
         """ Get the dictionary representation of the current parser.
@@ -156,12 +158,19 @@ class XMLParser(object):
 
         return self._build_dict(self.tree, dict_type=dict_type)
 
-    def to_xml(self, pretty=False):
+    def to_xml(self, pretty=False, xml_declaration=False, encoding="utf-8"):
         """ Get the xml string of the current parser.
 
         :param bool pretty: Pretty format the resulting xml string
+        :param bool xml_declaration: Add xml declaration header to resulting xml content
+        :param str encoding: The encoding to use for the resulting xml content
         :return: The xml string of the current parser
         :rtype: str
         """
 
-        return etree.tostring(self.tree, pretty_print=pretty).decode("utf-8")
+        return etree.tostring(
+            self.tree,
+            pretty_print=pretty,
+            xml_declaration=xml_declaration,
+            encoding=encoding.upper(),
+        ).decode(encoding)
