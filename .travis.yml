@@ -6,6 +6,9 @@ cache:
 
 language: python
 
+env:
+  - CODACY_PROJECT_TOKEN=***REMOVED***
+
 matrix:
   include:
     - python: "3.6"
