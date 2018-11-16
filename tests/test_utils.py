@@ -1,53 +1,53 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
-# ISC License <https://choosealicense.com/licenses/isc>
+# ISC License <https://opensource.org/licenses/isc>
 
 import re
-import enum
-import typing
-import collections
+from typing import Union
 
-import attr
-from hypothesis import given
-from hypothesis.strategies import one_of, from_type, characters
+from hypothesis import given, assume
+from hypothesis.strategies import builds, one_of, none, characters, booleans, text
 
 import file_config
-
-from . import config, config_var
-
-
-@given(config_var())
-def test_is_config_var(var):
-    assert file_config.utils.is_config_var(var)
-    assert not file_config.utils.is_config_var(attr.ib())
-
-
-@given(config())
-def test_is_config(config):
-    assert file_config.utils.is_config(config())
-    assert not file_config.utils.is_config(attr.s())
-
-
-@given(config())
-def test_is_config_type(config):
-    assert file_config.utils.is_config_type(config)
-    assert not file_config.utils.is_config_type(attr.s)
+from .strategies import builtins
 
 
 @given(characters())
 def test_is_compiled_pattern(string):
-    assert not file_config.utils.is_compiled_pattern(string)
-    assert file_config.utils.is_compiled_pattern(re.compile(re.escape(string)))
+    pattern = re.compile(re.escape(string))
+    regex = file_config.Regex(pattern)
+    assert file_config.utils.is_compiled_pattern(pattern)
+    assert not file_config.utils.is_compiled_pattern(regex)
 
 
 @given(characters())
 def test_is_regex_type(string):
-    assert file_config.utils.is_regex_type(file_config.Regex(re.escape(string)))
+    pattern = re.compile(re.escape(string))
+    regex = file_config.Regex(pattern)
+    assert file_config.utils.is_regex_type(regex)
+    assert not file_config.utils.is_regex_type(pattern)
 
 
-def test_is_enum_type():
-    class TestEnum(enum.Enum):
-        A = 0
-        B = 1
+# @given(builds())
+# def test_is_union_type(builds):
+#     assert file_config.utils.is_union_type(type(builds(Union)))
 
-    assert file_config.utils.is_enum_type(TestEnum)
-    assert not file_config.utils.is_enum_type(TestEnum.A)
+
+@given(none(), builtins())
+def test_is_null_type(none, other):
+    assume(other != None)
+    assert file_config.utils.is_null_type(type(none))
+    assert not file_config.utils.is_null_type(type(other))
+
+
+@given(booleans(), builtins())
+def test_is_bool_type(boolean, other):
+    assume(not isinstance(other, bool))
+    assert file_config.utils.is_bool_type(type(boolean))
+    assert not file_config.utils.is_bool_type(type(other))
+
+
+@given(one_of(characters(), text()), builtins())
+def test_is_string_type(string, other):
+    assume(not isinstance(other, str))
+    assert file_config.utils.is_string_type(type(string))
+    assert not file_config.utils.is_string_type(type(other))
