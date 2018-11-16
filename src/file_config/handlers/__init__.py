@@ -2,6 +2,7 @@
 # ISC License <https://choosealicense.com/licenses/isc>
 
 from .ini import INIHandler
+from .xml import XMLHandler
 from .json import JSONHandler
 from .toml import TOMLHandler
 from .yaml import YAMLHandler
@@ -10,6 +11,7 @@ from .msgpack import MsgpackHandler
 
 __all__ = [
     "INIHandler",
+    "XMLHandler",
     "JSONHandler",
     "TOMLHandler",
     "YAMLHandler",
