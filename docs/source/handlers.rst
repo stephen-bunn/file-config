@@ -469,3 +469,57 @@ Usage is just as you would expect...
 .. code-block:: bytes
 
    \x85\xa4name\xaaMy Project\xa4type\xb0personal-project\xa8keywords\x92\xa7example\xa4test\xa6status\x00\xacdependencies\x81\xaca-dependency\x82\xa4name\xacA Dependency\xa7version\xa3v12
+
+
+.. _handlers.xml:
+
+XML
+===
+
+`XML <https://www.w3.org/TR/xml/>`_ is an older data exchange format that follows a
+nested tag-attribute type structure. A custom :class:`~.contrib.xml_parser.XMLParser` is
+used since the many dictionary to xml helper packages out there are not reflective.
+
+The format options available to xml are the following:
+
+   - ``root="root"`` - *the name of the root element in the resulting xml*
+   - ``pretty=True`` - *indicates that the resulting xml should be pretty formatted*
+   - ``xml_declaration=True`` - *indicates that the xml header should be added*
+   - ``encoding="utf-8"`` - *the encoding to use for the resulting xml document*
+
+
+.. _handlers.xml.lxml:
+
+`lxml <https://pypi.org/project/lxml/>`_
+----------------------------------------
+
+Using XML requires ``lxml`` to be installed as an extra...
+
+.. code-block:: bash
+
+   pipenv install file-config[lxml]
+
+Usage is straightforward...
+
+.. code-block:: python
+
+   config_instance.dumps_xml(prefer="lxml", pretty=True, xml_declaration=True)
+
+.. code-block:: xml
+
+   <?xml version='1.0' encoding='UTF-8'?>
+   <ProjectConfig>
+      <name type="str">My Project</name>
+      <type type="str">personal-project</type>
+      <keywords>
+         <keywords type="str">example</keywords>
+         <keywords type="str">test</keywords>
+      </keywords>
+      <status type="int">0</status>
+      <dependencies>
+         <a-dependency>
+            <name type="str">A Dependency</name>
+            <version type="str">v12</version>
+         </a-dependency>
+      </dependencies>
+   </ProjectConfig>

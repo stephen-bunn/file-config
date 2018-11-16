@@ -251,14 +251,41 @@ JSON
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 
-Serializing json using ``ujson`` requires you to install ``ujson``, ``pipenv install file-config[ujson]``
+INI
+~~~
 
->>> json_content = my_config.dumps_json()
-{"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
->>> new_config = MyConfig.loads_json(json_content)
-MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
+**Unfortunately, INI cannot correctly serialize configs containing lists of mappings...** found in the ``groups`` var.
+You should really be using TOML in this case, but for now INI can deal with any config that doesn't contain a list of mappings.
 
-*The json serialization/deserialization handler prefers ujson over the builtin json module when trying to discover which module to use.*
+*For example...*
+
+.. code-block:: python
+
+   @file_config.config
+   class INIConfig(object):
+
+      @file_config.config
+      class INIConfigGroup(object):
+         value = file_config.var()
+
+      name = file_config.var(str)
+      value = file_config.var(int)
+      groups = file_config.var(Dict[str, INIConfigGroup])
+
+   my_config = INIConfig(
+      name="My Config",
+      value=-1,
+      groups={"group-1": INIConfig.INIConfigGroup(value=99)}
+   )
+
+>>> ini_content = my_config.dumps_ini()
+[INIConfig]
+name = "My Config"
+value = -1
+[INIConfig:groups:group-1]
+value = 99
+>>> new_config = INIConfig.loads_ini(ini_content)
+INIConfig(name='My Config', value=-1, groups={'group-1': INIConfig.INIConfigGroup(value=99)})
 
 Pickle
 ~~~~~~
@@ -306,6 +333,26 @@ Serializing message pack requires ``msgpack``, ``pipenv install file-config[msgp
 >>> msgpack_content = my_config.dumps_msgpack()
 b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
 >>> new_config = MyConfig.loads_msgpack(msgpack_content)
+MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
+
+XML
+~~~
+
+Serializing xml requires ``lxml``, ``pipenv install file-config[lxml]``
+
+>>> xml_content = my_config.dumps_xml(pretty=True, xml_declaration=True)
+<?xml version='1.0' encoding='UTF-8'?>
+<MyConfig>
+  <name type="str">Sample Config</name>
+  <version type="str">v12</version>
+  <groups>
+    <groups>
+      <name type="str">Sample Group</name>
+      <type type="str">config</type>
+    </groups>
+  </groups>
+</MyConfig>
+>>> new_config = MyConfig.loads_xml(xml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
 -----
