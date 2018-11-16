@@ -25,7 +25,7 @@ File Config
 
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.
 
-- These config files can dump and load from popular formats such as `JSON <http://www.json.org/>`_, `YAML <http://yaml.org/>`_, `TOML <https://github.com/toml-lang/toml>`_, `Message Pack <https://msgpack.org/index.html>`_, `INI <https://bit.ly/2DksT5u>`_, `XML <https://www.w3.org/TR/xml/>`_ and others.
+- These configs can dumped and loaded from popular formats such as `JSON <http://www.json.org/>`_, `YAML <http://yaml.org/>`_, `TOML <https://github.com/toml-lang/toml>`_, `Message Pack <https://msgpack.org/index.html>`_, `INI <https://bit.ly/2DksT5u>`_, and `XML <https://www.w3.org/TR/xml/>`_.
 - Validation of the config's state is done through dynamically generated `JSONSchema <https://json-schema.org/>`_.
 - Inspired from Hynek's `environ-config <https://pypi.org/project/environ-config/>`_.
 
