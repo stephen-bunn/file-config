@@ -75,8 +75,9 @@ def test_is_regex_type(string):
 def test_is_union_type(value1, value2):
     # NOTE: typing.Union does fancy conversions of similar types so we need to make
     # sure that we are dealing with a typing type
-    assume(typing.Union[type(value1), type(value2)].__module__ == "typing")
-    assert file_config.utils.is_union_type(typing.Union[type(value1), type(value2)])
+    union_type = typing.Union[type(value1), type(value2)]
+    assume(file_config.utils.is_typing_type(type(union_type)))
+    assert file_config.utils.is_union_type(union_type)
 
 
 @given(none(), builtins())
