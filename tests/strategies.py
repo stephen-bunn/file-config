@@ -1,9 +1,15 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
+import enum
+import random
+import keyword
+
+import attr
 from hypothesis import assume
 from hypothesis.strategies import (
     one_of,
+    from_regex,
     composite,
     builds,
     none,
@@ -27,6 +33,14 @@ from hypothesis.strategies import (
     uuids,
 )
 
+import file_config
+
+
+MIN_ENUM_VALUES = 1
+MAX_ENUM_VALUES = 5
+MIN_CONFIG_VARS = 1
+MAX_CONFIG_VARS = 5
+
 
 @composite
 def builtins(draw, ignore=None):
@@ -45,4 +59,49 @@ def builtins(draw, ignore=None):
             binary(),
             complex_numbers(),
         )
+    )
+
+
+@composite
+def class_name(draw):
+    name = draw(from_regex(r"^[a-zA-Z]+[a-zA-Z0-9_]*$")).replace("\n", "")
+    assume(name not in keyword.kwlist)
+    return name
+
+
+@composite
+def variable_name(draw):
+    name = draw(from_regex(r"^[a-z]+[a-zA-Z0-9_]*$")).replace("\n", "")
+    assume(name not in keyword.kwlist)
+    return name
+
+
+@composite
+def config_var(draw):
+    return file_config.var(type=type(draw(builtins())))
+
+
+@composite
+def config(draw):
+    return file_config.make_config(
+        draw(class_name()),
+        {
+            draw(variable_name()): draw(config_var())
+            for _ in range(
+                MIN_CONFIG_VARS, random.randint(MIN_CONFIG_VARS, MAX_CONFIG_VARS) + 1
+            )
+        },
+    )
+
+
+@composite
+def enums(draw):
+    return enum.Enum(
+        draw(class_name()),
+        {
+            draw(variable_name()): draw(builtins())
+            for _ in range(
+                MIN_ENUM_VALUES, random.randint(MIN_ENUM_VALUES, MAX_ENUM_VALUES) + 1
+            )
+        },
     )

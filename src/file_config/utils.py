@@ -82,7 +82,7 @@ def is_regex_type(type_):
 
 @lru_cache()
 def is_union_type(type_):
-    return isinstance(type_, typing._Union)
+    return type_.__origin__ in (typing.Union,)
 
 
 @lru_cache()
