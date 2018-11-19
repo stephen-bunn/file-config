@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
+import math
 import enum
 import random
 import keyword
@@ -78,7 +79,8 @@ def variable_name(draw):
 
 @composite
 def config_var(draw):
-    return file_config.var(type=type(draw(builtins())))
+    value = draw(builtins())
+    return file_config.var(type=type(value), default=value)
 
 
 @composite
@@ -99,7 +101,7 @@ def enums(draw):
     return enum.Enum(
         draw(class_name()),
         {
-            draw(variable_name()): draw(builtins())
+            draw(variable_name()): draw(one_of(characters(), integers()))
             for _ in range(
                 MIN_ENUM_VALUES, random.randint(MIN_ENUM_VALUES, MAX_ENUM_VALUES) + 1
             )
