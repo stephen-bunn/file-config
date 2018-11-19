@@ -94,7 +94,18 @@ def test_is_bool_type(boolean, other):
     assert not file_config.utils.is_bool_type(type(other))
 
 
-@given(sampled_from([str]), builtins())
+@given(
+    sampled_from(
+        [
+            str,
+            typing.Text,
+            typing.AnyStr,
+            collections.UserString,
+            file_config.Regex(r"^$"),
+        ]
+    ),
+    builtins(),
+)
 def test_is_string_type(string, other):
     assume(not isinstance(other, str))
     assert file_config.utils.is_string_type(string)
@@ -116,7 +127,21 @@ def test_is_number_type(number, other):
 
 
 # TODO: sample typing types
-@given(sampled_from([list, tuple, set, frozenset]), builtins())
+@given(
+    sampled_from(
+        [
+            list,
+            tuple,
+            set,
+            frozenset,
+            typing.List[str],
+            typing.Tuple[str],
+            typing.Set[str],
+            typing.FrozenSet[str],
+        ]
+    ),
+    builtins(),
+)
 def test_is_array_type(array, other):
     assume(not isinstance(other, (list, tuple, set, frozenset)))
     assert file_config.utils.is_array_type(array)
