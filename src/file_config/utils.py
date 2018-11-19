@@ -60,7 +60,7 @@ def is_builtin_type(type_):
 
 @lru_cache()
 def is_typing_type(type_):
-    return isinstance(type_, type) and getattr(type_, "__module__", None) == "typing"
+    return getattr(type_, "__module__", None) == "typing"
 
 
 @lru_cache()
@@ -104,11 +104,11 @@ def is_string_type(type_):
     if is_builtin_type(type_):
         return type_ in (str,)
     elif is_typing_type(type_):
-        return type_.__origin__ in (typing.Text, typing.AnyStr)
+        if is_regex_type(type_):
+            return True
+        return type_ in (typing.Text, typing.AnyStr)
     elif is_collections_type(type_):
         return type_ in (collections.UserString,)
-    elif is_regex_type(type_):
-        return True
     return False
 
 
