@@ -12,8 +12,6 @@ import attr
 
 from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
-COMPILED_PATTERN_TYPE = type(re.compile(""))
-
 
 class Types(Enum):
     """ An enum which keeps a record of top-level type grouping names.
@@ -34,6 +32,7 @@ class Types(Enum):
     UNION = "union"
 
 
+COMPILED_PATTERN_TYPE = type(re.compile(""))
 TYPE_MAPPINGS = {
     "builtins": {
         Types.NULL: (type(None),),
