@@ -84,16 +84,18 @@ def config_var(draw):
 
 
 @composite
+def config_var_dict(draw):
+    return {
+        draw(variable_name()): draw(config_var())
+        for _ in range(
+            MIN_CONFIG_VARS, random.randint(MIN_CONFIG_VARS, MAX_CONFIG_VARS) + 1
+        )
+    }
+
+
+@composite
 def config(draw):
-    return file_config.make_config(
-        draw(class_name()),
-        {
-            draw(variable_name()): draw(config_var())
-            for _ in range(
-                MIN_CONFIG_VARS, random.randint(MIN_CONFIG_VARS, MAX_CONFIG_VARS) + 1
-            )
-        },
-    )
+    return file_config.make_config(draw(class_name()), draw(config_var_dict()))
 
 
 @composite

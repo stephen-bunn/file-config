@@ -2,6 +2,7 @@
 # ISC License <https://choosealicense.com/licenses/isc>
 
 import re
+import base64
 import typing
 import itertools
 import collections
@@ -23,6 +24,7 @@ class Types(Enum):
 
     NULL = "null"
     BOOL = "bool"
+    BYTES = "bytes"
     INTEGER = "integer"
     NUMBER = "number"
     STRING = "string"
@@ -37,6 +39,7 @@ TYPE_MAPPINGS = {
     "builtins": {
         Types.NULL: (type(None),),
         Types.BOOL: (bool,),
+        Types.BYTES: (bytes, bytearray),
         Types.INTEGER: (int,),
         Types.NUMBER: (float,),
         Types.STRING: (str,),
@@ -78,6 +81,14 @@ def _get_types(type_):
     )
 
 
+def encode_bytes(bytes_):
+    return base64.encodebytes(bytes_)
+
+
+def decode_bytes(string):
+    return base64.decodebytes(bytes(string, "utf-8"))
+
+
 def is_config_var(var):
     return (
         isinstance(var, (attr._make.Attribute, attr._make._CountingAttr))
@@ -111,10 +122,7 @@ def is_builtin_type(type_):
 
 @lru_cache()
 def is_enum_type(type_):
-    return (
-        isinstance(type_, type)
-        and issubclass(type_, tuple(_get_types(Types.ENUM)))
-    )
+    return isinstance(type_, type) and issubclass(type_, tuple(_get_types(Types.ENUM)))
 
 
 @lru_cache()
@@ -158,6 +166,11 @@ def is_bool_type(type_):
 
 
 @lru_cache()
+def is_bytes_type(type_):
+    return type_ in _get_types(Types.BYTES)
+
+
+@lru_cache()
 def is_string_type(type_):
     string_types = _get_types(Types.STRING)
     if is_typing_type(type_):
@@ -179,14 +192,18 @@ def is_number_type(type_):
 def is_array_type(type_):
     array_types = _get_types(Types.ARRAY)
     if is_typing_type(type_):
-        return type_ in array_types or type_.__origin__ in array_types
+        return type_ in array_types or (
+            hasattr(type_, "__origin__") and type_.__origin__ in array_types
+        )
     return type_ in array_types
 
 
 def is_object_type(type_):
     object_types = _get_types(Types.OBJECT)
     if is_typing_type(type_):
-        return type_ in object_types or type_.__origin__ in object_types
+        return type_ in object_types or (
+            hasattr(type_, "__origin") and type_.__origin__ in object_types
+        )
     return type_ in object_types
 
 
@@ -194,6 +211,9 @@ def typecast(type_, value):
     # NOTE: does not do any special validation of types before casting
     # will just raise errors on type casting failures
     if is_builtin_type(type_) or is_collections_type(type_) or is_enum_type(type_):
+        # FIXME: move to Types enum and TYPE_MAPPING entry
+        if is_bytes_type(type_):
+            return decode_bytes(value)
         return type_(value)
     elif is_regex_type(type_):
         return typecast(str, value)
