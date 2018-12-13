@@ -1,0 +1,1 @@
+Adding ``TYPE_MAPPINGS`` to ``utils.py`` as a way of generically representing available types and their translations

@@ -5,7 +5,7 @@ File Config
    :target: https://pypi.org/project/file-config/
    :alt: Supported Versions
 
-.. image:: https://api.codacy.com/project/badge/Grade/3908ae20f86c4ed0ba9617846ed5419c
+.. image:: https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
 
@@ -246,7 +246,11 @@ JSON
 ~~~~
 
 >>> json_content = my_config.dumps_json()
-{"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
+
+.. code-block:: json
+
+   {"name":"Sample Config","version":"v12","groups":[{"name":"Sample Group","type":"config"}]}
+
 >>> new_config = MyConfig.loads_json(json_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
@@ -279,11 +283,15 @@ You should really be using TOML in this case, but for now INI can deal with any 
    )
 
 >>> ini_content = my_config.dumps_ini()
-[INIConfig]
-name = "My Config"
-value = -1
-[INIConfig:groups:group-1]
-value = 99
+
+.. code-block:: ini
+
+   [INIConfig]
+   name = "My Config"
+   value = -1
+   [INIConfig:groups:group-1]
+   value = 99
+
 >>> new_config = INIConfig.loads_ini(ini_content)
 INIConfig(name='My Config', value=-1, groups={'group-1': INIConfig.INIConfigGroup(value=99)})
 
@@ -303,11 +311,15 @@ YAML
 Serializing yaml requires ``pyyaml``, ``pipenv install file-config[pyyaml]``
 
 >>> yaml_content = my_config.dumps_yaml()
-name: Sample Config
-version: v12
-groups:
-- name: Sample Group
-  type: config
+
+.. code-block:: yaml
+
+   name: Sample Config
+   version: v12
+   groups:
+      - name: Sample Group
+   type: config
+
 >>> new_config = MyConfig.loads_yaml(yaml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
@@ -317,11 +329,15 @@ TOML
 Serializing toml requires ``tomlkit``, ``pipenv install file-config[tomlkit]``
 
 >>> toml_content = my_config.dumps_toml()
-name = "Sample Config"
-version = "v12"
-[[groups]]
-name = "Sample Group"
-type = "config"
+
+.. code-block:: toml
+
+   name = "Sample Config"
+   version = "v12"
+   [[groups]]
+   name = "Sample Group"
+   type = "config"
+
 >>> new_config = MyConfig.loads_toml(toml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
@@ -331,7 +347,11 @@ Message Pack
 Serializing message pack requires ``msgpack``, ``pipenv install file-config[msgpack]``
 
 >>> msgpack_content = my_config.dumps_msgpack()
-b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
+
+.. code-block:: python
+
+   b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
+
 >>> new_config = MyConfig.loads_msgpack(msgpack_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
@@ -341,17 +361,21 @@ XML
 Serializing xml requires ``lxml``, ``pipenv install file-config[lxml]``
 
 >>> xml_content = my_config.dumps_xml(pretty=True, xml_declaration=True)
-<?xml version='1.0' encoding='UTF-8'?>
-<MyConfig>
-  <name type="str">Sample Config</name>
-  <version type="str">v12</version>
-  <groups>
-    <groups>
-      <name type="str">Sample Group</name>
-      <type type="str">config</type>
-    </groups>
-  </groups>
-</MyConfig>
+
+.. code-block:: xml
+
+   <?xml version='1.0' encoding='UTF-8'?>
+   <MyConfig>
+      <name type="str">Sample Config</name>
+      <version type="str">v12</version>
+      <groups>
+         <groups>
+            <name type="str">Sample Group</name>
+            <type type="str">config</type>
+         </groups>
+      </groups>
+   </MyConfig>
+
 >>> new_config = MyConfig.loads_xml(xml_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
@@ -414,6 +438,9 @@ This allows you to throw any data you need to throw around in the config class, 
 You can get the jsonschema that is created to validate a config class through the ``build_schema`` method.
 
 >>> file_config.build_schema(ModConfig)
+
+.. code-block:: python
+
 {'$id': 'MyConfig.json',
  '$schema': 'http://json-schema.org/draft-07/schema#',
  'description': 'A simple/sample config',

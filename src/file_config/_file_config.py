@@ -12,7 +12,9 @@ from . import handlers
 from .utils import (
     typecast,
     is_config,
+    encode_bytes,
     is_enum_type,
+    is_bytes_type,
     is_array_type,
     is_config_var,
     is_config_type,
@@ -343,6 +345,10 @@ def _dump(config_instance, dict_type=OrderedDict):
             dump_value = getattr(config_instance, var.name, dump_default)
             result[dump_key] = (
                 dump_value.value if dump_value in entry.type else dump_value
+            )
+        elif is_bytes_type(entry.type):
+            result[dump_key] = encode_bytes(
+                getattr(config_instance, var.name, dump_default)
             )
         else:
             if is_config_type(entry.type):

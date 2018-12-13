@@ -8,7 +8,7 @@ import invoke
 import parver
 
 from . import docs, package
-from .utils import report, get_previous_version, get_tag_content, get_artifact_paths
+from .utils import report, get_tag_content, get_artifact_paths, get_previous_version
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -39,8 +39,7 @@ def profile(ctx, filepath):
         ctx.run(f"vprof -c cmhp {filepath!s}")
 
 
-
-@invoke.task(post=[docs.build, package.build])
+@invoke.task(post=[docs.build, package.build, package.check])
 def build(ctx):
     """ Build the project.
     """
@@ -122,7 +121,7 @@ def publish(ctx, test=False):
         ctx.run(git_reset_command)
 
 
-namespace = invoke.Collection(profile, build, clean, publish, docs, package)
+namespace = invoke.Collection(build, clean, publish, docs, package, profile)
 namespace.configure(
     {
         "metadata": metadata,
