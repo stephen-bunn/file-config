@@ -6,7 +6,7 @@ import subprocess
 
 import parver
 import colorama
-from towncrier._builder import find_fragments, render_fragments, split_fragments
+from towncrier._builder import find_fragments, split_fragments, render_fragments
 from towncrier._settings import load_config
 
 colorama.init()
@@ -36,7 +36,7 @@ class report(object):
         text_style = "".join(cls.level_colors.get(level, {}).get("text", [fg.CYAN]))
 
         return (
-            f"{task_style}{{{task_name}}}{reset}"
+            f"{task_style}[{task_name}]{reset}"
             f" {sty.DIM}...{sty.RESET_ALL} "
             f"{text_style}{text}{reset}"
         )
@@ -73,7 +73,7 @@ def get_previous_version(ctx):
     ]
     try:
         version = max(parver.Version.parse(ver).normalize() for ver in tags if ver)
-    except ValueError:
+    except (ValueError, subprocess.CalledProcessError):
         version = parver.Version.parse("0.0.0")
     return version
 

@@ -78,24 +78,43 @@ def variable_name(draw):
 
 
 @composite
-def config_var(draw):
-    value = draw(builtins())
+def config_var(draw, allowed_strategies=None):
+    if isinstance(allowed_strategies, list):
+        value = draw(one_of(allowed_strategies))
+    else:
+        value = draw(builtins())
     return file_config.var(type=type(value), default=value)
 
 
 @composite
-def config_var_dict(draw):
+def config_var_dict(draw, min_vars=None, max_vars=None, allowed_strategies=None):
+    if not isinstance(min_vars, int):
+        min_vars = MIN_CONFIG_VARS
+    if not isinstance(max_vars, int):
+        max_vars = MAX_CONFIG_VARS
     return {
-        draw(variable_name()): draw(config_var())
-        for _ in range(
-            MIN_CONFIG_VARS, random.randint(MIN_CONFIG_VARS, MAX_CONFIG_VARS) + 1
-        )
+        draw(variable_name()): draw(config_var(allowed_strategies=allowed_strategies))
+        for _ in range(MIN_CONFIG_VARS, random.randint(min_vars, max_vars) + 1)
     }
 
 
 @composite
-def config(draw):
-    return file_config.make_config(draw(class_name()), draw(config_var_dict()))
+def config(
+    draw, config_vars=None, min_vars=None, max_vars=None, allowed_strategies=None
+):
+    if isinstance(config_vars, dict):
+        return file_config.make_config(draw(class_name()), config_vars)
+    else:
+        return file_config.make_config(
+            draw(class_name()),
+            draw(
+                config_var_dict(
+                    min_vars=min_vars,
+                    max_vars=max_vars,
+                    allowed_strategies=allowed_strategies,
+                )
+            ),
+        )
 
 
 @composite

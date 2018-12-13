@@ -82,11 +82,13 @@ def _get_types(type_):
 
 
 def encode_bytes(bytes_):
-    return base64.encodebytes(bytes_)
+    return base64.encodebytes(bytes_).decode("utf-8")
 
 
 def decode_bytes(string):
-    return base64.decodebytes(bytes(string, "utf-8"))
+    if is_string_type(type(string)):
+        string = bytes(string, "utf-8")
+    return base64.decodebytes(string)
 
 
 def is_config_var(var):
