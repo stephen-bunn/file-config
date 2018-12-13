@@ -17,9 +17,6 @@ matrix:
     - python: "3.6"
       env: TOXENV=flake8
 
-    - python: "3.6"
-      env: TOXENV=packaging
-
 install:
   - pip install tox
   - pip install pipenv
