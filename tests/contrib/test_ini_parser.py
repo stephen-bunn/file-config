@@ -34,7 +34,7 @@ INI_SAFE_STRATEGIES.append(config(allowed_strategies=INI_SAFE_STRATEGIES))
 
 
 @given(config(allowed_strategies=INI_SAFE_STRATEGIES))
-@settings(supress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_from_dict(config):
     config_dict = file_config.to_dict(config())
     parser = INIParser.from_dict(config_dict)
@@ -42,7 +42,7 @@ def test_from_dict(config):
 
 
 @given(config(allowed_strategies=INI_SAFE_STRATEGIES))
-@settings(supress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_to_dict(config):
     config_dict = file_config.to_dict(config())
     parser = INIParser.from_dict(config_dict)
@@ -51,7 +51,7 @@ def test_to_dict(config):
 
 
 @given(config(allowed_strategies=INI_SAFE_STRATEGIES))
-@settings(supress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_to_ini(config):
     parser = INIParser.from_dict(file_config.to_dict(config()))
     ini = io.StringIO(parser.to_ini())
@@ -61,7 +61,7 @@ def test_to_ini(config):
 
 
 @given(config(allowed_strategies=INI_SAFE_STRATEGIES))
-@settings(supress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_from_ini(config):
     ini = INIParser.from_dict(file_config.to_dict(config())).to_ini()
     parser = INIParser.from_ini(ini)
