@@ -16,6 +16,7 @@ from hypothesis.strategies import (
     characters,
     booleans,
     integers,
+    binary,
     text,
 )
 
@@ -163,6 +164,8 @@ def test_is_object_type(object_, other):
 def test_typecast_builtins(value):
     assume(value)
     # FIXME: handle casting some of these types
+    # NOTE: the reason we are ignoring bytes here is that it is not base64 encoded bytes
+    # this causes a TypeError from binascii for incorrect padding (missing "=" suffix)
     assume(
         not isinstance(value, (list, tuple, set, frozenset, bytes, bytearray, complex))
     )
@@ -201,7 +204,9 @@ def test_typecast_collections():
 def test_typecast_typings(value):
     assume(value != None)
     # FIXME: handle some of these unhashable builtin types
-    assume(not isinstance(value, (list, tuple, set, frozenset)))
+    # NOTE: the reason we are ignoring bytes here is that it is not base64 encoded bytes
+    # this causes a TypeError from binascii for incorrect padding (missing "=" suffix)
+    assume(not isinstance(value, (bytes, list, tuple, set, frozenset)))
     for (typing_type, builtin_type) in {
         typing.List: list,
         typing.Tuple: tuple,
@@ -222,3 +227,12 @@ def test_typecast_typings(value):
             ),
             builtin_type,
         )
+
+
+@given(binary())
+def test_encode_decode_bytes(value):
+    encoded = file_config.utils.encode_bytes(value)
+    assert isinstance(encoded, str)
+    decoded = file_config.utils.decode_bytes(encoded)
+    assert isinstance(decoded, bytes)
+    assert decoded == value

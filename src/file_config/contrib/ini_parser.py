@@ -56,7 +56,11 @@ class INIParser(configparser.ConfigParser):
         elif string.lstrip("-").isdigit():
             return int(string)
         elif "." in string.lstrip("-"):
-            return float(string)
+            try:
+                return float(string)
+            except ValueError:
+                # one off case where we mistake a single "." as a float
+                return string
         else:
             return string
 

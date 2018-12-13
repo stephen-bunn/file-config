@@ -1,5 +1,5 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
-# ISC License <https://choosealicense.com/licenses/isc>
+# ISC License <https://opensource.org/licenses/isc>
 
 import enum
 
@@ -8,8 +8,7 @@ from hypothesis import given
 from hypothesis.strategies import characters
 
 import file_config
-
-from . import config, class_name, attribute_name, random_builtin
+from .strategies import config, builtins, class_name, variable_name
 
 
 @given(config(min_vars=0, max_vars=0))
@@ -20,7 +19,7 @@ def test_empty_config(config):
     assert len(schema["required"]) == 0
 
 
-@given(random_builtin())
+@given(builtins())
 def test_not_config(config):
     with pytest.raises(ValueError):
         file_config.build_schema(config)
@@ -65,7 +64,7 @@ def test_var_metadata(config_name, title, description):
     assert schema["properties"]["test"]["description"] == description
 
 
-@given(class_name(), attribute_name(), config(config_vars={}))
+@given(class_name(), variable_name(), config(config_vars={}))
 def test_nested_empty_config(config_name, nested_config_name, nested_config):
     config = file_config.make_config(
         config_name, {nested_config_name: file_config.var(nested_config)}
