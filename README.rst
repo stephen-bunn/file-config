@@ -9,8 +9,8 @@ File Config
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
 
-.. image:: https://travis-ci.org/stephen-bunn/file-config.svg?branch=master
-   :target: https://travis-ci.org/stephen-bunn/file-config
+.. image:: https://travis-ci.com/stephen-bunn/file-config.svg?branch=master
+   :target: https://travis-ci.com/stephen-bunn/file-config
    :alt: Travis CI
 
 .. image:: https://readthedocs.org/projects/file-config/badge/?version=latest
