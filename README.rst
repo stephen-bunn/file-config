@@ -347,7 +347,11 @@ Message Pack
 Serializing message pack requires ``msgpack``, ``pipenv install file-config[msgpack]``
 
 >>> msgpack_content = my_config.dumps_msgpack()
-b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
+
+.. code-block:: python
+
+   b'\x83\xa4name\xadSample Config\xa7version\xa3v12\xa6groups\x91\x82\xa4name\xacSample Group\xa4type\xa6config'
+
 >>> new_config = MyConfig.loads_msgpack(msgpack_content)
 MyConfig(name='Sample Config', version='v12', groups=[MyConfig.Group(name='Sample Group', type='config')])
 
