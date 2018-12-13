@@ -5,20 +5,30 @@ import io
 
 from lxml import etree
 from hypothesis import given
-from hypothesis.strategies import text, characters, integers, floats
-
+from hypothesis.strategies import (
+    text,
+    lists,
+    floats,
+    one_of,
+    booleans,
+    integers,
+    characters,
+)
 
 import file_config
 from file_config.contrib.xml_parser import XMLParser
-from ..strategies import config
 
+from ..strategies import config
 
 # TODO: expand list of xml safe strategies
 XML_SAFE_STRATEGIES = [
+    booleans(),
     text(characters(blacklist_categories=("Cc", "Cs"))),
     integers(),
     floats(),
 ]
+XML_SAFE_STRATEGIES.append(lists(one_of(XML_SAFE_STRATEGIES)))
+XML_SAFE_STRATEGIES.append(config(allowed_strategies=XML_SAFE_STRATEGIES))
 
 
 @given(config(allowed_strategies=XML_SAFE_STRATEGIES))
@@ -48,4 +58,3 @@ def test_from_xml(config):
     xml = XMLParser.from_dict(file_config.to_dict(config())).to_xml()
     parser = XMLParser.from_xml(xml)
     assert isinstance(parser, XMLParser)
-

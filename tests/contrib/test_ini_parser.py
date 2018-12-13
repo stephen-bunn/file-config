@@ -5,21 +5,32 @@ import io
 import configparser
 
 from hypothesis import given
-from hypothesis.strategies import text, characters, integers, floats
+from hypothesis.strategies import (
+    text,
+    lists,
+    floats,
+    one_of,
+    booleans,
+    integers,
+    characters,
+)
 
 import file_config
 from file_config.contrib.ini_parser import INIParser
-from ..strategies import config
 
+from ..strategies import config
 
 # TODO: expand list of ini safe strategies
 INI_SAFE_STRATEGIES = [
+    booleans(),
     text(characters(blacklist_categories=("Cc", "Cs"))).map(
         lambda x: x.replace("%", "%%")
     ),
     integers(),
     floats(),
 ]
+INI_SAFE_STRATEGIES.append(lists(one_of(INI_SAFE_STRATEGIES)))
+INI_SAFE_STRATEGIES.append(config(allowed_strategies=INI_SAFE_STRATEGIES))
 
 
 @given(config(allowed_strategies=INI_SAFE_STRATEGIES))
@@ -51,4 +62,3 @@ def test_from_ini(config):
     ini = INIParser.from_dict(file_config.to_dict(config())).to_ini()
     parser = INIParser.from_ini(ini)
     assert isinstance(parser, INIParser)
-
