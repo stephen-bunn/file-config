@@ -96,6 +96,9 @@ class BaseHandler(abc.ABC):
                 f"prefered package {package!r} does not exist, "
                 f"allowed are {self.packages!r}"
             )
+        # NOTE: this is a semi-dangerous property override that needs to be done since
+        # packages are dynamically defined as part of the subclass but the super needs
+        # to be able to override them no matter what
         self.packages = (package,)
 
     def dumps(self, config, instance, prefer=None, **kwargs):

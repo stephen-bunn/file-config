@@ -5,7 +5,6 @@ import re
 import typing
 import warnings
 import collections
-from functools import partial
 
 import attr
 
@@ -39,9 +38,9 @@ def Regex(pattern):
     return typing.NewType(REGEX_TYPE_NAME, re.compile(pattern))
 
 
-def _build_attribute_modifiers(
-    var, attribute_mapping, ignore=["type", "name", "required", "default"]
-):
+def _build_attribute_modifiers(var, attribute_mapping, ignore=None):
+    if not isinstance(ignore, list):
+        ignore = ["type", "name", "required", "default"]
     if not is_config_var(var):
         raise ValueError(
             f"cannot build field modifiers for {var!r}, is not a config var"
@@ -58,7 +57,7 @@ def _build_attribute_modifiers(
                 continue
             elif entry_attribute.name in attribute_mapping:
                 # NOTE: required for `isinstance(True, (int, float)) == True`
-                if type(entry_value) == entry_attribute.type:
+                if type(entry_value) == entry_attribute.type:  # noqa
                     modifiers[attribute_mapping[entry_attribute.name]] = entry_value
                 else:
                     raise ValueError(

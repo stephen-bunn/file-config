@@ -1,7 +1,6 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
-import typing
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -153,7 +152,7 @@ def config(maybe_cls=None, these=None, title=None, description=None):
 
 
 def var(
-    type=None,
+    type=None,  # noqa
     default=None,
     name=None,
     title=None,
@@ -162,8 +161,8 @@ def var(
     examples=None,
     encoder=None,
     decoder=None,
-    min=None,
-    max=None,
+    min=None,  # noqa
+    max=None,  # noqa
     unique=None,
     contains=None,
     **kwargs,
@@ -192,6 +191,10 @@ def var(
     :rtype: attr.Attribute
     """
 
+    # NOTE: this method overrides some of the builtin Python method names on purpose in
+    # order to supply a readable and easy to understand api
+    # In this case it is not dangerous as they are only overriden in the scope and are
+    # never used within the scope
     kwargs.update(dict(default=default, type=type))
     return attr.ib(
         metadata={
