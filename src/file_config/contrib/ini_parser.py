@@ -54,7 +54,11 @@ class INIParser(configparser.ConfigParser):
         elif string.lower() in ("true", "false"):
             return string.lower() == "true"
         elif string.lstrip("-").isdigit():
-            return int(string)
+            try:
+                return int(string)
+            except ValueError:
+                # case where we mistake something like "--0" a a int
+                return string
         elif "." in string.lstrip("-"):
             try:
                 return float(string)
