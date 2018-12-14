@@ -330,7 +330,7 @@ Serializing toml requires ``tomlkit``, ``pipenv install file-config[tomlkit]``
 
 >>> toml_content = my_config.dumps_toml()
 
-.. code-block:: toml
+.. code-block:: ini
 
    name = "Sample Config"
    version = "v12"
