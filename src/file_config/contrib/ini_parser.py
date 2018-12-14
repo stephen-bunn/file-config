@@ -15,6 +15,13 @@ class INIParser(configparser.ConfigParser):
     .. important:: This parser conforms to what Mozilla says configuration files and
         their encoded values and types should look like.
         You can find their specification `here <https://bit.ly/2DksT5u>`_
+
+    .. warning:: This parser is very unstable across the extremely wide range of ways
+        that INI files can be represented. Mainly this was just created to be reflective
+        with it's own results rather than building a new :mod:`configparser`.
+
+        So building a config instance that parses things like ``tox.ini`` might take a
+        bit of hacking to work.
     """
 
     # characters that require the string to be quoted

@@ -5,22 +5,8 @@ File Config Package
 
 The module that exposes mostly all of the package's functionality.
 
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 2
-
-   file_config.handlers
-   file_config.schema_builder
-   file_config.contrib
-
-
-File Config
------------
-
-Although these methods are privatized under the ``_file_config`` namespace they can be
-accessed from the imported ``file_config`` module...
+Although these methods are privatized under the :mod:`~._file_config` namespace they
+can be accessed from the imported :mod:`~file_config` module...
 
 .. code-block:: python
 
@@ -30,6 +16,16 @@ accessed from the imported ``file_config`` module...
    class Config(object):
       name = file_config.var(str)
 
+Submodules
+----------
+
+   - :mod:`~.handlers` — *Dumping / Loading handlers for different formats*
+   - :mod:`~.schema_builder` — *Config JSONSchema builder*
+   - :mod:`~.contrib` — *Additional utilities that benefit the package*
+
+|
+|
+|
 
 .. automodule:: file_config._file_config
    :members:

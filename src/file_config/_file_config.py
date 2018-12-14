@@ -100,6 +100,17 @@ def _handle_load(cls, handler, file_object, validate=False, **kwargs):
 def config(maybe_cls=None, these=None, title=None, description=None):
     """ File config class decorator.
 
+    Usage is to simply decorate a **class** to make it a
+    :func:`config <file_config._file_config.config>` class.
+
+    >>> import file_config
+    >>> @file_config.config(
+            title="My Config Title",
+            description="A description about my config"
+        )
+        class MyConfig(object):
+            pass
+
     :param class maybe_cls: The class to inherit from, defaults to None, optional
     :param dict these: A dictionary of str to ``file_config.var`` to use as attribs
     :param str title: The title of the config, defaults to None, optional
@@ -169,6 +180,14 @@ def var(
 ):
     """ Creates a config variable.
 
+    Use this method to create the class variables of your
+    :func:`config <file_config._file_config.config>` decorated class.
+
+    >>> import file_config
+    >>> @file_config.config
+        class MyConfig(object):
+            name = file_config.var(str)
+
     :param type type: The expected type of the variable, defaults to None, optional
     :param default: The default value of the var, defaults to None, optional
     :param str name: The serialized name of the variable, defaults to None, optional
@@ -220,6 +239,14 @@ def var(
 
 def make_config(name, var_dict, title=None, description=None, **kwargs):
     """ Creates a config instance from scratch.
+
+    Usage is virtually the same as :func:`attr.make_class`.
+
+    >>> import file_config
+    >>> MyConfig = file_config.make_config(
+            "MyConfig",
+            {"name": file_config.var(str)}
+        )
 
     :param str name: The name of the config
     :param dict var_dict: The dictionary of config variable definitions

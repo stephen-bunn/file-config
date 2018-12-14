@@ -10,6 +10,14 @@ from lxml import etree
 @attr.s
 class XMLParser(object):
     """ A custom XML parser which is reflective between xml and dictionaries.
+
+    .. warning:: This parser **requires** ``type`` to be set on every value element.
+        This is the only way the XML can be correctly parsed and understood by the
+        loading config.
+
+        So this parser is really effective at being reflective with itself. However, it
+        might require hacking to make it work with xml documents that are not built from
+        a config instance in the first place.
     """
 
     tree = attr.ib(type=etree.Element)
