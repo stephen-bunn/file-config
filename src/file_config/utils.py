@@ -151,7 +151,7 @@ def is_regex_type(type_):
 
 @lru_cache()
 def is_union_type(type_):
-    if is_typing_type(type_):
+    if is_typing_type(type_) and hasattr(type_, "__origin__"):
         # NOTE: union types can only be from typing module
         return type_.__origin__ in _get_types(Types.UNION)
     return False
