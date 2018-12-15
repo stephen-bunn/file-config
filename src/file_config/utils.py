@@ -204,7 +204,7 @@ def is_object_type(type_):
     object_types = _get_types(Types.OBJECT)
     if is_typing_type(type_):
         return type_ in object_types or (
-            hasattr(type_, "__origin") and type_.__origin__ in object_types
+            hasattr(type_, "__origin__") and type_.__origin__ in object_types
         )
     return type_ in object_types
 
