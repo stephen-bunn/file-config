@@ -56,16 +56,17 @@ def clean(ctx):
 
 
 @invoke.task(pre=[clean, docs.build_news, build])
-def publish(ctx, test=False):
+def publish(ctx, test=False, force=False):
     """ Publish the project.
 
     :param bool test: Publishes to PyPi test server (defaults to False)
+    :param bool force: Skip version check (defaults to False)
     """
 
     previous_version = get_previous_version(ctx)
     current_version = parver.Version.parse(metadata["version"])
 
-    if current_version <= previous_version:
+    if current_version <= previous_version and not force:
         error_message = (
             f"current version ({current_version!s}) is <= to previous version "
             f"({previous_version!s}), use 'package.version' to update current version"
