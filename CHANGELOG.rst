@@ -8,7 +8,7 @@ Changelog
 
 .. towncrier release notes start
 
-`0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.0>`_ (*2018-12-16*)
+`0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.0>`_ (*2018-12-16*)
 =========================================================================================
 
 Features
@@ -20,14 +20,14 @@ Features
 Documentation
 -------------
 
-- Splitting up Sphinx autodocs into separate sections 
-- Adding Handlers section to documentation 
+- Splitting up Sphinx autodocs into separate sections
+- Adding Handlers section to documentation
 
 Miscellaneous
 -------------
 
-- Adding ``TYPE_MAPPINGS`` to ``utils.py`` as a way of generically representing available types and their translations 
-- Project Restructure - restructuring project to provide a better development experience 
+- Adding ``TYPE_MAPPINGS`` to ``utils.py`` as a way of generically representing available types and their translations
+- Project Restructure - restructuring project to provide a better development experience
 - Updating from MIT to ISC licensing
 
 
