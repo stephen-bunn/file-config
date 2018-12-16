@@ -102,7 +102,7 @@ def publish(ctx, test=False):
                 ctx,
                 "success",
                 "publish",
-                "about to publish, [Enter] to config, [Ctrl-C] to abort: ",
+                "about to publish, [Enter] to continue, [Ctrl-C] to abort: ",
             )
         )
         report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!s}")
