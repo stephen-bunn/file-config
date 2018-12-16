@@ -8,6 +8,29 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.0>`_ (*2018-12-16*)
+=========================================================================================
+
+Features
+--------
+
+- Adding basic ini support through ``configparser`` `#10 <https://github.com/stephen-bunn/file-config/issues/10>`_
+- Adding basic xml support through ``lxml`` `#12 <https://github.com/stephen-bunn/file-config/issues/12>`_
+
+Documentation
+-------------
+
+- Splitting up Sphinx autodocs into separate sections 
+- Adding Handlers section to documentation 
+
+Miscellaneous
+-------------
+
+- Adding ``TYPE_MAPPINGS`` to ``utils.py`` as a way of generically representing available types and their translations 
+- Project Restructure - restructuring project to provide a better development experience 
+- Updating from MIT to ISC licensing
+
+
 `0.2.0 <https://github.com/stephen-bunn/file-config/releases/tag/v0.2.0>`_ (*2018-11-07*)
 =========================================================================================
 - adding serialization and deserialization support for enums
