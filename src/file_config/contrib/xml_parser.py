@@ -5,6 +5,7 @@ import collections
 
 import attr
 from lxml import etree
+from defusedxml.lxml import fromstring
 
 
 @attr.s
@@ -154,7 +155,7 @@ class XMLParser(object):
         """
 
         parser = etree.XMLParser(encoding=encoding)
-        return cls(etree.fromstring(content.encode(encoding), parser=parser))
+        return cls(fromstring(content.encode(encoding), parser=parser))
 
     def to_dict(self, dict_type=collections.OrderedDict):
         """ Get the dictionary representation of the current parser.
