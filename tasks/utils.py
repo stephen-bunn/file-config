@@ -100,7 +100,4 @@ def get_tag_content(ctx):
 
 
 def get_artifact_paths(ctx):
-    artifact_glob = f"{ctx.metadata['name'].replace('name', '[-_]')}-*"
-    return [
-        ctx.directory.joinpath(_) for _ in (ctx.directory / "dist").glob(artifact_glob)
-    ]
+    return [ctx.directory.joinpath(_) for _ in (ctx.directory / "dist").iterdir()]

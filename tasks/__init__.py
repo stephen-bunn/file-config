@@ -2,6 +2,7 @@
 # ISC License <https://opensource.org/licenses/isc>
 
 import pathlib
+import getpass
 import configparser
 
 import invoke
@@ -25,7 +26,7 @@ except KeyError:
 
 
 @invoke.task()
-def profile(ctx, filepath):
+def profile(ctx, filepath, calltree=False):
     """ Run and profile a given Python script.
 
     :param str filepath: The filepath of the script to profile
@@ -35,8 +36,18 @@ def profile(ctx, filepath):
     if not filepath.is_file():
         report.error(ctx, "profile", f"no such script {filepath!s}")
     else:
-        report.info(ctx, "profile", f"profiling script {filepath!s}")
-        ctx.run(f"vprof -c cmhp {filepath!s}")
+        if calltree:
+            report.info(ctx, "profile", f"profiling script {filepath!s} calltree")
+            ctx.run(
+                (
+                    f"python -m cProfile -o .profile.cprof {filepath!s}"
+                    " && pyprof2calltree -k -i .profile.cprof"
+                    " && rm -rf .profile.cprof"
+                )
+            )
+        else:
+            report.info(ctx, "profile", f"profiling script {filepath!s}")
+            ctx.run(f"vprof -c cmhp {filepath!s}")
 
 
 @invoke.task(post=[docs.build, package.build, package.check])
@@ -56,7 +67,7 @@ def clean(ctx):
 
 
 @invoke.task(pre=[clean, docs.build_news, build])
-def publish(ctx, test=False, force=False):
+def publish(ctx, test=False, force=False, draft=False):
     """ Publish the project.
 
     :param bool test: Publishes to PyPi test server (defaults to False)
@@ -75,11 +86,17 @@ def publish(ctx, test=False, force=False):
         raise ValueError(error_message)
 
     report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!r}")
+    report.warning(
+        ctx,
+        "publish",
+        f"drafting publish for project {ctx.metadata['name']!r} (has no effect)",
+    )
 
     commit_message = f"Release {current_version!s}"
     report.info(ctx, "publish", f"git commiting release {commit_message!r}")
     git_commit_command = f"git commit -asm {commit_message!r}"
-    ctx.run(git_commit_command)
+    if not draft:
+        ctx.run(git_commit_command)
 
     tag_content = get_tag_content(ctx).replace('"', '\\"')
     git_tag_command = (
@@ -89,9 +106,12 @@ def publish(ctx, test=False, force=False):
     report.info(
         ctx, "publish", f"git tagging commit as release for version {current_version!s}"
     )
-    ctx.run(git_tag_command)
+    if not draft:
+        ctx.run(git_tag_command)
 
     artifact_paths = [f"{_.as_posix()!r}" for _ in get_artifact_paths(ctx)]
+    for artifact_path in artifact_paths:
+        report.debug(ctx, "publish", f"publishing artifact {artifact_path}")
     publish_command = f"twine upload {' '.join(artifact_paths)}"
     if test:
         publish_command += " --repository 'https://test.pypi.org/legacy/'"
@@ -106,20 +126,50 @@ def publish(ctx, test=False, force=False):
                 "about to publish, [Enter] to continue, [Ctrl-C] to abort: ",
             )
         )
-        report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!s}")
-        ctx.run(publish_command)
+
+        while True:
+            username = input(
+                report._get_text(ctx, "success", "publish", "PyPi Username: ")
+            )
+            if len(username) <= 0:
+                continue
+            password = getpass.getpass(
+                report._get_text(
+                    ctx, "success", "publish", f"PyPi Password ({username!s}): "
+                )
+            )
+            if len(password) <= 0:
+                continue
+
+            # TODO: check if username and password are valid before tyring to post
+            report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!s}")
+            if not draft:
+                publish_command += f" -u {username!r} -p {password!r}"
+                publish_result = ctx.run(publish_command, warn=True)
+                if publish_result.exited:
+                    report.error(
+                        ctx,
+                        "publish",
+                        f"failed to publish {ctx.metadata['name']!s} (retrying)",
+                    )
+                    continue
+            break
+
         git_push_command = "git push --tags"
         report.info(ctx, "publish", f"pushing git tags")
-        ctx.run(git_push_command)
+        if not draft:
+            ctx.run(git_push_command)
     except KeyboardInterrupt:
         print()
         report.error(ctx, "publish", "aborting publish!")
         git_remove_tag_command = f"git tag -d {current_version!s}"
         report.warn(ctx, "publish", "removing git tags")
-        ctx.run(git_remove_tag_command)
+        if not draft:
+            ctx.run(git_remove_tag_command)
         git_reset_command = f"git reset --soft HEAD^"
         report.warn(ctx, "publish", "softly reseting commit")
-        ctx.run(git_reset_command)
+        if not draft:
+            ctx.run(git_reset_command)
 
 
 namespace = invoke.Collection(build, clean, publish, docs, package, profile)

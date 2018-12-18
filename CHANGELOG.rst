@@ -11,6 +11,51 @@ Changelog
 `0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
 ========================================================================================
 
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+Miscellaneous
+-------------
+
+- Fixing missing wheel in release
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+No significant changes.
+
+
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
 Features
 --------
 
