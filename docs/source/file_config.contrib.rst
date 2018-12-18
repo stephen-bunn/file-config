@@ -3,6 +3,11 @@
 Contrib
 -------
 
-.. automodule:: file_config.contrib
+.. automodule:: file_config.contrib.xml_parser
+   :members:
+   :undoc-members:
+
+
+.. automodule:: file_config.contrib.ini_parser
    :members:
    :undoc-members:
