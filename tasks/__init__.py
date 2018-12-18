@@ -1,15 +1,21 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-import pathlib
 import getpass
+import pathlib
 import configparser
 
 import invoke
 import parver
 
 from . import docs, package
-from .utils import report, get_tag_content, get_artifact_paths, get_previous_version
+from .utils import (
+    report,
+    get_tag_content,
+    get_artifact_paths,
+    get_previous_version,
+    get_username_password,
+)
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -72,6 +78,7 @@ def publish(ctx, test=False, force=False, draft=False):
 
     :param bool test: Publishes to PyPi test server (defaults to False)
     :param bool force: Skip version check (defaults to False)
+    :param bool draft: Sample publish (has no effect) (defaults to False)
     """
 
     previous_version = get_previous_version(ctx)
@@ -128,19 +135,9 @@ def publish(ctx, test=False, force=False, draft=False):
         )
 
         while True:
-            username = input(
-                report._get_text(ctx, "success", "publish", "PyPi Username: ")
+            (username, password) = get_username_password(
+                ctx, "PyPi Username: ", "PyPi Password: "
             )
-            if len(username) <= 0:
-                continue
-            password = getpass.getpass(
-                report._get_text(
-                    ctx, "success", "publish", f"PyPi Password ({username!s}): "
-                )
-            )
-            if len(password) <= 0:
-                continue
-
             # TODO: check if username and password are valid before tyring to post
             report.info(ctx, "publish", f"publishing project {ctx.metadata['name']!s}")
             if not draft:

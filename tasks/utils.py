@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
+import getpass
 import pathlib
 import subprocess
 
@@ -101,3 +102,18 @@ def get_tag_content(ctx):
 
 def get_artifact_paths(ctx):
     return [ctx.directory.joinpath(_) for _ in (ctx.directory / "dist").iterdir()]
+
+
+def get_username_password(
+    ctx, username_label: str = "Username: ", password_label: str = "Password: "
+):
+    while True:
+        username = input(report._get_text(ctx, "success", "publish", username_label))
+        if len(username) <= 0:
+            continue
+        password = getpass.getpass(
+            report._get_text(ctx, "success", "publish", password_label)
+        )
+        if len(password) <= 0:
+            continue
+        return (username, password)
