@@ -107,7 +107,7 @@ def publish(ctx, test=False, force=False, draft=False):
 
     tag_content = get_tag_content(ctx).replace('"', '\\"')
     git_tag_command = (
-        f'git tag -a "{current_version!s}" -m '
+        f'git tag -a "v{current_version!s}" -m '
         f'"Version {current_version!s}\n\n{tag_content}"'
     )
     report.info(

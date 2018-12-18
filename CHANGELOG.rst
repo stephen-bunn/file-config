@@ -8,8 +8,8 @@ Changelog
 
 .. towncrier release notes start
 
-`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
-========================================================================================
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.1>`_ (*2018-12-18*)
+=========================================================================================
 
 Features
 --------
@@ -22,7 +22,7 @@ Miscellaneous
 - Fixing lxml required for import
 
 
-`0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.0>`_ (*2018-12-16*)
+`0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.0>`_ (*2018-12-16*)
 =========================================================================================
 
 Features

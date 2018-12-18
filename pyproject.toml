@@ -6,7 +6,7 @@ requires = ["setuptools>=36.2.2", "wheel>=0.28.0"]
   package_dir = "src"
   filename = "CHANGELOG.rst"
   directory = "news/"
-  title_format = "`{version} <https://github.com/stephen-bunn/file-config/releases/tag/{version}>`_ (*{project_date}*)"
+  title_format = "`{version} <https://github.com/stephen-bunn/file-config/releases/tag/v{version}>`_ (*{project_date}*)"
   issue_format = '`#{issue} <https://github.com/stephen-bunn/file-config/issues/{issue}>`_'
   template = 'tasks/CHANGELOG.rst.jinja2'
 
