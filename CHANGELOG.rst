@@ -8,6 +8,20 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.1>`_ (*2018-12-18*)
+========================================================================================
+
+Features
+--------
+
+- Adding `defusedxml <https://pypi.org/project/defusedxml/>`_ as fromstring reader in XMLParser `#17 <https://github.com/stephen-bunn/file-config/issues/17>`_
+
+Miscellaneous
+-------------
+
+- Fixing lxml required for import
+
+
 `0.3.0 <https://github.com/stephen-bunn/file-config/releases/tag/0.3.0>`_ (*2018-12-16*)
 =========================================================================================
 
