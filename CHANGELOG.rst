@@ -8,6 +8,28 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.2 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.2>`_ (*2019-01-09*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Fixing schema builder where building schemas for object types with nested typing types silently fails `#18 <https://github.com/stephen-bunn/file-config/issues/18>`_
+
+Documentation
+-------------
+
+- Showing newly documented private methods in package documentation 
+- Adding basic docstrings for private schema_builder functions 
+- Adding basic docstrings for util functions 
+
+Miscellaneous
+-------------
+
+- Updating copyright statements from 2018 to 2019 
+- Fixing missing wheel in release
+
+
 `0.3.1 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.1>`_ (*2018-12-18*)
 =========================================================================================
 

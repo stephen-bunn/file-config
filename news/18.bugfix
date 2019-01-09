@@ -1,1 +1,0 @@
-Fixing schema builder where building schemas for object types with nested typing types silently fails
