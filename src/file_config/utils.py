@@ -220,7 +220,7 @@ def is_regex_type(type_):
 
     return (
         callable(type_)
-        and not is_typing_type(type)
+        and not is_typing_type(type_)
         and type_.__name__ == REGEX_TYPE_NAME
         and hasattr(type_, "__supertype__")
         and is_compiled_pattern(type_.__supertype__)
