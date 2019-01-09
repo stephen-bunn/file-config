@@ -39,6 +39,18 @@ def Regex(pattern):
 
 
 def _build_attribute_modifiers(var, attribute_mapping, ignore=None):
+    """ Handles adding schema modifiers for a given config var and some mapping.
+
+    :param attr._make.Attribute var: The config var to build modifiers for
+    :param Dict[str, str] attribute_mapping: A mapping of attribute to jsonschema
+        modifiers
+    :param List[str] ignore: A list of mapping keys to ignore, defaults to None
+    :raises ValueError: When the given ``var`` is not an config var
+    :raises ValueError: When jsonschema modifiers are given the wrong type
+    :return: A dictionary of the built modifiers
+    :rtype: Dict[str, Any]
+    """
+
     if not isinstance(ignore, list):
         ignore = ["type", "name", "required", "default"]
     if not is_config_var(var):
@@ -75,6 +87,15 @@ def _build_attribute_modifiers(var, attribute_mapping, ignore=None):
 
 
 def _build_null_type(var, property_path=None):
+    """ Builds schema definitions for null type values.
+
+    :param var: The null type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -82,6 +103,15 @@ def _build_null_type(var, property_path=None):
 
 
 def _build_enum_type(var, property_path=None):
+    """ Builds schema definitions for enum type values.
+
+    :param var: The enum type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -103,6 +133,16 @@ def _build_enum_type(var, property_path=None):
 
 
 def _build_bool_type(var, property_path=None):
+    """ Builds schema definitions for boolean type values.
+
+    :param var: The boolean type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -110,6 +150,16 @@ def _build_bool_type(var, property_path=None):
 
 
 def _build_string_type(var, property_path=None):
+    """ Builds schema definitions for string type values.
+
+    :param var: The string type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -121,16 +171,27 @@ def _build_string_type(var, property_path=None):
         schema["pattern"] = var.__supertype__.pattern
         return schema
 
-    schema.update(
-        _build_attribute_modifiers(var, {"min": "minLength", "max": "maxLength"})
-    )
+    if is_config_var(var):
+        schema.update(
+            _build_attribute_modifiers(var, {"min": "minLength", "max": "maxLength"})
+        )
+        if is_regex_type(var.type):
+            schema["pattern"] = var.type.__supertype__.pattern
 
-    if is_regex_type(var.type):
-        schema["pattern"] = var.type.__supertype__.pattern
     return schema
 
 
 def _build_integer_type(var, property_path=None):
+    """ Builds schema definitions for integer type values.
+
+    :param var: The integer type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -138,11 +199,25 @@ def _build_integer_type(var, property_path=None):
     if is_builtin_type(var):
         return schema
 
-    schema.update(_build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"}))
+    if is_config_var(var):
+        schema.update(
+            _build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"})
+        )
+
     return schema
 
 
 def _build_number_type(var, property_path=None):
+    """ Builds schema definitions for number type values.
+
+    :param var: The number type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -150,11 +225,25 @@ def _build_number_type(var, property_path=None):
     if is_builtin_type(var):
         return schema
 
-    schema.update(_build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"}))
+    if is_config_var(var):
+        schema.update(
+            _build_attribute_modifiers(var, {"min": "minimum", "max": "maximum"})
+        )
+
     return schema
 
 
 def _build_array_type(var, property_path=None):
+    """ Builds schema definitions for array type values.
+
+    :param var: The array type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -162,28 +251,45 @@ def _build_array_type(var, property_path=None):
     if is_builtin_type(var):
         return schema
 
-    schema.update(
-        _build_attribute_modifiers(
-            var,
-            {
-                "min": "minItems",
-                "max": "maxItems",
-                "unique": "uniqueItems",
-                "contains": "contains",
-            },
+    if is_config_var(var):
+        schema.update(
+            _build_attribute_modifiers(
+                var,
+                {
+                    "min": "minItems",
+                    "max": "maxItems",
+                    "unique": "uniqueItems",
+                    "contains": "contains",
+                },
+            )
         )
-    )
 
-    if is_typing_type(var.type) and len(var.type.__args__) > 0:
-        # NOTE: typing.List only allows one typing argument
-        nested_type = var.type.__args__[0]
+        if is_typing_type(var.type) and len(var.type.__args__) > 0:
+            # NOTE: typing.List only allows one typing argument
+            nested_type = var.type.__args__[0]
+            schema["items"].update(
+                _build(nested_type, property_path=property_path + ["items"])
+            )
+    elif is_typing_type(var):
+        nested_type = var.__args__[0]
         schema["items"].update(
             _build(nested_type, property_path=property_path + ["items"])
         )
+
     return schema
 
 
 def _build_object_type(var, property_path=None):
+    """ Builds schema definitions for object type values.
+
+    :param var: The object type value
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :param property_path: [type], optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -219,6 +325,16 @@ def _build_object_type(var, property_path=None):
 
 
 def _build_type(type_, value, property_path=None):
+    """ Builds the schema definition based on the given type for the given value.
+
+    :param type_: The type of the value
+    :param value: The value to build the schema definition for
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -242,6 +358,16 @@ def _build_type(type_, value, property_path=None):
 
 
 def _build_var(var, property_path=None):
+    """ Builds a schema definition for a given config var.
+
+    :param attr._make.Attribute var: The var to generate a schema definition for
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :raises ValueError: When the given ``var`` is not a file_config var
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -267,6 +393,7 @@ def _build_var(var, property_path=None):
     if is_union_type(var.type):
         type_union = {"anyOf": []}
         for allowed_type in var.type.__args__:
+            # NOTE: requires jsonschema draft-07
             type_union["anyOf"].append(
                 _build_type(
                     allowed_type, allowed_type, property_path=property_path + [var_name]
@@ -281,6 +408,16 @@ def _build_var(var, property_path=None):
 
 
 def _build_config(config_cls, property_path=None):
+    """ Builds the schema definition for a given config class.
+
+    :param class config_cls: The config class to build a schema definition for
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :raises ValueError: When the given ``config_cls`` is not a config decorated class
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -302,6 +439,7 @@ def _build_config(config_cls, property_path=None):
     # if the length of the property path is 0, assume that current object is root
     if len(property_path) <= 0:
         schema["$id"] = f"{config_cls.__qualname__}.json"
+        # NOTE: requires draft-07 for typing.Union type schema generation
         schema["$schema"] = "http://json-schema.org/draft-07/schema#"
     else:
         schema["$id"] = f"#/{'/'.join(property_path)}"
@@ -329,6 +467,15 @@ def _build_config(config_cls, property_path=None):
 
 
 def _build(value, property_path=None):
+    """ The generic schema definition build method.
+
+    :param value: The value to build a schema definition for
+    :param List[str] property_path: The property path of the current type,
+        defaults to None, optional
+    :return: The built schema definition
+    :rtype: Dict[str, Any]
+    """
+
     if not property_path:
         property_path = []
 
@@ -341,6 +488,8 @@ def _build(value, property_path=None):
     elif is_regex_type(value):
         # NOTE: building regular expression types assumes type is string
         return _build_type(str, value, property_path=property_path)
+    elif is_typing_type(value):
+        return _build_type(value, value, property_path=property_path)
     return _build_type(type(value), value, property_path=property_path)
 
 
