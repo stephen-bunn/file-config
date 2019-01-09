@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Stephen Bunn <stephen@bunn.io>
+# Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
 import re
@@ -82,16 +82,37 @@ def _get_types(type_):
 
 
 def encode_bytes(bytes_):
+    """ Encodes some given bytes into base64 using utf-8.
+
+    :param bytes bytes_: The bytes to encode
+    :return: The bytes encoded base64 string
+    :rtype: str
+    """
+
     return base64.encodebytes(bytes_).decode("utf-8")
 
 
 def decode_bytes(string):
+    """ Decodes a given base64 string into bytes.
+
+    :param str string: The string to decode
+    :return: The decoded bytes
+    :rtype: bytes
+    """
+
     if is_string_type(type(string)):
         string = bytes(string, "utf-8")
     return base64.decodebytes(string)
 
 
 def is_config_var(var):
+    """ Checks if the given value is a valid ``file_config.var``.
+
+    :param var: The value to check
+    :return: True if the given value is a var, otherwise False
+    :rtype: bool
+    """
+
     return (
         isinstance(var, (attr._make.Attribute, attr._make._CountingAttr))
         and hasattr(var, "metadata")
@@ -100,6 +121,13 @@ def is_config_var(var):
 
 
 def is_config_type(type_):
+    """ Checks if the given type is ``file_config.config`` decorated.
+
+    :param type_: The type to check
+    :return: True if the type is config decorated, otherwise False
+    :rtype: bool
+    """
+
     return (
         isinstance(type_, type)
         and hasattr(type_, "__attrs_attrs__")
@@ -108,32 +136,74 @@ def is_config_type(type_):
 
 
 def is_config(config_instance):
+    """ Checks if the given value is a ``file_config.config`` instance.
+
+    :param config_instance: The instance to check
+    :return: True if the given instance is a config, otherwise False
+    :rtype: bool
+    """
+
     return isinstance(config_instance, object) and is_config_type(type(config_instance))
 
 
 @lru_cache()
 def is_compiled_pattern(compiled_pattern):
+    """ Checks if the given value is a compiled regex pattern.
+
+    :param compiled_pattern: The value to check
+    :return: True if the given value is a compiled regex pattern, otherwise False
+    :rtype: bool
+    """
+
     return isinstance(compiled_pattern, COMPILED_PATTERN_TYPE)
 
 
 @lru_cache()
 def is_builtin_type(type_):
+    """ Checks if the given type is a bulitin type.
+
+    :param type_: The type to check
+    :return: True if the type is a bulitin, otherwise False
+    :rtype: bool
+    """
+
     # NOTE: supported builtin types
     return isinstance(type_, type) and getattr(type_, "__module__", None) == "builtins"
 
 
 @lru_cache()
 def is_enum_type(type_):
+    """ Checks if the given type is an enum type.
+
+    :param type_: The type to check
+    :return: True if the type is a enum type, otherwise False
+    :rtype: bool
+    """
+
     return isinstance(type_, type) and issubclass(type_, tuple(_get_types(Types.ENUM)))
 
 
 @lru_cache()
 def is_typing_type(type_):
+    """ Checks if the given type is a ``typing`` module type.
+
+    :param type_: The type to check
+    :return: True if the type is part of the ``typing`` module, otherwise False
+    :rtype: bool
+    """
+
     return getattr(type_, "__module__", None) == "typing"
 
 
 @lru_cache()
 def is_collections_type(type_):
+    """ Checks if the given type is a ``collections`` module type
+
+    :param type_: The type to check
+    :return: True if the type is part of the ``collections`` module, otherwise False
+    :rtype: bool
+    """
+
     return (
         isinstance(type_, type) and getattr(type_, "__module__", None) == "collections"
     )
@@ -141,6 +211,13 @@ def is_collections_type(type_):
 
 @lru_cache()
 def is_regex_type(type_):
+    """ Checks if the given type is a regex type.
+
+    :param type_: The type to check
+    :return: True if the type is a regex type, otherwise False
+    :rtype: bool
+    """
+
     return (
         callable(type_)
         and type_.__name__ == REGEX_TYPE_NAME
@@ -151,6 +228,13 @@ def is_regex_type(type_):
 
 @lru_cache()
 def is_union_type(type_):
+    """ Checks if the given type is a union type.
+
+    :param type_: The type to check
+    :return: True if the type is a union type, otherwise False
+    :rtype: bool
+    """
+
     if is_typing_type(type_) and hasattr(type_, "__origin__"):
         # NOTE: union types can only be from typing module
         return type_.__origin__ in _get_types(Types.UNION)
@@ -159,21 +243,49 @@ def is_union_type(type_):
 
 @lru_cache()
 def is_null_type(type_):
+    """ Checks if the given type is a null type.
+
+    :param type_: The type to check
+    :return: True if the type is a null type, otherwise False
+    :rtype: bool
+    """
+
     return type_ in _get_types(Types.NULL)
 
 
 @lru_cache()
 def is_bool_type(type_):
+    """ Checks if the given type is a bool type.
+
+    :param type_: The type to check
+    :return: True if the type is a bool type, otherwise False
+    :rtype: bool
+    """
+
     return type_ in _get_types(Types.BOOL)
 
 
 @lru_cache()
 def is_bytes_type(type_):
+    """ Checks if the given type is a bytes type.
+
+    :param type_: The type to check
+    :return: True if the type is a bytes type, otherwise False
+    :rtype: bool
+    """
+
     return type_ in _get_types(Types.BYTES)
 
 
 @lru_cache()
 def is_string_type(type_):
+    """ Checks if the given type is a string type.
+
+    :param type_: The type to check
+    :return: True if the type is a string type, otherwise False
+    :rtype: bool
+    """
+
     string_types = _get_types(Types.STRING)
     if is_typing_type(type_):
         return type_ in string_types or is_regex_type(type_)
@@ -182,16 +294,37 @@ def is_string_type(type_):
 
 @lru_cache()
 def is_integer_type(type_):
+    """ Checks if the given type is a integer type.
+
+    :param type_: The type to check
+    :return: True if the type is a integer type, otherwise False
+    :rtype: bool
+    """
+
     return type_ in _get_types(Types.INTEGER)
 
 
 @lru_cache()
 def is_number_type(type_):
+    """ Checks if the given type is a number type.
+
+    :param type_: The type to check
+    :return: True if the type is a number type, otherwise False
+    :rtype: bool
+    """
+
     return type_ in _get_types(Types.NUMBER)
 
 
 @lru_cache()
 def is_array_type(type_):
+    """ Checks if the given type is a array type.
+
+    :param type_: The type to check
+    :return: True if the type is a array type, otherwise False
+    :rtype: bool
+    """
+
     array_types = _get_types(Types.ARRAY)
     if is_typing_type(type_):
         return type_ in array_types or (
@@ -201,6 +334,13 @@ def is_array_type(type_):
 
 
 def is_object_type(type_):
+    """ Checks if the given type is a object type.
+
+    :param type_: The type to check
+    :return: True if the type is a object type, otherwise False
+    :rtype: bool
+    """
+
     object_types = _get_types(Types.OBJECT)
     if is_typing_type(type_):
         return type_ in object_types or (
@@ -210,6 +350,13 @@ def is_object_type(type_):
 
 
 def typecast(type_, value):
+    """ Tries to smartly typecast the given value with the given type.
+
+    :param type_: The type to try to use for the given value
+    :param value: The value to try and typecast to the given type
+    :return: The typecasted value if possible, otherwise just the original value
+    """
+
     # NOTE: does not do any special validation of types before casting
     # will just raise errors on type casting failures
     if is_builtin_type(type_) or is_collections_type(type_) or is_enum_type(type_):
