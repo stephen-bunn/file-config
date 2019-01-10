@@ -72,7 +72,7 @@ def clean(ctx):
     report.success(ctx, "clean", f"cleaning project {ctx.metadata['name']!r}")
 
 
-@invoke.task(pre=[clean, docs.build_news, build])
+@invoke.task(pre=[clean, docs.build_news, build])  # noqa
 def publish(ctx, test=False, force=False, draft=False):
     """ Publish the project.
 
