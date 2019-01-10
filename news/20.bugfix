@@ -1,0 +1,1 @@
+Fixing ``dump_x`` handlers not using kwargs like ``dumps_x`` handlers

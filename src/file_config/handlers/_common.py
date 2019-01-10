@@ -106,6 +106,7 @@ class BaseHandler(abc.ABC):
 
         :param class config: The config class of the instance
         :param object instance: The instance to dump
+        :param str prefer: The preferred serialization module name
         :raises ValueError: If dump handler does not provide handler method
         :return: The dumped content
         :rtype: str
@@ -137,6 +138,7 @@ class BaseHandler(abc.ABC):
 
         :param class config: The config class to load into
         :param str content: The content to load from
+        :param str prefer: The preferred serialization module name
         :raises ValueError: If load handler does not provided handler method
         :return: A dictionary converted from the given content
         :rtype: dict
@@ -154,19 +156,23 @@ class BaseHandler(abc.ABC):
             )
         return loads_hook(self.handler, config, content)
 
-    def dump(self, config, instance, file_object, prefer=None):
+    def dump(self, config, instance, file_object, prefer=None, **kwargs):
         """ An abstract method that dumps to a given file object.
 
+        :param class config: The config class of the instance
         :param object instance: The instance to dump
         :param file file_object: The file object to dump to
+        :param str prefer: The preferred serialization module name
         """
 
-        file_object.write(self.dumps(config, instance, prefer=prefer))
+        file_object.write(self.dumps(config, instance, prefer=prefer, **kwargs))
 
     def load(self, config, file_object, prefer=None):
         """ An abstract method that loads from a given file object.
 
+        :param class config: The config class to load into
         :param file file_object: The file object to load from
+        :param str prefer: The preferred serialization module name
         :returns: A dictionary converted from the content of the given file object
         :rtype: dict
         """
