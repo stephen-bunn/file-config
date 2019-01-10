@@ -1,1 +1,0 @@
-Fixing regex check bug where ``type_.__name__`` raises an ``AttributeError`` on ``typing.List`` edge case

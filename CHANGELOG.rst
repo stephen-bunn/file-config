@@ -8,6 +8,16 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.3 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.3>`_ (*2019-01-10*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Fixing regex check bug where ``type_.__name__`` raises an ``AttributeError`` on ``typing.List`` edge case `#19 <https://github.com/stephen-bunn/file-config/issues/19>`_
+- Fixing ``dump_x`` handlers not using kwargs like ``dumps_x`` handlers `#20 <https://github.com/stephen-bunn/file-config/issues/20>`_
+
+
 `0.3.2 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.2>`_ (*2019-01-09*)
 =========================================================================================
 
