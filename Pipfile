@@ -4,9 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-file-config = {editable = true, extras = ["dev", "docs", "test"], path = "."}
+file-config = {editable = true, extras = ["docs", "test"], path = "."}
 
 [dev-packages]
+twine = "*"
+invoke = "*"
+parver = "*"
+black = "*"
+flake8 = "*"
+towncrier = "*"
+colorama = "*"
+vprof = "*"
+readme_renderer = {version = "*", extras = ["md"]}
+pip-licenses = "*"
 
 [requires]
 python_version = "3.6"
