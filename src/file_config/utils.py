@@ -367,7 +367,11 @@ def typecast(type_, value):
     elif is_regex_type(type_):
         return typecast(str, value)
     elif is_typing_type(type_):
-        base_type = type_.__extra__
+        try:
+            base_type = type_.__extra__
+        except AttributeError:
+            # NOTE: when handling typing._GenericAlias __extra__ is actually __origin__
+            base_type = type_.__origin__
         arg_types = type_.__args__
 
         if is_array_type(type_):
