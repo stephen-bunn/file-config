@@ -8,6 +8,15 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.4 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.4>`_ (*2019-01-11*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Fixing typing._GenericAlias typecasting raising AttributeError `#21 <https://github.com/stephen-bunn/file-config/issues/21>`_
+
+
 `0.3.3 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.3>`_ (*2019-01-10*)
 =========================================================================================
 
