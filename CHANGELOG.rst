@@ -14,7 +14,7 @@ Changelog
 Bug Fixes
 ---------
 
-- Fixing typing._GenericAlias typecasting raising AttributeError `#21 <https://github.com/stephen-bunn/file-config/issues/21>`_
+- Fixing ``typing._GenericAlias`` typecasting raising ``AttributeError`` `#21 <https://github.com/stephen-bunn/file-config/issues/21>`_
 
 
 `0.3.3 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.3>`_ (*2019-01-10*)
@@ -38,14 +38,14 @@ Bug Fixes
 Documentation
 -------------
 
-- Showing newly documented private methods in package documentation 
-- Adding basic docstrings for private schema_builder functions 
-- Adding basic docstrings for util functions 
+- Showing newly documented private methods in package documentation
+- Adding basic docstrings for private schema_builder functions
+- Adding basic docstrings for util functions
 
 Miscellaneous
 -------------
 
-- Updating copyright statements from 2018 to 2019 
+- Updating copyright statements from 2018 to 2019
 - Fixing missing wheel in release
 
 
@@ -55,7 +55,7 @@ Miscellaneous
 Features
 --------
 
-- Adding `defusedxml <https://pypi.org/project/defusedxml/>`_ as fromstring reader in XMLParser `#17 <https://github.com/stephen-bunn/file-config/issues/17>`_
+- Adding `defusedxml <https://pypi.org/project/defusedxml/>`_ as fromstring reader in ``XMLParser`` `#17 <https://github.com/stephen-bunn/file-config/issues/17>`_
 
 Miscellaneous
 -------------
