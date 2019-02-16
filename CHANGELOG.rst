@@ -8,6 +8,15 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.5 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.5>`_ (*2019-02-15*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Allowing default values to be used in configs when loading from dictionaries that are missing the value `#22 <https://github.com/stephen-bunn/file-config/issues/22>`_
+
+
 `0.3.4 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.4>`_ (*2019-01-11*)
 =========================================================================================
 
