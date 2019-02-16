@@ -17,8 +17,8 @@ Style Guide
    - E123
    - W503
    - E203
-- Maximum line length is 88 characters.
-- Maxiumum McCabe complexity is 12.
+- Maximum line length for Python files is 88 characters.
+- Maxiumum McCabe complexity is 13.
 - Linting and test environments are configured via ``tox.ini``.
 - Imports are sorted using `isort <https://pypi.python.org/pypi/isort>`_ with multi-line output mode ``3``.
 - An ``.editorconfig`` file is included in this repository which dictates whitespace, indentation, and file encoding rules.
