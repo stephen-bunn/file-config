@@ -8,6 +8,21 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.6 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.6>`_ (*2019-03-15*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Fixing failures when loading from serialized content missing configuration for nested configs `#24 <https://github.com/stephen-bunn/file-config/issues/24>`_
+
+Miscellaneous
+-------------
+
+- Adding latest PyPi version badge to documentation and README 
+- Adding basic auto-generated typing stubs under ``stubs/``
+
+
 `0.3.5 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.5>`_ (*2019-02-15*)
 =========================================================================================
 
