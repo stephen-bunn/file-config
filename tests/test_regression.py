@@ -38,3 +38,25 @@ def test_config_read_from_file_keeps_defaults():
     assert internal_cfg.foo == "goofy" and internal_cfg.bar == "Default"
     assert json_cfg.foo == "goofy" and json_cfg.bar == "Default"
     assert yaml_cfg.foo == "goofy" and yaml_cfg.bar == "Default"
+
+
+def test_complex_config_deserialization_allows_nulls():
+    from textwrap import dedent
+
+    @file_config.config
+    class TestConfig:
+
+        @file_config.config
+        class InnerConfig:
+            foo = file_config.var(str, default="Default", required=False)
+
+        inner = file_config.var(InnerConfig, required=False)
+        bar = file_config.var(str, default="Default", required=False)
+
+    yaml = dedent("""\
+      bar: goofy
+    """)
+
+    yaml_cfg = TestConfig.loads_yaml(yaml)
+
+    assert yaml_cfg.bar == "goofy" and yaml_cfg.inner is None
