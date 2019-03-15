@@ -1,6 +1,10 @@
 File Config
 ===========
 
+.. image:: https://badge.fury.io/py/file-config.svg
+   :target: https://pypi.org/project/file-config/
+   :alt: PyPI version
+
 .. image:: https://img.shields.io/pypi/pyversions/file-config.svg
    :target: https://pypi.org/project/file-config/
    :alt: Supported Versions
