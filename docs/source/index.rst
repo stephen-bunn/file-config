@@ -2,7 +2,7 @@
 
    <h1 align="center" style="font-size: 64px;">File Config</h1>
    <p align="center" style="margin: 0px;">
-      <a href="https://badge.fury.io/py/file-config" target="_blank"><img src="https://badge.fury.io/py/file-config.svg" alt="PyPI version" height="18"></a>
+      <a href="https://badge.fury.io/py/file-config" target="_blank"><img src="https://badge.fury.io/py/file-config.svg" alt="PyPI version"></a>
       <a href="https://pypi.org/project/file-config/" target="_blank"><img alt="Supported Versions" src="https://img.shields.io/pypi/pyversions/file-config.svg"></a>
       <a class="badge-align" href="https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a"/></a>
       <a href="https://travis-ci.com/stephen-bunn/file-config" target="_blank"><img alt="Travis CI" src="https://travis-ci.com/stephen-bunn/file-config.svg?branch=master"></a>
