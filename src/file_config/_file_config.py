@@ -322,7 +322,10 @@ def _build(config_cls, dictionary, validate=False):
             else:
                 kwargs[var.name] = typecast(entry.type, item)
         elif is_config_type(entry.type):
-            kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
+            if arg_key not in dictionary:
+                kwargs[var.name] = arg_default
+            else:
+                kwargs[var.name] = _build(entry.type, dictionary.get(arg_key, arg_default))
         else:
             if arg_key not in dictionary:
                 kwargs[var.name] = arg_default
