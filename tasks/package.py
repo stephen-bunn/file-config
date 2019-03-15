@@ -147,7 +147,12 @@ def stub(ctx):
     """
 
     report.info(ctx, "package.stub", f"generating typing stubs for package")
-    ctx.run("pytype")
+    ctx.run(
+        f"stubgen --include-private --no-import "
+        f"--output {ctx.directory.joinpath('stubs')!s} "
+        f"--search-path {ctx.directory.joinpath('src')!s} "
+        f"--package {ctx.metadata['package_name']}"
+    )
 
 
 @invoke.task(pre=[stub])
