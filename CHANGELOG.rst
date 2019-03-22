@@ -8,6 +8,25 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.7 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.7>`_ (*2019-03-22*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Adding the ability for nested configs to default to the empty state of the nested config if desired `#26 <https://github.com/stephen-bunn/file-config/issues/26>`_
+
+Documentation
+-------------
+
+- Adding documentation ``Loading Defaults`` in "Getting Started" regarding the different results when loading defaults from serialized content 
+
+Miscellaneous
+-------------
+
+- Updating the copyright year in the docs to 2019
+
+
 `0.3.6 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.6>`_ (*2019-03-15*)
 =========================================================================================
 

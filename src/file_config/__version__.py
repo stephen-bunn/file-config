@@ -3,7 +3,7 @@
 
 __name__ = "file-config"
 __repo__ = "https://github.com/stephen-bunn/file-config"
-__version__ = "0.3.6"
+__version__ = "0.3.7"
 __description__ = "An attr's based configuration file abstraction"
 __author__ = "Stephen Bunn"
 __contact__ = "stephen@bunn.io"
