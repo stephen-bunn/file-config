@@ -760,3 +760,52 @@ keywords = ["example", "test"]
 [dependencies]
 a-dependency = {name = "A Dependency",version = "v12"}
 
+
+Loading Defaults
+----------------
+
+When loading a config instance from some serialized content, you should be aware of what kind of data you want the built config instance to contain.
+There are currently three different ways the :func:`var <file_config._file_config.var>` ``default`` kwarg is treated when loading serialized content.
+
+For example, take the following config...
+
+.. code-block:: python
+
+   import file_config
+
+   @file_config.config
+   class ParentConfig(object):
+
+      @file_config.config
+      class ChildConfig(object):
+
+         bar = var(str, default="Default", required=False)
+
+      foo = var(str, default=False, required=False)
+      bar = var(int)
+      child = var(ChildConfig, default=ChildConfig, required=False)
+
+
+If ``default`` is ``None`` (which it is by default) the config instance attribute is set to ``None``.
+*Notice what happens when we load from content missing the "bar" attribute.*
+
+>>> config_1 = ParentConfig.loads_json(
+...     '{"foo": "Testing", "child": {"bar": "Testing"}}'
+... )
+ParentConfig(foo='Testing', bar=None, child=ParentConfig.ChildConfig(bar='Testing'))
+
+
+If the ``var`` type is another config class and ``default`` is the **exact** same config class, the empty state of the given config class is built as the default.
+*Notice what happens when we load from content missing the "child" attribute.*
+
+>>> config_2 = ParentConfig.loads_json('{"foo": "Testing", "bar": 1}')
+ParentConfig(foo='Testing', bar=1, child=ParentConfig.ChildConfig(bar='Default'))
+
+
+If ``default`` is any other value, the config instance attribute is set to that given value.
+*Notice what happens when we load from content missing the "foo" attribute.*
+
+>>> config_3 = ParentConfig.loads_json(
+...     '{"bar": 1, "child": {"bar": "Testing"}}'
+... )
+ParentConfig(foo=False, bar=1, child=ParentConfig.ChildConfig(bar='Testing'))

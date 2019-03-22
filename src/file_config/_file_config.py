@@ -1,6 +1,7 @@
 # Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
+from typing import Any
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -30,7 +31,7 @@ class _ConfigEntry(object):
     """
 
     type = attr.ib(default=None)
-    default = attr.ib(type=str, default=None)
+    default = attr.ib(type=Any, default=None)
     name = attr.ib(type=str, default=None)
     title = attr.ib(type=str, default=None)
     description = attr.ib(type=str, default=None)
@@ -264,7 +265,7 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
     )
 
 
-def _build(config_cls, dictionary, validate=False):
+def _build(config_cls, dictionary, validate=False):  # noqa
     """ Builds an instance of ``config_cls`` using ``dictionary``.
 
     :param type config_cls: The class to use for building
@@ -293,7 +294,7 @@ def _build(config_cls, dictionary, validate=False):
 
         entry = var.metadata[CONFIG_KEY]
         arg_key = entry.name if entry.name else var.name
-        arg_default = var.default if var.default else None
+        arg_default = var.default if var.default is not None else None
 
         if callable(entry.decoder):
             kwargs[var.name] = entry.decoder(dictionary.get(arg_key, arg_default))
@@ -323,7 +324,12 @@ def _build(config_cls, dictionary, validate=False):
                 kwargs[var.name] = typecast(entry.type, item)
         elif is_config_type(entry.type):
             if arg_key not in dictionary:
-                kwargs[var.name] = arg_default
+                # if the default value for a nested config is the nested config class
+                # then build the empty state of the nested config
+                if is_config_type(arg_default) and entry.type == arg_default:
+                    kwargs[var.name] = _build(entry.type, {})
+                else:
+                    kwargs[var.name] = arg_default
             else:
                 kwargs[var.name] = _build(
                     entry.type, dictionary.get(arg_key, arg_default)

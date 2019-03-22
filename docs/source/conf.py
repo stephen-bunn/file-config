@@ -36,7 +36,7 @@ sys.path.insert(0, BASE_DIR.joinpath("src").as_posix())
 # -- Project information -----------------------------------------------------
 
 project = title
-copyright = f"2018, {metadata['author']}"
+copyright = f"2019, {metadata['author']}"
 author = metadata["author"]
 
 # The short X.Y version
