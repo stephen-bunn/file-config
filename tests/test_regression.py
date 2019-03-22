@@ -23,13 +23,17 @@ def test_config_read_from_file_keeps_defaults():
         foo = file_config.var(str, default="Default", required=False)
         bar = file_config.var(str, default="Default", required=False)
 
-    yaml = dedent("""\
+    yaml = dedent(
+        """\
       foo: goofy
-    """)
+    """
+    )
 
-    json = dedent("""\
+    json = dedent(
+        """\
       {"foo": "goofy"}
-    """)
+    """
+    )
 
     internal_cfg = TestConfig(foo="goofy")
     yaml_cfg = TestConfig.loads_yaml(yaml)
@@ -45,7 +49,6 @@ def test_complex_config_deserialization_allows_nulls():
 
     @file_config.config
     class TestConfig:
-
         @file_config.config
         class InnerConfig:
             foo = file_config.var(str, default="Default", required=False)
@@ -53,10 +56,40 @@ def test_complex_config_deserialization_allows_nulls():
         inner = file_config.var(InnerConfig, required=False)
         bar = file_config.var(str, default="Default", required=False)
 
-    yaml = dedent("""\
+    yaml = dedent(
+        """\
       bar: goofy
-    """)
+    """
+    )
 
     yaml_cfg = TestConfig.loads_yaml(yaml)
 
-    assert yaml_cfg.bar == "goofy" and yaml_cfg.inner is None
+    assert yaml_cfg.bar == "goofy"
+    assert yaml_cfg.inner is None
+
+
+def test_complex_config_deserialization_handles_inner_configs():
+    from textwrap import dedent
+
+    @file_config.config
+    class TestConfig:
+        @file_config.config
+        class InnerConfig:
+            foo = file_config.var(str, default="Default", required=False)
+
+        inner = file_config.var(InnerConfig, required=False, default=InnerConfig)
+        bar = file_config.var(str, default="Default", required=False)
+
+    yaml = dedent(
+        """\
+        bar: goofy
+    """
+    )
+    yaml_cfg = TestConfig.loads_yaml(yaml)
+
+    assert yaml_cfg.bar == "goofy"
+    assert yaml_cfg.inner is not None and isinstance(
+        yaml_cfg.inner, TestConfig.InnerConfig
+    )
+    assert yaml_cfg.inner.foo == "Default"
+

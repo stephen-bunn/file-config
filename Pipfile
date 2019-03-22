@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-file-config = {editable = true, extras = ["docs", "test"], path = "."}
+file-config = {editable = true,extras = ["docs", "test"],path = "."}
 
 [dev-packages]
 twine = "*"
@@ -15,8 +15,9 @@ flake8 = "*"
 towncrier = "*"
 colorama = "*"
 vprof = "*"
-readme_renderer = {version = "*", extras = ["md"]}
+readme_renderer = {version = "*",extras = ["md"]}
 pip-licenses = "*"
+ptpython = "*"
 
 [requires]
 python_version = "3.6"
