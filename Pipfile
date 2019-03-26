@@ -19,8 +19,5 @@ readme_renderer = {version = "*",extras = ["md"]}
 pip-licenses = "*"
 ptpython = "*"
 
-[requires]
-python_version = "3.6"
-
 [pipenv]
 allow_prereleases = true
