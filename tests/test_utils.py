@@ -176,6 +176,7 @@ def test_typecast_builtins(value):
     assert file_config.utils.typecast(type(value), str(value)) == value
 
 
+@settings(deadline=None)
 @given(characters())
 def test_typecast_regex(string):
     regex = file_config.Regex(re.escape(string))
