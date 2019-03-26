@@ -104,7 +104,8 @@ venv.bak/
 
 # End of https://www.gitignore.io/api/python
 
-# custom
+# Custom Rules
 Pipfile.lock
 .vscode/
 main.py
+test-results.xml

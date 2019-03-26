@@ -4,7 +4,7 @@
 import attr
 import pytest
 import jsonschema
-from hypothesis import given
+from hypothesis import given, settings, HealthCheck
 from hypothesis.strategies import characters
 
 import file_config
@@ -61,7 +61,6 @@ def test_make_config(class_name, config_var_dict, title, description):
 
 
 def test_validate():
-
     @file_config.config
     class ConfigInstance:
         a = file_config.var(type=str, default="a")
@@ -75,6 +74,7 @@ def test_validate():
         file_config.validate(config_instance)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(config())
 def test_from_dict(config):
     config_dict = file_config.to_dict(config())

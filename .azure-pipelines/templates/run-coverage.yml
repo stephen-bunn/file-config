@@ -1,0 +1,13 @@
+steps:
+  - script: "coverage xml -o coverage.xml"
+    displayName: "Build Coverage Report"
+
+  - script: "python-codacy-coverage -r coverage.xml"
+    env:
+      CODACY_PROJECT_TOKEN: $(CODACY_PROJECT_TOKEN)
+    displayName: "Send Coverage Report"
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      summaryFileLocation: "coverage.xml"
+    displayName: "Publish Coverage Report"
