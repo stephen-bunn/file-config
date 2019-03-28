@@ -94,6 +94,7 @@ def test_string_var(config_name):
         assert schema["properties"]["test"]["type"] == "string"
 
 
+@settings(deadline=None)
 @given(class_name())
 def test_integer_var(config_name):
     for type_ in (int,):
