@@ -27,6 +27,7 @@ class INIParser(configparser.ConfigParser):
     # characters that require the string to be quoted
     requires_quotes = (" ", "\t", "=")
     quoted_string_regex = re.compile(r"^(\'.*\')|(\".*\")$")
+    is_digit_regex = re.compile(r"\d+")
 
     @classmethod
     def _encode_var(cls, var):
@@ -56,7 +57,8 @@ class INIParser(configparser.ConfigParser):
         str_match = cls.quoted_string_regex.match(string)
         if str_match:
             return string.strip("'" if str_match.groups()[0] else '"')
-        elif string.isdigit():
+        # NOTE: "¹".isdigit() results in True because they are idiots
+        elif string.isdigit() and cls.is_digit_regex.match(string) is not None:
             return int(string)
         elif string.lower() in ("true", "false"):
             return string.lower() == "true"
@@ -64,7 +66,7 @@ class INIParser(configparser.ConfigParser):
             try:
                 return int(string)
             except ValueError:
-                # case where we mistake something like "--0" a a int
+                # case where we mistake something like "--0" as a int
                 return string
         elif "." in string.lstrip("-"):
             try:

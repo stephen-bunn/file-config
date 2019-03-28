@@ -22,7 +22,7 @@ def clean(ctx):
 
 
 @invoke.task
-def build_news(ctx, draft=False):
+def build_news(ctx, draft=False, yes=False):
     """ Build towncrier newsfragments.
     """
 
@@ -35,6 +35,11 @@ def build_news(ctx, draft=False):
             "building changelog as draft (results are written to stdout)",
         )
         build_command += " --draft"
+    elif yes:
+        report.warn(
+            ctx, "docs.build-news", "removing news files without user confirmation (-y)"
+        )
+        build_command += " --yes"
     ctx.run(build_command, hide=None)
 
 

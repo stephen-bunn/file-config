@@ -184,6 +184,7 @@ def test_typecast_regex(string):
     assert not file_config.utils.typecast(regex, string) == regex
 
 
+@settings(deadline=None)
 @given(enums())
 def test_typecast_enum(enum):
     item = list(enum.__members__.items())[0][-1]
@@ -201,6 +202,7 @@ def test_typecast_collections():
             assert isinstance(file_config.utils.typecast(type_, value), type_)
 
 
+@settings(deadline=None)
 @given(builtins())
 def test_typecast_typings(value):
     assume(value != None)

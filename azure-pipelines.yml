@@ -18,7 +18,7 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     variables:
-      - group: Coverage
+      - group: CI
     steps:
       - template: .azure-pipelines/templates/run-tests.yml
       - template: .azure-pipelines/templates/run-coverage.yml
@@ -48,3 +48,13 @@ jobs:
       vmImage: macOS-10.13
     steps:
       - template: .azure-pipelines/templates/run-tests.yml
+
+  - job: BuildPackage
+    dependsOn:
+      - TestLinux
+      - TestWindows
+      - TestMac
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - template: .azure-pipelines/templates/build-package.yml

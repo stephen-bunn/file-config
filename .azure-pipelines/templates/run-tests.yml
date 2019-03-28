@@ -1,21 +1,20 @@
 steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: "$(python.version)"
-    displayName: "Use Python $(python.version)"
+      versionSpec: $(python.version)
+    displayName: Use Python $(python.version)
 
-  - script: python -m pip install --upgrade pip setuptools wheel
-    displayName: "Install Dependencies"
+  - template: install-dependencies.yml
 
   - script: python -m pip install -e .[test] --upgrade
-    displayName: "Install Package"
+    displayName: Install Package
 
-  - script: "pytest --junitxml=test-results.xml"
-    displayName: "Run Tests"
+  - script: pytest --junitxml=test-results.xml
+    displayName: Run Tests
 
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: "**/test-results.xml"
-      testRunTitle: "$(Agent.OS) - $(Build.DefinitionName) - Python $(python.version)"
+      testRunTitle: $(Agent.OS) - $(Build.DefinitionName) - Python $(python.version)
     condition: succeededOrFailed()
-    displayName: "Publish Test Results"
+    displayName: Publish Test Results
