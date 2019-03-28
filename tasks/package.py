@@ -125,7 +125,7 @@ def version(ctx, version=None, force=False):
             report.error(ctx, "package.version", error_message)
             raise ValueError(error_message)
     else:
-        version = previous_version.bump_release(len(previous_version.release) - 1)
+        version = previous_version.bump_release(index=len(previous_version.release) - 1)
 
     report.info(ctx, "package.version", f"updating version to {version!s}")
     for (path, replacements) in updates.items():

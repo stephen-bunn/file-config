@@ -33,6 +33,7 @@ def test_signature():
         assert hasattr(file_config, importable)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(config())
 def test_config(config):
     assert callable(config)
@@ -42,6 +43,7 @@ def test_config(config):
     assert hasattr(config, file_config.CONFIG_KEY)
 
 
+@settings(deadline=None)
 @given(config_var())
 def test_config_var(var):
     assert not callable(var)
@@ -49,6 +51,7 @@ def test_config_var(var):
     assert file_config.CONFIG_KEY in var.metadata
 
 
+@settings(deadline=None)
 @given(class_name(), config_var_dict(), characters(), characters())
 def test_make_config(class_name, config_var_dict, title, description):
     config = file_config.make_config(
@@ -81,11 +84,13 @@ def test_from_dict(config):
     assert isinstance(file_config.from_dict(config, config_dict), config)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(config())
 def test_to_dict(config):
     assert isinstance(file_config.to_dict(config()), dict)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(config())
 def test_reflective(config):
     config_instance = config()
