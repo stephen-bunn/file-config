@@ -66,7 +66,7 @@ class INIParser(configparser.ConfigParser):
             try:
                 return int(string)
             except ValueError:
-                # case where we mistake something like "--0" a a int
+                # case where we mistake something like "--0" as a int
                 return string
         elif "." in string.lstrip("-"):
             try:
