@@ -1,5 +1,4 @@
 steps:
-
   - script: python -m pip install python-codacy-coverage codecov
     displayName: Install Coverage Reporters
 
@@ -7,8 +6,8 @@ steps:
     displayName: Build Coverage Report
 
   - script: |
-    python-codacy-coverage -r coverage.xml
-    codecov
+      python-codacy-coverage -r coverage.xml
+      codecov
     env:
       CODACY_PROJECT_TOKEN: $(CODACY_PROJECT_TOKEN)
       CODECOV_TOKEN: $(CODECOV_TOKEN)
