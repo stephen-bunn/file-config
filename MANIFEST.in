@@ -3,6 +3,7 @@ include pyproject.toml LICENSE README*.rst CHANGELOG.rst CONTRIBUTING.rst
 exclude .editorconfig
 exclude .coveragerc
 exclude .travis.yml
+exclude azure-pipelines.yml
 exclude tox.ini
 exclude Pipfile*
 exclude requirements*.txt

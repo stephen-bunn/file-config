@@ -13,9 +13,9 @@ File Config
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
 
-.. image:: https://travis-ci.com/stephen-bunn/file-config.svg?branch=master
-   :target: https://travis-ci.com/stephen-bunn/file-config
-   :alt: Travis CI
+.. image:: https://dev.azure.com/stephen-bunn/file-config/_apis/build/status/stephen-bunn.file-config?branchName=master
+   :target: https://dev.azure.com/stephen-bunn/file-config/_build?definitionId=1
+   :alt: Azure Pipelines
 
 .. image:: https://readthedocs.org/projects/file-config/badge/?version=latest
    :target: https://file-config.readthedocs.io/en/latest/?badge=latest
