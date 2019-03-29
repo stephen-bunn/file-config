@@ -93,6 +93,27 @@ def test_integer_var(config_name):
         schema = file_config.build_schema(config)
         assert schema["properties"]["test"]["type"] == "integer"
 
+        config = file_config.make_config(
+            config_name, {"test": file_config.var(type_, min=0, max=1)}
+        )
+        schema = file_config.build_schema(config)
+        assert schema["properties"]["test"]["minimum"] == 0
+        assert schema["properties"]["test"]["maximum"] == 1
+
+        # warning on unique modifier
+        with pytest.warns(UserWarning):
+            config = file_config.make_config(
+                config_name, {"test": file_config.var(type_, unique=True)}
+            )
+            schema = file_config.build_schema(config)
+
+        # warning on contains modifier
+        with pytest.warns(UserWarning):
+            config = file_config.make_config(
+                config_name, {"test": file_config.var(type_, contains=1)}
+            )
+            schema = file_config.build_schema(config)
+
 
 @given(class_name())
 def test_number_var(config_name):
@@ -100,6 +121,28 @@ def test_number_var(config_name):
         config = file_config.make_config(config_name, {"test": file_config.var(type_)})
         schema = file_config.build_schema(config)
         assert schema["properties"]["test"]["type"] == "number"
+
+        # modifiers
+        config = file_config.make_config(
+            config_name, {"test": file_config.var(type_, min=1.0, max=1.1)}
+        )
+        schema = file_config.build_schema(config)
+        assert schema["properties"]["test"]["minimum"] == 1.0
+        assert schema["properties"]["test"]["maximum"] == 1.1
+
+        # warning on unique modifier
+        with pytest.warns(UserWarning):
+            config = file_config.make_config(
+                config_name, {"test": file_config.var(type_, unique=True)}
+            )
+            schema = file_config.build_schema(config)
+
+        # warning on contains modifier
+        with pytest.warns(UserWarning):
+            config = file_config.make_config(
+                config_name, {"test": file_config.var(type_, contains=1)}
+            )
+            schema = file_config.build_schema(config)
 
 
 @given(class_name())
@@ -139,3 +182,21 @@ def test_enum_var(config_name):
     assert schema["properties"]["test"]["type"] == "number"
     assert "enum" in schema["properties"]["test"]
     assert [0.0, 1.0] == schema["properties"]["test"]["enum"]
+
+
+@given(class_name())
+def test_bool_var(config_name):
+    assert file_config.schema_builder._build_bool_type(bool)["type"] == "boolean"
+    config = file_config.make_config(config_name, {"test": file_config.var(bool)})
+    schema = file_config.build_schema(config)
+    assert schema["properties"]["test"]["type"] == "boolean"
+
+
+@given(class_name())
+def test_null_var(config_name):
+    null_type = type(None)
+    assert file_config.schema_builder._build_null_type(null_type)["type"] == "null"
+    config = file_config.make_config(config_name, {"test": file_config.var(null_type)})
+    schema = file_config.build_schema(config)
+    assert schema["properties"]["test"]["type"] == "null"
+

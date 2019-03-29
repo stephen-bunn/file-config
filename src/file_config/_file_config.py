@@ -39,8 +39,8 @@ class _ConfigEntry(object):
     examples = attr.ib(type=list, default=None)
     encoder = attr.ib(default=None)
     decoder = attr.ib(default=None)
-    min = attr.ib(type=int, default=None)
-    max = attr.ib(type=int, default=None)
+    min = attr.ib(type=(int, float), default=None)
+    max = attr.ib(type=(int, float), default=None)
     unique = attr.ib(type=bool, default=None)
     contains = attr.ib(type=list, default=None)
 
