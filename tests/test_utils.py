@@ -55,7 +55,6 @@ def test_is_builtin_type(type_):
     assert file_config.utils.is_builtin_type(type(type_))
 
 
-@settings(deadline=None)
 @given(enums(), builtins())
 def test_is_enum_type(enum_, other):
     assert file_config.utils.is_enum_type(enum_)
@@ -176,7 +175,6 @@ def test_typecast_builtins(value):
     assert file_config.utils.typecast(type(value), str(value)) == value
 
 
-@settings(deadline=None)
 @given(characters())
 def test_typecast_regex(string):
     regex = file_config.Regex(re.escape(string))
@@ -184,7 +182,6 @@ def test_typecast_regex(string):
     assert not file_config.utils.typecast(regex, string) == regex
 
 
-@settings(deadline=None)
 @given(enums())
 def test_typecast_enum(enum):
     item = list(enum.__members__.items())[0][-1]
@@ -202,7 +199,6 @@ def test_typecast_collections():
             assert isinstance(file_config.utils.typecast(type_, value), type_)
 
 
-@settings(deadline=None)
 @given(builtins())
 def test_typecast_typings(value):
     assume(value != None)

@@ -11,7 +11,6 @@ import file_config
 from .strategies import config, builtins, class_name, variable_name
 
 
-@settings(deadline=None)
 @given(config(min_vars=0, max_vars=0))
 def test_empty_config(config):
     schema = file_config.build_schema(config)
@@ -20,14 +19,12 @@ def test_empty_config(config):
     assert len(schema["required"]) == 0
 
 
-@settings(deadline=None)
 @given(builtins())
 def test_not_config(config):
     with pytest.raises(ValueError):
         file_config.build_schema(config)
 
 
-@settings(deadline=None)
 @given(class_name(), characters(), characters())
 def test_config_metadata(config_name, title, description):
     config = file_config.make_config(
@@ -38,7 +35,6 @@ def test_config_metadata(config_name, title, description):
     assert schema["description"] == description
 
 
-@settings(deadline=None)
 @given(class_name())
 def test_empty_var(config_name):
     config = file_config.make_config(config_name, {"test": file_config.var()})
@@ -49,7 +45,6 @@ def test_empty_var(config_name):
     assert "type" not in schema["properties"]["test"]
 
 
-@settings(deadline=None)
 @given(config(config_vars={"test": file_config.var(required=False)}))
 def test_optional_var(config):
     schema = file_config.build_schema(config)
@@ -59,7 +54,6 @@ def test_optional_var(config):
     assert "type" not in schema["properties"]["test"]
 
 
-@settings(deadline=None)
 @given(class_name(), characters(), characters())
 def test_var_metadata(config_name, title, description):
     config = file_config.make_config(
@@ -70,7 +64,6 @@ def test_var_metadata(config_name, title, description):
     assert schema["properties"]["test"]["description"] == description
 
 
-@settings(deadline=None)
 @given(class_name(), variable_name(), config(config_vars={}))
 def test_nested_empty_config(config_name, nested_config_name, nested_config):
     config = file_config.make_config(
@@ -85,7 +78,6 @@ def test_nested_empty_config(config_name, nested_config_name, nested_config):
     assert len(nested_config_schema["required"]) == 0
 
 
-@settings(deadline=None)
 @given(class_name())
 def test_string_var(config_name):
     for type_ in (str,):
@@ -94,7 +86,6 @@ def test_string_var(config_name):
         assert schema["properties"]["test"]["type"] == "string"
 
 
-@settings(deadline=None)
 @given(class_name())
 def test_integer_var(config_name):
     for type_ in (int,):
@@ -103,7 +94,6 @@ def test_integer_var(config_name):
         assert schema["properties"]["test"]["type"] == "integer"
 
 
-@settings(deadline=None)
 @given(class_name())
 def test_number_var(config_name):
     for type_ in (float,):
@@ -112,7 +102,6 @@ def test_number_var(config_name):
         assert schema["properties"]["test"]["type"] == "number"
 
 
-@settings(deadline=None)
 @given(class_name())
 def test_enum_var(config_name):
     class IntTestEnum(enum.Enum):
