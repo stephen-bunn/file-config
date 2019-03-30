@@ -109,3 +109,4 @@ Pipfile.lock
 .vscode/
 main.py
 test-results.xml
+coverage.xml
