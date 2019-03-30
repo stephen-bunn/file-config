@@ -26,6 +26,11 @@ def test_not_config(config):
         file_config.build_schema(config)
 
 
+def test_not_var():
+    with pytest.raises(ValueError):
+        file_config.schema_builder._build_var(None)
+
+
 @given(class_name(), characters(), characters())
 def test_config_metadata(config_name, title, description):
     config = file_config.make_config(
@@ -55,14 +60,25 @@ def test_optional_var(config):
     assert "type" not in schema["properties"]["test"]
 
 
-@given(class_name(), characters(), characters())
-def test_var_metadata(config_name, title, description):
+@given(class_name(), characters(), characters(), characters())
+def test_var_metadata(config_name, title, description, example):
     config = file_config.make_config(
-        config_name, {"test": file_config.var(title=title, description=description)}
+        config_name,
+        {
+            "test": file_config.var(
+                title=title, description=description, examples=[example]
+            )
+        },
     )
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["title"] == title
     assert schema["properties"]["test"]["description"] == description
+    assert "examples" in schema["properties"]["test"]
+
+    examples = schema["properties"]["test"]["examples"]
+    assert isinstance(examples, list)
+    assert len(examples) == 1
+    assert examples[0] == example
 
 
 @given(class_name(), variable_name(), config(config_vars={}))
@@ -82,6 +98,9 @@ def test_nested_empty_config(config_name, nested_config_name, nested_config):
 @given(class_name())
 def test_string_var(config_name):
     type_ = str
+    schema = file_config.schema_builder._build_string_type(type_)
+    assert schema["type"] == "string"
+
     config = file_config.make_config(config_name, {"test": file_config.var(type_)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "string"
@@ -105,6 +124,10 @@ def test_string_var(config_name):
 @given(class_name())
 def test_regex_var(config_name):
     type_ = file_config.Regex(r"test")
+    schema = file_config.schema_builder._build_string_type(type_)
+    assert schema["type"] == "string"
+    assert schema["pattern"] == "test"
+
     config = file_config.make_config(config_name, {"test": file_config.var(type_)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "string"
@@ -130,6 +153,9 @@ def test_regex_var(config_name):
 @given(class_name())
 def test_integer_var(config_name):
     type_ = int
+    schema = file_config.schema_builder._build_integer_type(type_)
+    assert schema["type"] == "integer"
+
     config = file_config.make_config(config_name, {"test": file_config.var(type_)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "integer"
@@ -153,6 +179,9 @@ def test_integer_var(config_name):
 @given(class_name())
 def test_number_var(config_name):
     type_ = float
+    schema = file_config.schema_builder._build_number_type(type_)
+    assert schema["type"] == "number"
+
     config = file_config.make_config(config_name, {"test": file_config.var(type_)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "number"
@@ -232,6 +261,9 @@ def test_null_var(config_name):
 
 @given(class_name())
 def test_array_var(config_name):
+    schema = file_config.schema_builder._build_array_type(list)
+    assert schema["type"] == "array"
+
     config = file_config.make_config(config_name, {"test": file_config.var(list)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "array"
@@ -258,6 +290,9 @@ def test_array_var(config_name):
 
 @given(class_name())
 def test_object_var(config_name):
+    schema = file_config.schema_builder._build_object_type(dict)
+    assert schema["type"] == "object"
+
     config = file_config.make_config(config_name, {"test": file_config.var(dict)})
     schema = file_config.build_schema(config)
     assert schema["properties"]["test"]["type"] == "object"
@@ -280,6 +315,12 @@ def test_object_var(config_name):
     assert schema["properties"]["test"]["minProperties"] == 0
     assert schema["properties"]["test"]["maxProperties"] == 1
 
+    with pytest.raises(ValueError):
+        config = file_config.make_config(
+            config_name, {"test": file_config.var(typing.Dict[int, int])}
+        )
+        file_config.build_schema(config)
+
 
 @given(class_name())
 def test_union_var(config_name):
@@ -293,3 +334,18 @@ def test_union_var(config_name):
     assert schema["properties"]["test"]["anyOf"][0]["type"] == "string"
     assert schema["properties"]["test"]["anyOf"][-1]["type"] == "integer"
 
+
+def test_unhandled_types():
+    for unhandled_type in (complex,):
+        with pytest.warns(UserWarning):
+            file_config.schema_builder._build_type(unhandled_type, None)
+
+
+@given(class_name())
+def test_var_modifier_exceptions(config_name):
+    with pytest.raises(ValueError):
+        file_config.schema_builder._build_attribute_modifiers(None, {})
+
+    config = file_config.make_config(config_name, {"test": file_config.var(str, min=True)})
+    with pytest.raises(ValueError):
+        file_config.build_schema(config)
