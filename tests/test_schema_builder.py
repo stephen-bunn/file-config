@@ -349,3 +349,29 @@ def test_var_modifier_exceptions(config_name):
     config = file_config.make_config(config_name, {"test": file_config.var(str, min=True)})
     with pytest.raises(ValueError):
         file_config.build_schema(config)
+
+def test_generic_build():
+    config = file_config.make_config("A", {"test": file_config.var(str)})
+    # build schema for config instance
+    schema = file_config.schema_builder._build(config)
+    assert schema["type"] == "object"
+    assert "required" in schema
+
+    # build schema for instance var
+    # TODO: potentially support config var (non-instance)?
+    instance = config(test="test")
+    schema = file_config.schema_builder._build(instance.test)
+    assert schema["type"] == "string"
+
+    # build schema for builtin
+    schema = file_config.schema_builder._build(str)
+    assert schema["type"] == "string"
+
+    # build schema for regex
+    schema = file_config.schema_builder._build(file_config.Regex(r"test"))
+    assert schema["type"] == "string"
+    assert schema["pattern"] == "test"
+
+    # build schema for arbitrary value
+    schema = file_config.schema_builder._build("test")
+    assert schema["type"] == "string"
