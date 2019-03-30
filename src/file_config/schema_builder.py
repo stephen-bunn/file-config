@@ -68,8 +68,13 @@ def _build_attribute_modifiers(var, attribute_mapping, ignore=None):
             if entry_attribute.name in ignore:
                 continue
             elif entry_attribute.name in attribute_mapping:
-                # NOTE: required for `isinstance(True, (int, float)) == True`
-                if type(entry_value) == entry_attribute.type:  # noqa
+                # NOTE: stupid type comparisons required for off case where
+                # bool is a subclass of int `isinstance(True, (int, float)) == True`
+                if entry_attribute.type is not None and (
+                    type(entry_value) in entry_attribute.type
+                    if isinstance(entry_attribute.type, (list, tuple, set))
+                    else type(entry_value) == entry_attribute.type
+                ):  # noqa
                     modifiers[attribute_mapping[entry_attribute.name]] = entry_value
                 else:
                     raise ValueError(

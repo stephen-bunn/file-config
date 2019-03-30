@@ -1,6 +1,9 @@
 # Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://opensource.org/licenses/isc>
 
+import enum
+import typing
+
 import attr
 import pytest
 import jsonschema
@@ -93,3 +96,106 @@ def test_reflective(config):
     new_instance = file_config.from_dict(config, config_dict)
     assert isinstance(new_instance, config)
     assert config_instance == new_instance
+
+
+@given(class_name())
+def test_custom_encoder_decoder(config_name):
+    encoder = lambda x: f"x={x}"
+    decoder = lambda x: x[2:]
+
+    config = file_config.make_config(
+        config_name, {"test": file_config.var(str, encoder=encoder, decoder=decoder)}
+    )
+    instance = config(test="test")
+    encoded = file_config.to_dict(instance)
+    assert encoded["test"] == "x=test"
+
+    decoded = file_config.from_dict(config, encoded)
+    assert decoded.test == "test"
+
+
+@given(class_name())
+def test_build_exceptions(config_name):
+    with pytest.raises(ValueError):
+        file_config._file_config._build(None, {})
+
+    # test build validation
+    config = file_config.make_config(config_name, {"test": file_config.var(str)})
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        file_config._file_config._build(config, {"test": 1}, validate=True)
+
+
+def test_build_nested_array():
+    @file_config.config
+    class A:
+        @file_config.config
+        class B:
+            bar = file_config.var(str)
+
+        foo = file_config.var(typing.List[B])
+        bar = file_config.var(typing.List[str])
+
+    # test list of nested configs
+    instance = file_config._file_config._build(
+        A, {"foo": [{"bar": "test"}], "bar": ["test"]}
+    )
+    assert isinstance(instance, A)
+    assert isinstance(instance.bar[0], str)
+    assert instance.bar[0] == "test"
+    assert isinstance(instance.foo[0], A.B)
+    assert instance.foo[0].bar == "test"
+
+
+def test_build_nested_object():
+    @file_config.config
+    class A:
+        @file_config.config
+        class B:
+            bar = file_config.var(str)
+
+        foo = file_config.var(typing.Dict[str, B])
+        bar = file_config.var(typing.Dict[str, str])
+
+    instance = file_config._file_config._build(
+        A, {"foo": {"test": {"bar": "test"}}, "bar": {"test": "test"}}
+    )
+    assert isinstance(instance, A)
+    assert isinstance(instance.bar, dict)
+    assert instance.bar["test"] == "test"
+    assert isinstance(instance.foo, dict)
+    assert isinstance(instance.foo["test"], A.B)
+    assert instance.foo["test"].bar == "test"
+
+
+@given(class_name())
+def test_dump_exceptions(config_name):
+    with pytest.raises(ValueError):
+        file_config._file_config._dump(None)
+
+
+def test_dump_enum():
+    class TestEnum(enum.Enum):
+        A = 0
+        B = 1
+
+    @file_config.config
+    class A:
+        foo = file_config.var(TestEnum)
+
+    instance = A(foo=TestEnum.A)
+    dumped = file_config._file_config._dump(instance)
+    assert dumped["foo"] == 0
+
+
+def test_dump_nested_config():
+    @file_config.config
+    class A:
+        @file_config.config
+        class B:
+            bar = file_config.var(str)
+
+        foo = file_config.var(B)
+
+    instance = A(foo=A.B(bar="test"))
+    dumped = file_config._file_config._dump(instance)
+    assert dumped["foo"]["bar"] == "test"

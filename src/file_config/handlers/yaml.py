@@ -50,7 +50,7 @@ class YAMLHandler(BaseHandler):
         :rtype: str
         """
 
-        return yaml.dump(dictionary)
+        return yaml.dump(dictionary, Dumper=yaml.Dumper)
 
     def on_yaml_loads(self, yaml, config, content, **kwargs):
         """ The `pyyaml <https://pypi.org/project/pyyaml/>`_ loads method.
@@ -62,4 +62,4 @@ class YAMLHandler(BaseHandler):
         :rtype: dict
         """
 
-        return yaml.load(content)
+        return yaml.load(content, Loader=yaml.Loader)
