@@ -30,6 +30,7 @@ def test_yaml_ordereddict():
     content = instance.dumps_yaml()
     assert content == dedent(
         """\
-        foo: {test: test}
+        foo:
+          test: test
     """
     )
