@@ -19,13 +19,19 @@ class BaseHandler(abc.ABC):
         :rtype: module
         """
 
-        if not hasattr(self, "_imported") or self._imported is None:
+        if not hasattr(self, "_imported"):
             self._imported = self._discover_import()
         return self._imported
 
     @property
     def handler(self):
-        if not hasattr(self, "_handler") or self._handler is None:
+        """ The current imported serialization handler module.
+
+        :return: The imported handler
+        :rtype: module
+        """
+
+        if not hasattr(self, "_handler"):
             self._handler = sys.modules[self.imported]
         return self._handler
 
