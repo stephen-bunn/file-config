@@ -4,9 +4,11 @@
    <p align="center" style="margin: 0px;">
       <a href="https://badge.fury.io/py/file-config" target="_blank"><img src="https://badge.fury.io/py/file-config.svg" alt="PyPI version"></a>
       <a href="https://pypi.org/project/file-config/" target="_blank"><img alt="Supported Versions" src="https://img.shields.io/pypi/pyversions/file-config.svg"></a>
-      <a class="badge-align" href="https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade" target="_blank"><img src="https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a"/></a>
-      <a href="https://dev.azure.com/stephen-bunn/file-config/_build?definitionId=1" target="_blank"><img alt="Azure Pipelines" src="https://dev.azure.com/stephen-bunn/file-config/_apis/build/status/stephen-bunn.file-config?branchName=master"></a>
       <a href="https://github.com/ambv/black" target="_blank"><img alt="Code Style: Black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+      <br/>
+      <a class="badge-align" href="https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade" target="_blank"><img src="https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a"/></a>
+      <a href="https://codecov.io/gh/stephen-bunn/file-config" target="_blank"><img src="https://codecov.io/gh/stephen-bunn/file-config/branch/master/graph/badge.svg"/></a>
+      <a href="https://dev.azure.com/stephen-bunn/file-config/_build?definitionId=1" target="_blank"><img alt="Azure Pipelines" src="https://dev.azure.com/stephen-bunn/file-config/_apis/build/status/stephen-bunn.file-config?branchName=master"></a>
    </p>
 
 

@@ -9,22 +9,27 @@ File Config
    :target: https://pypi.org/project/file-config/
    :alt: Supported Versions
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
+   :alt: Code Style: Black
+
 .. image:: https://readthedocs.org/projects/file-config/badge/?version=latest
    :target: https://file-config.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+
+|
 
 .. image:: https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
 
+.. image:: https://codecov.io/gh/stephen-bunn/file-config/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/stephen-bunn/file-config
+   :alt: Codecov
+
 .. image:: https://dev.azure.com/stephen-bunn/file-config/_apis/build/status/stephen-bunn.file-config?branchName=master
    :target: https://dev.azure.com/stephen-bunn/file-config/_build?definitionId=1
    :alt: Azure Pipelines
-
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-   :target: https://github.com/ambv/black
-   :alt: Code Style: Black
-
 
 
 An `attr's <http://www.attrs.org/en/stable/>`_ like interface to building class representations of config files.
