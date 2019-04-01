@@ -110,3 +110,5 @@ Pipfile.lock
 main.py
 test-results.xml
 coverage.xml
+pip-wheel-metadata/
+
