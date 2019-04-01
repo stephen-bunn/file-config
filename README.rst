@@ -17,8 +17,6 @@ File Config
    :target: https://file-config.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-|
-
 .. image:: https://api.codacy.com/project/badge/Grade/05b5b7e17d0d471e84b9e32ec50b843a
    :target: https://www.codacy.com/app/stephen-bunn/file-config?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stephen-bunn/file-config&amp;utm_campaign=Badge_Grade
    :alt: Codacy Grade
