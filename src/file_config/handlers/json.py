@@ -9,7 +9,7 @@ class JSONHandler(BaseHandler):
     """
 
     name = "json"
-    packages = ("rapidjson", "ujson", "json")
+    packages = ("rapidjson", "json", "ujson")
     options = {"indent": None, "sort_keys": False}
 
     def on_json_dumps(self, json, config, dictionary, **kwargs):

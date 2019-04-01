@@ -19,13 +19,13 @@ class BaseHandler(abc.ABC):
         :rtype: module
         """
 
-        if not hasattr(self, "_imported"):
+        if not hasattr(self, "_imported") or self._imported is None:
             self._imported = self._discover_import()
         return self._imported
 
     @property
     def handler(self):
-        if not hasattr(self, "_handler"):
+        if not hasattr(self, "_handler") or self._handler is None:
             self._handler = sys.modules[self.imported]
         return self._handler
 
@@ -72,7 +72,7 @@ class BaseHandler(abc.ABC):
                 return True
         return False
 
-    def _discover_import(self):
+    def _discover_import(self, prefer=None):
         """ Discovers and imports the best available module from ``packages``.
 
         :raises ModuleNotFoundError: If no module is available
@@ -80,7 +80,11 @@ class BaseHandler(abc.ABC):
         :rtype: str
         """
 
-        for module_name in self.packages:
+        available_packages = self.packages
+        if isinstance(prefer, str):
+            available_packages = (prefer,)
+
+        for module_name in available_packages:
             spec = importlib.util.find_spec(module_name)
             if spec is not None:
                 importlib.import_module(module_name)
@@ -88,18 +92,31 @@ class BaseHandler(abc.ABC):
                 if callable(imported_hook):
                     imported_hook(sys.modules[module_name])
                 return module_name
-        raise ModuleNotFoundError(f"no modules in {self.packages!r} found")
+        raise ModuleNotFoundError(f"no modules in {available_packages!r} found")
 
     def _prefer_package(self, package):
-        if package not in self.packages:
-            raise ValueError(
-                f"prefered package {package!r} does not exist, "
-                f"allowed are {self.packages!r}"
-            )
-        # NOTE: this is a semi-dangerous property override that needs to be done since
-        # packages are dynamically defined as part of the subclass but the super needs
-        # to be able to override them no matter what
-        self.packages = (package,)
+        """ Prefer a serializtion handler over other handlers.
+
+        :param str package: The name of the package to use
+        :raises ValueError: When the given package name is not one of the available
+            supported serializtion packages for this handler
+        :return: The name of the serialization handler
+        :rtype: str
+        """
+
+        if isinstance(package, str) and package != self.imported:
+            if package not in self.packages:
+                raise ValueError(
+                    f"preferred package {package!r} does not exist, allowed are "
+                    f"{self.packages!r}"
+                )
+            # clear out current serialization handler (if exists)
+            if hasattr(self, "_handler"):
+                del self._handler
+            # manually update imported handlers with a given preference
+            self._imported = self._discover_import(prefer=package)
+            return package
+        return self.imported
 
     def dumps(self, config, instance, prefer=None, **kwargs):
         """ An abstract dumps method which dumps an instance into the subclasses format.
@@ -112,10 +129,8 @@ class BaseHandler(abc.ABC):
         :rtype: str
         """
 
-        if isinstance(prefer, str):
-            self._prefer_package(prefer)
-
-        dumps_hook_name = f"on_{self.imported}_dumps"
+        dumper = self._prefer_package(prefer)
+        dumps_hook_name = f"on_{dumper}_dumps"
         dumps_hook = getattr(self, dumps_hook_name, None)
         if not callable(dumps_hook):
             raise ValueError(
@@ -144,10 +159,8 @@ class BaseHandler(abc.ABC):
         :rtype: dict
         """
 
-        if isinstance(prefer, str):
-            self._prefer_package(prefer)
-
-        loads_hook_name = f"on_{self.imported}_loads"
+        loader = self._prefer_package(prefer)
+        loads_hook_name = f"on_{loader}_loads"
         loads_hook = getattr(self, loads_hook_name, None)
         if not callable(loads_hook):
             raise ValueError(
