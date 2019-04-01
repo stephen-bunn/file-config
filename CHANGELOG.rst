@@ -8,6 +8,26 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.8 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.8>`_ (*2019-04-01*)
+=========================================================================================
+
+Bug Fixes
+---------
+
+- Fixed issue related to the ``prefer`` keyword not loading the proper modules for serialization / deserialization when ``prefer`` had already been invoked in subsequent calls for a given config `#36 <https://github.com/stephen-bunn/file-config/issues/36>`_
+
+Documentation
+-------------
+
+- Adding codecov for alternate coverage reporting since codacy struggles sometimes and isn't always correct 
+
+Miscellaneous
+-------------
+
+- Adding and improving tests for serialization handlers 
+- Improving testing and code coverage for ``schema_builder`` and ``_file_config``
+
+
 `0.3.7 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.7>`_ (*2019-03-22*)
 =========================================================================================
 

@@ -1,1 +1,0 @@
-Fixed issue related to the ``prefer`` keyword not loading the proper modules for serialization / deserialization when ``prefer`` had already been invoked in subsequent calls for a given config
