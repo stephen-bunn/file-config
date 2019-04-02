@@ -11,6 +11,9 @@ class BaseHandler(abc.ABC):
     """ The base handler that all handlers should inherit from.
     """
 
+    _imported = None
+    _handler = None
+
     @property
     def imported(self):
         """ The imported handler module.

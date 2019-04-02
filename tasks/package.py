@@ -108,7 +108,7 @@ def version(ctx, version=None, force=False):
     # define replacement strategies for files where the version needs to be in sync
     updates = {
         ctx.directory.joinpath("setup.cfg"): [
-            (r"(version\s?=\s?)(.*)", "\\g<1>{version}")
+            (r"^(version\s?=\s?)(.*)", "\\g<1>{version}")
         ],
         ctx.package.directory.joinpath("__version__.py"): [
             (r"(__version__\s?=\s?)(.*)", '\\g<1>"{version}"')
