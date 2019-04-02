@@ -5,9 +5,10 @@ import io
 from textwrap import dedent
 from collections import OrderedDict
 
-import file_config
 from hypothesis import given, settings
-from hypothesis.strategies import characters, integers, booleans, floats, none
+from hypothesis.strategies import none, floats, booleans, integers, characters
+
+import file_config
 
 from ..strategies import config_instance
 
@@ -35,10 +36,19 @@ def test_yaml_ordereddict():
         foo = file_config.var(OrderedDict)
 
     instance = A(foo=OrderedDict([("test", "test")]))
-    content = instance.dumps_yaml()
-    assert content == dedent(
-        """\
+    content = instance.dumps_yaml(prefer="yaml")
+    assert (
+        content
+        == dedent(
+            """\
         foo:
           test: test
     """
+        )
+        or content
+        == dedent(
+            """\
+        foo: {test: test}
+    """
+        )
     )
