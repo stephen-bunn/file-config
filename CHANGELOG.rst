@@ -19,12 +19,12 @@ Bug Fixes
 Documentation
 -------------
 
-- Adding codecov for alternate coverage reporting since codacy struggles sometimes and isn't always correct 
+- Adding codecov for alternate coverage reporting since codacy struggles sometimes and isn't always correct
 
 Miscellaneous
 -------------
 
-- Adding and improving tests for serialization handlers 
+- Adding and improving tests for serialization handlers
 - Improving testing and code coverage for ``schema_builder`` and ``_file_config``
 
 
@@ -39,7 +39,7 @@ Bug Fixes
 Documentation
 -------------
 
-- Adding documentation ``Loading Defaults`` in "Getting Started" regarding the different results when loading defaults from serialized content 
+- Adding documentation ``Loading Defaults`` in "Getting Started" regarding the different results when loading defaults from serialized content
 
 Miscellaneous
 -------------
@@ -58,7 +58,7 @@ Bug Fixes
 Miscellaneous
 -------------
 
-- Adding latest PyPi version badge to documentation and README 
+- Adding latest PyPi version badge to documentation and README
 - Adding basic auto-generated typing stubs under ``stubs/``
 
 
