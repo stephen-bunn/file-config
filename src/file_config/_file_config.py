@@ -98,7 +98,7 @@ def _handle_load(cls, handler, file_object, validate=False, **kwargs):
     return from_dict(cls, handler.load(cls, file_object, **kwargs), validate=validate)
 
 
-def config(maybe_cls=None, these=None, title=None, description=None):
+def config(maybe_cls=None, these=None, title=None, description=None, **kwargs):
     """ File config class decorator.
 
     Usage is to simply decorate a **class** to make it a
@@ -155,7 +155,10 @@ def config(maybe_cls=None, these=None, title=None, description=None):
                     partialmethod(_handle_load, handler),
                 )
         config_vars = these if isinstance(these, dict) else None
-        return attr.s(config_cls, these=config_vars, slots=True)
+        config_options = {
+            key: value for (key, value) in kwargs.items() if key not in ("slots",)
+        }
+        return attr.s(config_cls, these=config_vars, slots=True, **config_options)
 
     if maybe_cls is None:
         return wrap
