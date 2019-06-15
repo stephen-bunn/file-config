@@ -1,1 +1,0 @@
-Adding *extremely* basic reflection tests for ``ujson`` serialization (please use ``rapidjson`` instead of ``ujson``)

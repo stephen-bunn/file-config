@@ -1,1 +1,0 @@
-Adding kwarg passthrough for ``config`` so you can now use things like ``config(hash=True)``

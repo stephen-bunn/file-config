@@ -8,6 +8,16 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.9 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.9>`_ (*2019-06-15*)
+=========================================================================================
+
+Miscellaneous
+-------------
+
+- Adding kwarg passthrough for ``config`` so you can now use things like ``config(hash=True)`` 
+- Adding *extremely* basic reflection tests for ``ujson`` serialization (please use ``rapidjson`` instead of ``ujson``)
+
+
 `0.3.8 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.8>`_ (*2019-04-01*)
 =========================================================================================
 
