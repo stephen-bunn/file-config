@@ -137,7 +137,9 @@ def version(ctx, version=None, force=False):
                     "package.version",
                     f"applying replacement ({pattern!r}, {sub!r}) to {path!s}",
                 )
-                content = re.sub(pattern, sub.format(version=version), content, re.M)
+                content = re.sub(
+                    pattern, sub.format(version=version), content, flags=re.M
+                )
             path.write_text(content)
 
 
