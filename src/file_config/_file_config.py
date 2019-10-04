@@ -298,25 +298,26 @@ def _build(config_cls, dictionary, validate=False):  # noqa
         entry = var.metadata[CONFIG_KEY]
         arg_key = entry.name if entry.name else var.name
         arg_default = var.default if var.default is not None else None
+        arg_type = entry.type if entry.type else var.type
 
         if callable(entry.decoder):
             kwargs[var.name] = entry.decoder(dictionary.get(arg_key, arg_default))
             continue
 
-        if is_array_type(entry.type):
-            if is_typing_type(entry.type) and len(entry.type.__args__) > 0:
-                nested_type = entry.type.__args__[0]
+        if is_array_type(arg_type):
+            if is_typing_type(arg_type) and len(arg_type.__args__) > 0:
+                nested_type = arg_type.__args__[0]
                 if is_config_type(nested_type):
                     kwargs[var.name] = [
                         _build(nested_type, item)
                         for item in dictionary.get(arg_key, [])
                     ]
                 else:
-                    kwargs[var.name] = typecast(entry.type, dictionary.get(arg_key, []))
-        elif is_object_type(entry.type):
+                    kwargs[var.name] = typecast(arg_type, dictionary.get(arg_key, []))
+        elif is_object_type(arg_type):
             item = dictionary.get(arg_key, {})
-            if is_typing_type(entry.type) and len(entry.type.__args__) == 2:
-                (_, value_type) = entry.type.__args__
+            if is_typing_type(arg_type) and len(arg_type.__args__) == 2:
+                (_, value_type) = arg_type.__args__
                 kwargs[var.name] = {
                     key: _build(value_type, value)
                     if is_config_type(value_type)
@@ -324,25 +325,25 @@ def _build(config_cls, dictionary, validate=False):  # noqa
                     for (key, value) in item.items()
                 }
             else:
-                kwargs[var.name] = typecast(entry.type, item)
-        elif is_config_type(entry.type):
+                kwargs[var.name] = typecast(arg_type, item)
+        elif is_config_type(arg_type):
             if arg_key not in dictionary:
                 # if the default value for a nested config is the nested config class
                 # then build the empty state of the nested config
-                if is_config_type(arg_default) and entry.type == arg_default:
-                    kwargs[var.name] = _build(entry.type, {})
+                if is_config_type(arg_default) and arg_type == arg_default:
+                    kwargs[var.name] = _build(arg_type, {})
                 else:
                     kwargs[var.name] = arg_default
             else:
                 kwargs[var.name] = _build(
-                    entry.type, dictionary.get(arg_key, arg_default)
+                    arg_type, dictionary.get(arg_key, arg_default)
                 )
         else:
             if arg_key not in dictionary:
                 kwargs[var.name] = arg_default
             else:
                 kwargs[var.name] = typecast(
-                    entry.type, dictionary.get(arg_key, arg_default)
+                    arg_type, dictionary.get(arg_key, arg_default)
                 )
 
     return config_cls(**kwargs)
@@ -371,6 +372,7 @@ def _dump(config_instance, dict_type=OrderedDict):
         entry = var.metadata[CONFIG_KEY]
         dump_key = entry.name if entry.name else var.name
         dump_default = var.default if var.default else None
+        dump_type = entry.type if entry.type else var.type
 
         if callable(entry.encoder):
             result[dump_key] = entry.encoder(
@@ -378,24 +380,24 @@ def _dump(config_instance, dict_type=OrderedDict):
             )
             continue
 
-        if is_array_type(entry.type):
+        if is_array_type(dump_type):
             items = getattr(config_instance, var.name, [])
             if items is not None:
                 result[dump_key] = [
                     (_dump(item, dict_type=dict_type) if is_config(item) else item)
                     for item in items
                 ]
-        elif is_enum_type(entry.type):
+        elif is_enum_type(dump_type):
             dump_value = getattr(config_instance, var.name, dump_default)
             result[dump_key] = (
-                dump_value.value if dump_value in entry.type else dump_value
+                dump_value.value if dump_value in dump_type else dump_value
             )
-        elif is_bytes_type(entry.type):
+        elif is_bytes_type(dump_type):
             result[dump_key] = encode_bytes(
                 getattr(config_instance, var.name, dump_default)
             )
         else:
-            if is_config_type(entry.type):
+            if is_config_type(dump_type):
                 result[dump_key] = _dump(
                     getattr(config_instance, var.name, {}), dict_type=dict_type
                 )

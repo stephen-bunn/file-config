@@ -93,3 +93,39 @@ def test_complex_config_deserialization_handles_inner_configs():
     )
     assert yaml_cfg.inner.foo == "Default"
 
+
+def test_regression_issue38():
+    """Test that utilizing typehints vs. var type kwarg handles serailization the same.
+
+    .. note:: Refer to https://github.com/stephen-bunn/file-config/issues/38
+    """
+
+    @file_config.config
+    class TestCase1(object):
+        @file_config.config
+        class Nested(object):
+            name = file_config.var(str)
+
+        nests = file_config.var(List[Nested])
+
+    @file_config.config
+    class TestCase2(object):
+        @file_config.config
+        class Nested(object):
+            name: str = file_config.var()
+
+        nests: List[Nested] = file_config.var()
+
+    loadable_json = """{"nests": [{"name": "hello"}, {"name": "world"}]}"""
+
+    test_1 = TestCase1.loads_json(loadable_json)
+    test_2 = TestCase2.loads_json(loadable_json)
+    assert all(
+        isinstance(nest, TestCase1.Nested) and isinstance(nest.name, str)
+        for nest in test_1.nests
+    )
+    assert all(
+        isinstance(nest, TestCase2.Nested) and isinstance(nest.name, str)
+        for nest in test_2.nests
+    )
+    assert test_1.dumps_json() == test_2.dumps_json()
