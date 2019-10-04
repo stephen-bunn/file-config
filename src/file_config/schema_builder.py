@@ -391,7 +391,10 @@ def _build_var(var, property_path=None):
             schema["title"] = entry.title
         if isinstance(entry.description, str):
             schema["description"] = entry.description
-        if isinstance(entry.examples, collections.Iterable) and len(entry.examples) > 0:
+        if (
+            isinstance(entry.examples, collections.abc.Iterable)
+            and len(entry.examples) > 0
+        ):
             schema["examples"] = entry.examples
 
     # handle typing.Union types by simply using the "anyOf" key
