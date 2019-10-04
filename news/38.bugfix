@@ -1,1 +1,0 @@
-Allowing Python 3 typehints to be considered as the config var's type just like the var's ``type`` kwarg

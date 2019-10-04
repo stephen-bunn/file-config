@@ -8,6 +8,21 @@ Changelog
 
 .. towncrier release notes start
 
+`0.3.10 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.10>`_ (*2019-10-04*)
+===========================================================================================
+
+Bug Fixes
+---------
+
+- Allowing Python 3 typehints to be considered as the config var's type just like the var's ``type`` kwarg `#38 <https://github.com/stephen-bunn/file-config/issues/38>`_
+
+Miscellaneous
+-------------
+
+- Fixing access to collections.abc for Iterable deprecation warning 
+- Updating package stubs to mimic true kwargs typings
+
+
 `0.3.9 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.9>`_ (*2019-06-15*)
 =========================================================================================
 
