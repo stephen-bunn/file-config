@@ -61,8 +61,8 @@ You can get the schema by passing a config class to the :func:`~.schema_builder.
 Currently the generated JSONSchema is pretty boring since the ``ProjectConfig`` class is totally empty.
 We can add a quick title and description to the root JSONSchema object by adding two arguments to the :func:`config <file_config._file_config.config>` decorator...
 
-- ``title`` - *Defines the title of the object in the generated JSONSchema*
-- ``description`` - *Defines the description of the object in the generated JSONSchema*
+- ``title`` - Defines the title of the object in the generated JSONSchema
+- ``description`` - Defines the description of the object in the generated JSONSchema
 
 .. code-block:: python
 
@@ -88,8 +88,8 @@ After building the schema again you can see the added ``title`` and ``descriptio
 
 We can also control the ``$id`` and ``$schema`` properties within the generated JSONSchema but adding two more arguments to the :func:`config <file_config._file_config.config>` decorator...
 
-- ``schema_id`` - *Defines a custom id for the generated JSONSchema's ``$id`` property*
-- ``schema_draft`` - *Defines a custom draft URL for the generated JSONSchema's ``$schema`` property*
+- ``schema_id`` - Defines a custom id for the generated JSONSchema's ``$id`` property
+- ``schema_draft`` - Defines a custom draft URL for the generated JSONSchema's ``$schema`` property
 
 .. code-block:: python
 
