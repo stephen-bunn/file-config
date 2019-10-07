@@ -98,7 +98,15 @@ def _handle_load(cls, handler, file_object, validate=False, **kwargs):
     return from_dict(cls, handler.load(cls, file_object, **kwargs), validate=validate)
 
 
-def config(maybe_cls=None, these=None, title=None, description=None, **kwargs):
+def config(
+    maybe_cls=None,
+    these=None,
+    title=None,
+    description=None,
+    schema_id=None,
+    schema_draft=None,
+    **kwargs,
+):
     """ File config class decorator.
 
     Usage is to simply decorate a **class** to make it a
@@ -116,6 +124,10 @@ def config(maybe_cls=None, these=None, title=None, description=None, **kwargs):
     :param dict these: A dictionary of str to ``file_config.var`` to use as attribs
     :param str title: The title of the config, defaults to None, optional
     :param str description: A description of the config, defaults to None, optional
+    :param str schema_id: The JSONSchema ``$id`` to use when building the schema,
+        defaults to None, optional
+    :param str schema_raft: The JSONSchema ``$schema`` to use when building the schema,
+        defaults to None, optional
     :return: Config wrapped class
     :rtype: class
     """
@@ -128,7 +140,17 @@ def config(maybe_cls=None, these=None, title=None, description=None, **kwargs):
         :rtype: class
         """
 
-        setattr(config_cls, CONFIG_KEY, dict(title=title, description=description))
+        setattr(
+            config_cls,
+            CONFIG_KEY,
+            dict(
+                title=title,
+                description=description,
+                schema_id=schema_id,
+                schema_draft=schema_draft,
+            ),
+        )
+
         # dynamically assign available handlers to the wrapped class
         for handler_name in handlers.__all__:
             handler = getattr(handlers, handler_name)
@@ -241,7 +263,15 @@ def var(
     )
 
 
-def make_config(name, var_dict, title=None, description=None, **kwargs):
+def make_config(
+    name,
+    var_dict,
+    title=None,
+    description=None,
+    schema_id=None,
+    schema_draft=None,
+    **kwargs,
+):
     """ Creates a config instance from scratch.
 
     Usage is virtually the same as :func:`attr.make_class`.
@@ -256,6 +286,10 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
     :param dict var_dict: The dictionary of config variable definitions
     :param str title: The title of the config, defaults to None, optional
     :param str description: The description of the config, defaults to None, optional
+    :param str schema_id: The JSONSchema ``$id`` to use when building the schema,
+        defaults to None, optional
+    :param str schema_raft: The JSONSchema ``$schema`` to use when building the schema,
+        defaults to None, optional
     :return: A new config class
     :rtype: class
     """
@@ -265,6 +299,8 @@ def make_config(name, var_dict, title=None, description=None, **kwargs):
         these=var_dict,
         title=title,
         description=description,
+        schema_id=schema_id,
+        schema_draft=schema_draft,
     )
 
 
