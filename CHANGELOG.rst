@@ -8,6 +8,25 @@ Changelog
 
 .. towncrier release notes start
 
+`1.0.0 <https://github.com/stephen-bunn/file-config/releases/tag/v1.0.0>`_ (*2019-10-07*)
+=========================================================================================
+
+Features
+--------
+
+- Adding the ability to define custom JSONSchema ``$id`` and ``$schema`` properties. Will raise user warnings if unsupported schema draft is specified. `#41 <https://github.com/stephen-bunn/file-config/issues/41>`_
+
+Documentation
+-------------
+
+- Adding some documentation around ``schema_id`` and ``schema_draft`` parameters for the ``@config()`` decorator in Getting Started 
+
+Miscellaneous
+-------------
+
+- Adding ``long_description_content_type`` to ``setup.cfg`` for new twine package check warnings
+
+
 `0.3.10 <https://github.com/stephen-bunn/file-config/releases/tag/v0.3.10>`_ (*2019-10-04*)
 ===========================================================================================
 
