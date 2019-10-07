@@ -26,6 +26,9 @@ from .utils import (
 )
 from .constants import CONFIG_KEY, REGEX_TYPE_NAME
 
+DEFAULT_SCHEMA_DRAFT = "http://json-schema.org/draft-07/schema#"
+SUPPORTED_SCHEMA_DRAFTS = (DEFAULT_SCHEMA_DRAFT,)
+
 
 def Regex(pattern):
     """ A custom typing type to store regular expressions for schema building.
@@ -446,9 +449,24 @@ def _build_config(config_cls, property_path=None):
 
     # if the length of the property path is 0, assume that current object is root
     if len(property_path) <= 0:
-        schema["$id"] = f"{config_cls.__qualname__}.json"
-        # NOTE: requires draft-07 for typing.Union type schema generation
-        schema["$schema"] = "http://json-schema.org/draft-07/schema#"
+        schema_id = cls_entry.get("schema_id")
+        if schema_id is None:
+            schema_id = f"{config_cls.__qualname__}.json"
+        schema["$id"] = schema_id
+
+        # NOTE: requires at leaast draft-07 for typing.Union type schema generation
+        schema_draft = cls_entry.get("schema_draft")
+        if schema_draft is None:
+            schema_draft = DEFAULT_SCHEMA_DRAFT
+        if schema_draft not in SUPPORTED_SCHEMA_DRAFTS:
+            warnings.warn(
+                "Specifying a custom JSONSchema draft is allowed but not advised. "
+                "We depend on the features provided in drafts "
+                f"{SUPPORTED_SCHEMA_DRAFTS!s} and functionality may become unstable if "
+                "using an unsupported draft."
+            )
+        schema["$schema"] = schema_draft
+
     else:
         schema["$id"] = f"#/{'/'.join(property_path)}"
 
@@ -503,6 +521,14 @@ def _build(value, property_path=None):
 
 def build_schema(config_cls):
     """ Builds the JSONSchema for a given config class.
+
+    .. important:: Although you can configure the generated JSONSchema's ``$id`` and
+        ``$schema`` properties through the :func:`file_config._file_config.config`
+        decorator, this method will default those values for you. You should be wary of
+        using a ``$schema`` draft of anything less than
+        `draft-07 <https://json-schema.org/draft-07/json-schema-release-notes.html>`_ as
+        we rely on the specified functionality for handling both union and regex pattern
+        matching types.
 
     :param class config_cls: The config class to build the JSONSchema for
     :return: The resulting JSONSchema

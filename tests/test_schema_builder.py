@@ -5,8 +5,8 @@ import enum
 
 import typing
 import pytest
-from hypothesis import given, settings
-from hypothesis.strategies import characters
+from hypothesis import given, settings, assume
+from hypothesis.strategies import characters, sampled_from
 
 import file_config
 from .strategies import config, builtins, class_name, variable_name
@@ -31,14 +31,65 @@ def test_not_var():
         file_config.schema_builder._build_var(None)
 
 
-@given(class_name(), characters(), characters())
-def test_config_metadata(config_name, title, description):
+@given(class_name(), characters(), characters(), characters(), characters())
+def test_config_metadata(config_name, title, description, schema_id, schema_draft):
     config = file_config.make_config(
-        config_name, {}, title=title, description=description
+        config_name,
+        {},
+        title=title,
+        description=description,
+        schema_id=schema_id,
+        schema_draft=schema_draft,
     )
-    schema = file_config.build_schema(config)
+    # NOTE: this will always cause a warning since we are always passing in unsupported
+    # draft names into the schema build
+    with pytest.warns(UserWarning):
+        schema = file_config.build_schema(config)
+
     assert schema["title"] == title
     assert schema["description"] == description
+    assert schema["$id"] == schema_id
+    assert schema["$schema"] == schema_draft
+
+
+@given(class_name())
+def test_config_default_schema_metadata(config_name):
+    default_config = file_config.make_config(config_name, {})
+    default_schema = file_config.build_schema(default_config)
+
+    assert isinstance(default_schema["$id"], str)
+    assert len(default_schema["$id"]) > 0
+    assert default_schema["$schema"] == file_config.schema_builder.DEFAULT_SCHEMA_DRAFT
+
+
+@given(
+    class_name(),
+    characters(),
+    sampled_from(file_config.schema_builder.SUPPORTED_SCHEMA_DRAFTS),
+)
+def test_config_valid_schema_metadata(config_name, schema_id, schema_draft):
+    custom_config = file_config.make_config(
+        config_name, {}, schema_id=schema_id, schema_draft=schema_draft
+    )
+
+    custom_schema = file_config.build_schema(custom_config)
+    assert custom_schema["$id"] == schema_id
+    assert custom_schema["$schema"] == schema_draft
+
+
+@given(class_name(), characters(), characters())
+def test_config_invalid_schema_metadata(config_name, schema_id, schema_draft):
+    assume(schema_draft not in file_config.schema_builder.SUPPORTED_SCHEMA_DRAFTS)
+    custom_config = file_config.make_config(
+        config_name, {}, schema_id=schema_id, schema_draft=schema_draft
+    )
+
+    # should raise user warning when building a schema with unsupported draft versions
+    with pytest.warns(UserWarning):
+        custom_schema = file_config.build_schema(custom_config)
+
+    assert custom_schema["$id"] == schema_id
+    assert custom_schema["$schema"] == schema_draft
 
 
 @given(class_name())
@@ -346,9 +397,12 @@ def test_var_modifier_exceptions(config_name):
     with pytest.raises(ValueError):
         file_config.schema_builder._build_attribute_modifiers(None, {})
 
-    config = file_config.make_config(config_name, {"test": file_config.var(str, min=True)})
+    config = file_config.make_config(
+        config_name, {"test": file_config.var(str, min=True)}
+    )
     with pytest.raises(ValueError):
         file_config.build_schema(config)
+
 
 def test_generic_build():
     config = file_config.make_config("A", {"test": file_config.var(str)})

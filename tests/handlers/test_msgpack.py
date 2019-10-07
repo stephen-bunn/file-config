@@ -21,7 +21,6 @@ def test_msgpack_reflective(instance):
             # deal with message pack limitations in integer limits
             assume(instance_arg >= -(2 ** 64) and instance_arg <= (2 ** 64) - 1)
 
-    print(instance)
     content = instance.dumps_msgpack(prefer="msgpack")
     assert isinstance(content, bytes)
     loaded = instance.__class__.loads_msgpack(content)
