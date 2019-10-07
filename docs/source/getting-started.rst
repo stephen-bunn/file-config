@@ -86,6 +86,38 @@ After building the schema again you can see the added ``title`` and ``descriptio
  'type': 'object'}
 
 
+We can also control the ``$id`` and ``$schema`` properties within the generated JSONSchema but adding two more arguments to the :func:`config <file_config._file_config.config>` decorator...
+
+- ``schema_id`` - *Defines a custom id for the generated JSONSchema's ``$id`` property*
+- ``schema_draft`` - *Defines a custom draft URL for the generated JSONSchema's ``$schema`` property*
+
+.. code-block:: python
+
+   @file_config.config(
+      schema_id="MyProjectSchema",
+      schema_draft="http://json-schema.org/2019-09/schema#"
+   )
+   class ProjectConfig(object):
+      pass
+
+
+Building this schema will result in the following dictionary:
+
+>>> file_config.build_schema(ProjectConfig)
+{'$id': 'MyProjectSchema',
+ '$schema': 'http://json-schema.org/2019-09/schema#',
+ 'properties': {},
+ 'required': [],
+ 'type': 'object'}
+
+
+.. important:: We rely heavily on the feature specified in at least JSONSchema `draft-07 <https://json-schema.org/draft-07/json-schema-release-notes.html>`_ for both union types and regex pattern matching types.
+   If you provide an unsupported draft to ``schema_draft`` which might imply that internal config validation will break, a :class:`UserWarning` will be thrown.
+
+   | In 99% of cases you shouldn't even specify a custom ``schema_draft``.
+   | **Use this parameter at your own peril.**
+
+
 Config Vars
 ===========
 
