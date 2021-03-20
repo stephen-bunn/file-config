@@ -21,7 +21,7 @@ hypothesis==4.17.2
 idna==2.8
 imagesize==1.1.0
 isort==4.3.17
-jinja2==2.10.1
+jinja2==2.11.3
 jsonschema==3.0.1
 lxml==4.3.3
 markupsafe==1.1.1
