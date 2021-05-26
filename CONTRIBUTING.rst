@@ -1,34 +1,228 @@
 ============
 Contributing
 ============
-When contributing to this repository, please first discuss the change you wish to make via an issue to the owners of this repository before submitting a pull request.
-
-.. important:: **We have an enforced style guide and a code of conduct.**
-   Please follow them in all your interactions with this project.
 
 
-Style Guide
------------
+.. important::
+   When contributing to this repository, please adhere to our :ref:`code-of-conduct` and
+   first discuss the change you wish to make via an issue **before** submitting a pull
+   request.
 
-- We somewhat follow `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ and utilize `Sphinx <http://www.sphinx-doc.org/en/stable/>`_ docstrings on **all** classes and functions.
-- We employee `flake8 <http://flake8.pycqa.org/en/latest/>`_ as our linter with exceptions to the following rules:
-   - D203
-   - F401
-   - E123
-   - W503
-   - E203
-- Maximum line length for Python files is 88 characters.
-- Maxiumum McCabe complexity is 13.
-- Linting and test environments are configured via ``tox.ini``.
-- Imports are sorted using `isort <https://pypi.python.org/pypi/isort>`_ with multi-line output mode ``3``.
-- An ``.editorconfig`` file is included in this repository which dictates whitespace, indentation, and file encoding rules.
-- Although ``requirements.txt`` and ``requirements-dev.txt`` do exist, `Pipenv <https://docs.pipenv.org/>`_ is utilized as the primary virtual environment and package manager for this project.
-- We strictly utilize `Semantic Versioning <https://semver.org/>`_ as our version specification.
-- All Python source files are post-processed using `ambv/black <https://github.com/ambv/black>`_.
 
-Issues
-------
-Issues should follow the included ``ISSUE_TEMPLATE`` found in ``.github/ISSUE_TEMPLATE.md``.
+.. _local-development:
+
+Local Development
+=================
+
+The following sections will guide you through setting up a local development environment
+for working on this project package.
+**At the very least**, make sure that you have the necessary pre-commit hooks installed
+to make sure that all commits are pristine before they make it into the change history.
+
+Installing Python
+-----------------
+
+.. note::
+   If you already have Python 3.7+ installed on your local system, you can skip this
+   step completely.
+
+
+Installing Python should be done through `pyenv <https://github.com/pyenv/pyenv>`_.
+To first install ``pyenv`` please follow the guide they provided at
+https://github.com/pyenv/pyenv#installation. When you finally have ``pyenv`` you should
+be good to continue on.
+
+.. code-block:: console
+
+   $ pyenv --version
+   pyenv x.x.x
+
+
+Now that you have ``pyenv`` we can install the necessary Python version. This project's
+package depends on Python 3.7+, so we can request that through ``pyenv``.
+
+.. code-block:: console
+
+   $ pyenv install 3.7  # to install Python 3.7+
+   ...
+
+   $ pwd
+   /PATH/TO/CLONED/REPOSITORY/project-name
+   $ pyenv local 3.7  # to mark the project directory as needing Python 3.7+
+   ...
+
+   $ pyenv global 3.7  # if you wish Python 3.7 to be aliased to `python` everywhere
+   ...
+
+
+After installing and marking the repository as requiring Python 3.7+ you should be good
+to continue on installing the project's dependencies.
+
+Virtual Environment
+-------------------
+
+We use `Poetry <https://python-poetry.org/>`_ to manage both our dependencies and
+virtual environments. Setting up ``poetry`` just involves installing it through ``pip``
+as a user-level dependency.
+
+.. code-block:: console
+
+   $ pip install --user poetry
+   Collecting poetry
+   Downloading poetry-x.x.x-py2.py3-non-any.whl
+   ...
+
+
+You can quickly setup your entire development environment by running the installation
+process from poetry.
+
+.. code-block:: console
+
+   $ poetry install
+   Installing dependencies from lock file
+   ...
+
+
+This with create a virtual environment for you and install the necesary development
+dependencies. From there you can jump into a subshell using the newly created virtual
+environment using the ``shell`` subcommand.
+
+.. code-block:: console
+
+   $ poetry shell
+   pawning shell within ~/.local/share/virtualenvs/my-project-py3.7
+   ...
+
+   $ exit # when you wish to exit the subshell
+
+
+From this shell you have access to all the necessary development dependencies installed
+in the virutal environment and can start actually writing and running code within the
+client package.
+
+
+Style Enforcement
+-----------------
+
+This project's preferred styles are fully enforced through
+`pre-commit <https://pre-commit.com/>`_ hooks. In order to take advantage of these hooks
+please make sure that you have ``pre-commit`` and the configured hooks installed in your
+local environment.
+
+Installing ``pre-commit`` is done through ``pip`` and should be installed as a
+user-level dependency as it adds some console scripts that all projects using
+``pre-commit`` will need.
+
+.. code-block:: console
+
+   $ pip install --user pre-commit
+   Collecting pre-commit
+   Downloading pre_commit-x.x.x-py2.py3-none-any.whl
+   ...
+
+   $ pre-commit --version
+   pre-commit 2.4.0
+
+
+Once ``pre-commit`` is installed you should also install the hooks into the cloned
+repository.
+
+.. code-block:: console
+
+   $ pwd
+   /PATH/TO/CLONED/REPOSITORY/project-name
+
+   $ pre-commit install
+   pre-commit installed at .git/hooks/pre-commit
+
+
+After this you should be good to continue on. These installed hooks will do a first-time
+setup when you attempt your next commit to build hook environments. Changes that violate
+the defined style specifications in ``setup.cfg`` and ``pyproject.toml`` will cause the
+commit to fail and will likely make the necessary changes to added / changed files to
+be written to the failing files.
+
+This will give you the opprotunity to view the changes the hooks made to the failing
+files and add the new changes to the commit in order to make the commit pass. It also
+gives you the opprotunity to make tweaks to the autogenerated changes to make them more
+human accessible (only if necessary).
+
+Editor Configuration
+--------------------
+
+We also have some specific settings for editor configuration via
+`editorconfig <https://editorconfig.org/#download>`_. We recommend you install the
+appropriate plugin for your editor of choice if your editor doesn't already natively
+support ``.editorconfig`` configuration files.
+
+Project Tasking
+---------------
+
+All of our tasks are built and run through `invoke <http://www.pyinvoke.org/>`_ which is
+basically just a more advanced (a little too advanced) Python alternative to
+`make <http://man7.org/linux/man-pages/man1/make.1.html>`_. The only reason we are using
+this utility is because I know how it works and I already had most of the necessary
+tasks defined from other projects.
+
+From within the Poetry subshell, you can access and run these commands through the
+provided ``invoke`` development dependency.
+
+.. code-block:: console
+
+   $ invoke --list
+   Available tasks:
+
+      build                  Build the project.
+      clean                  Clean the project.
+      lint                   Lint the project.
+      profile                Run and profile a given Python script.
+      test                   Test the project.
+      docs.build             Build docs.
+      docs.build-news        Build towncrier newsfragments.
+      docs.clean             Clean built docs.
+      docs.view              Build and view docs.
+      linter.black           Run Black tool check against source.
+      linter.flake8          Run Flake8 tool against source.
+      linter.isort           Run ISort tool check against source.
+      linter.mypy            Run MyPy tool check against source.
+      package.build          Build pacakge source files.
+      package.check          Check built package is valid.
+      package.clean          Clean previously built package artifacts.
+      package.coverage       Build coverage report for test run.
+      package.format         Auto format package source files.
+      package.requirements   Generate requirements.txt from Poetry's lock.
+      package.stub           Generate typing stubs for the package.
+      package.test           Run package tests.
+      package.typecheck      Run type checking with generated package stubs.
+
+
+You can run these tasks to do many miscellaneous project tasks such as building
+documentation.
+
+.. code-block:: console
+
+   $ invoke docs.build
+   [docs.build] ... building 'html' documentation
+   Running Sphinx v3.0.3
+   loading pickled environment... done
+   building [mo]: targets for 0 po files that are out of date
+   building [html]: targets for 0 source files that are out of date
+   updating environment: 0 added, 0 changed, 0 removed
+   looking for now-outdated files... none found
+   no targets are out of date.
+   build succeeded.
+
+   The HTML pages are in build/html.
+
+
+All of these tasks should just work right out of the box, but something might break
+eventually after required tooling gets enough major updates.
+
+Opening Issues
+==============
+
+Issues should follow the included ``ISSUE_TEMPLATE`` found in
+``.github/ISSUE_TEMPLATE.md``.
 
 - Issues should contain the following sections:
    - Expected Behavior
@@ -38,58 +232,17 @@ Issues should follow the included ``ISSUE_TEMPLATE`` found in ``.github/ISSUE_TE
    - Context
    - Your Environment
 
-These sections help the developers greatly by providing a large understanding of the context of the bug or requested feature without having to launch a full fleged discussion inside of the issue.
+These sections help the developers greatly by providing a large understanding of the
+context of the bug or requested feature without having to launch a full fleged
+discussion inside of the issue.
 
-Pull Requests
--------------
-Pull requests should follow the included ``PULL_REQUEST_TEMPLATE`` found in ``.github/PULL_REQUEST_TEMPLATE.md``.
+Creating Pull Requests
+======================
 
-- Pull requests should always be from a **topic/feature/bugfix** (left side) branch. *Pull requests from master branches will not be merged.*
+Pull requests should follow the included ``PULL_REQUEST_TEMPLATE`` found in
+``.github/PULL_REQUEST_TEMPLATE.md``.
+
+- | Pull requests should always be from a ``topic`` / ``feature`` / ``bugfix``
+    (left side) branch.
+  | **Pull requests from master branches will not be merged.**
 - Pull requests should not fail our requested style guidelines or linting checks.
-
-Code of Conduct
----------------
-Our code of conduct is taken directly from the `Contributor Covenant <https://www.contributor-covenant.org/>`_ since it directly hits all of the points we find necessary to address.
-
-Our Pledge
-''''''''''
-In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
-
-Our Standards
-'''''''''''''
-Examples of behavior that contributes to creating a positive environment include:
-
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
-
-Examples of unacceptable behavior by participants include:
-
-- The use of sexualized language or imagery and unwelcome sexual attention or advances
-- Trolling, insulting/derogatory comments, and personal or political attacks
-- Public or private harassment
-- Publishing others’ private information, such as a physical or electronic address, without explicit permission
-- Other conduct which could reasonably be considered inappropriate in a professional setting
-
-Our Responsibilities
-''''''''''''''''''''
-Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
-
-Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
-
-Scope
-'''''
-This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by project maintainers.
-
-Enforcement
-'''''''''''
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at stephen@bunn.io. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
-
-Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project’s leadership.
-
-Attribution
-'''''''''''
-This Code of Conduct is adapted from the `Contributor Covenant <https://www.contributor-covenant.org/>`_, version 1.4, available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
-

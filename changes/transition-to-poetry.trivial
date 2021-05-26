@@ -1,0 +1,2 @@
+Transitioning from Pipenv to Poetry for package management.
+Including updates to the necessary configuration files as ``pyproject.toml`` consolidates configuration for many tools.

@@ -1,8 +1,0 @@
-[run]
-branch = True
-parallel = True
-source =
-    src/file_config/
-
-[report]
-show_missing = True

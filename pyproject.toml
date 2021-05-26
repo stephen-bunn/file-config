@@ -1,41 +1,207 @@
 [build-system]
-requires = ["setuptools>=36.2.2", "wheel>=0.28.0"]
+requires = ["poetry>=0.12", "setuptools>=36.2.2", "wheel>=0.28.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "file-config"
+version = "2.0.0"
+description = "An attrs based configuration file abstraction."
+authors = ["Stephen Bunn <stephen@bunn.io>"]
+maintainers = []
+license = "ISC License"
+packages = [
+  { include = "file_config", from = "src" }
+]
+readme = "README.rst"
+homepage = "https://github.com/stephen-bunn/file-config"
+repository = "https://github.com/stephen-bunn/file-config"
+documentation = "https://file-config.readthedocs.io"
+keywords = [
+  "config",
+  "file",
+  "toml",
+  "json",
+  "yaml",
+  "msgpack",
+  "pickle",
+  "xml",
+  "ini",
+  "attrs"
+]
+classifiers = [
+  "License :: OSI Approved :: ISC License (ISCL)",
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Intended Audience :: Developers",
+  "Operating System :: POSIX",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Natural Language :: English",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+include = [
+  "pyproject.toml",
+  "LICENSE",
+  "README*.rst",
+  "README*.md",
+  "CHANGELOG.rst",
+  "CHANGELOG.md",
+  "CONTRIBUTING.rst",
+  "CONTRIBUTING.md",
+]
+exclude = [
+  ".editorconfig",
+  ".pre-commit-config.yaml",
+  ".readthedocs.yaml",
+  "requirements*.txt"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/stephen-bunn/file-config/issues"
+"Changelog" = "https://file-config.readthedocs.io/en/latest/changelog.html"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+attrs = "^21.2.0"
+jsonschema = "^3.2.0"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+check-manifest = "^0.42"
+colorama = "^0.4.3"
+coverage = { version = "^5.2.1", extras = ["toml"] }
+flake8 = "^3.8.3"
+flake8-docstrings = "^1.5.0"
+hypothesis = "^5.29.3"
+invoke = "^1.4.1"
+isort = "^5.4.2"
+mypy = "^0.782"
+pre-commit = "^2.7.1"
+pyprof2calltree = { version = "^1.4.5", optional = true }
+pytest = "^6.0.1"
+pytest-cov = "^2.10.1"
+pytest-flake8 = "^1.0.6"
+pytest-sugar = "^0.9.4"
+pytest-xdist = "^2.1.0"
+readme-renderer = { version = "^26.0", extras = ["md"] }
+rope = "^0.17.0"
+sphinx = "^3.2.1"
+toml = "^0.10.1"
+towncrier = "^19.2.0"
+twine = "^3.2.0"
+vprof = { version = "^0.38", optional = true }
+sphinx-autodoc-typehints = "^1.11.1"
+sphinx-hoverxref = "^0.5b1"
+sphinx-rtd-theme = "^0.5.2"
+
+[tool.poetry.extras]
+profile = ["pyprof2calltree", "vprof"]
+lxml = ["lxml", "defusedxml"]
+toml = ["toml"]
+tomlkit = ["tomlkit"]
+pytoml = ["pytoml"]
+ujson = ["ujson"]
+pyyaml = ["pyyaml"]
+msgpack = ["msgpack"]
+python-rapidjson = ["python-rapidjson"]
+
+[tool.black]
+line-length = 88
+target_version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+    \.eggs
+    | \.git
+    | \.mypy_cache
+    | _build
+    | build
+    | dist
+  )/
+)
+'''
 
 [tool.towncrier]
-  package = "file_config"
-  package_dir = "src"
-  filename = "CHANGELOG.rst"
-  directory = "news/"
-  title_format = "`{version} <https://github.com/stephen-bunn/file-config/releases/tag/v{version}>`_ (*{project_date}*)"
-  issue_format = '`#{issue} <https://github.com/stephen-bunn/file-config/issues/{issue}>`_'
-  template = 'tasks/CHANGELOG.rst.jinja2'
+package = "file-config"
+package_dir = "src"
+filename = "CHANGELOG.rst"
+directory = "changes/"
+title_format = "`{version} <https://github.com/stephen-bunn/file-config/releases/tag/v{version}>`_ (*{project_date}*)"
+issue_format = '`#{issue} <https://github.com/stephen-bunn/file-config/issues/{issue}>`_'
+template = 'tasks/CHANGELOG.rst.jinja2'
 
-  [[tool.towncrier.type]]
-  directory = 'feature'
-  name = 'Features'
-  showcontent = true
+[[tool.towncrier.type]]
+directory = 'feature'
+name = 'Features'
+showcontent = true
 
-  [[tool.towncrier.type]]
-  directory = 'bugfix'
-  name = 'Bug Fixes'
-  showcontent = true
+[[tool.towncrier.type]]
+directory = 'bugfix'
+name = 'Bug Fixes'
+showcontent = true
 
-  [[tool.towncrier.type]]
-  directory = 'doc'
-  name = 'Documentation'
-  showcontent = true
+[[tool.towncrier.type]]
+directory = 'doc'
+name = 'Documentation'
+showcontent = true
 
-  [[tool.towncrier.type]]
-  directory = 'trivial'
-  name = 'Trivial Changes'
-  showcontent = false
+[[tool.towncrier.type]]
+directory = 'trivial'
+name = 'Trivial Changes'
+showcontent = false
 
-  [[tool.towncrier.type]]
-  directory = 'misc'
-  name = 'Miscellaneous'
-  showcontent = true
+[[tool.towncrier.type]]
+directory = 'misc'
+name = 'Miscellaneous'
+showcontent = true
 
-  [[tool.towncrier.type]]
-  directory = 'removal'
-  name = 'Removals and Deprecations'
-  showcontent = true
+[[tool.towncrier.type]]
+directory = 'removal'
+name = 'Removals'
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = 'deprecation'
+name = 'Deprecations'
+showcontent = true
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-rxsX --flake8 -n 4 --cov"
+norecursedirs = [
+  ".git",
+  "_build",
+  "dist",
+  "changes",
+  "tasks",
+  "docs"
+]
+testpaths = "tests"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+flake8-ignore = [
+  "docs/source/*.py ALL",
+  "tests/*.py ALL",
+  "setup.py ALL"
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+disable_warnings = [
+  "no-data-collected"
+]
+source = [
+  "src/file_config/"
+]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"

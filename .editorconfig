@@ -19,7 +19,7 @@ indent_size = 4
 indent_size = 3
 
 # external config
-[*.{json,yaml,yml,toml,html,js}]
+[*.{json,yaml,yml,toml,html,js,ts,md}]
 indent_size = 2
 
 # batch config

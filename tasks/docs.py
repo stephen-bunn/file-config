@@ -1,7 +1,9 @@
-# Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
-# ISC License <https://opensource.org/licenses/isc>
+# -*- encoding: utf-8 -*-
+# Copyright (c) 2021 Stephen Bunn <stephen@bunn.io>
+# ISC License <https://choosealicense.com/licenses/isc>
 
-import pathlib
+"""Contains Invoke task functions for documentation building."""
+
 import webbrowser
 from urllib.request import pathname2url
 
@@ -12,19 +14,16 @@ from .utils import report
 
 @invoke.task
 def clean(ctx):
-    """ Clean built docs.
-    """
+    """Clean built docs."""
 
-    clean_command = f"make clean"
     with ctx.cd(ctx.docs.directory.as_posix()):
         report.info(ctx, "docs.clean", "cleaning documentation artifacts")
-        ctx.run(clean_command)
+        ctx.run("make clean")
 
 
 @invoke.task
 def build_news(ctx, draft=False, yes=False):
-    """ Build towncrier newsfragments.
-    """
+    """Build towncrier newsfragments."""
 
     report.info(ctx, "docs.build-news", "building changelog from news fragments")
     build_command = f"towncrier --version {ctx.metadata['version']}"
@@ -45,8 +44,7 @@ def build_news(ctx, draft=False, yes=False):
 
 @invoke.task()
 def build(ctx, output="html"):
-    """ Build docs.
-    """
+    """Build docs."""
 
     with ctx.cd(ctx.docs.directory.as_posix()):
         build_command = f"make {output}"
@@ -56,10 +54,9 @@ def build(ctx, output="html"):
 
 @invoke.task(pre=[build])
 def view(ctx):
-    """ Build and view docs.
-    """
+    """Build and view docs."""
 
-    report.info(ctx, "docs.view", f"viewing documentation")
+    report.info(ctx, "docs.view", "viewing documentation")
     build_path = ctx.docs.directory / "build" / "html" / "index.html"
     build_path = pathname2url(build_path.as_posix())
     webbrowser.open(f"file:{build_path!s}")

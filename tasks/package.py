@@ -1,25 +1,56 @@
-# Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
-# ISC License <https://opensource.org/licenses/isc>
+# -*- encoding: utf-8 -*-
+# Copyright (c) 2021 Stephen Bunn <stephen@bunn.io>
+# ISC License <https://choosealicense.com/licenses/isc>
 
-import re
+"""Contains Invoke task functions for package building and testing."""
+
 import shutil
+import webbrowser
+from pathlib import Path
 
 import invoke
-import parver
 
-from .utils import report, get_previous_version
+from .utils import report
+
+
+@invoke.task
+def test(ctx, verbose=False):
+    """Run package tests."""
+
+    test_command = "pytest"
+    report.info(ctx, "package.test", "running package tests")
+    if verbose:
+        test_command += " --verbose"
+    ctx.run(test_command)
+
+
+@invoke.task(pre=[test])
+def coverage(ctx, view=False):
+    """Build coverage report for test run."""
+
+    reports_dirpath = Path(__file__).parent.parent.joinpath("htmlcov")
+    if not reports_dirpath.is_dir():
+        report.debug(
+            ctx,
+            "package.coverage",
+            f"creating coverage report directory at {reports_dirpath!s}",
+        )
+        reports_dirpath.mkdir()
+
+    report.info(ctx, "package.coverage", "building coverage report")
+    ctx.run(f"coverage html -d {reports_dirpath.as_posix()!s}")
+
+    if view:
+        index_filepath = reports_dirpath.joinpath("index.html")
+        report.debug(ctx, "package.coverage", f"opening report from {index_filepath!s}")
+        webbrowser.open(f"file:{index_filepath!s}")
 
 
 @invoke.task
 def clean(ctx):
-    """ Clean previously built package artifacts.
-    """
+    """Clean previously built package artifacts."""
 
-    clean_command = "python setup.py clean"
-    report.info(ctx, "package.clean", "cleaning up built package artifacts")
-    ctx.run(clean_command)
-
-    egg_name = f"{ctx.metadata['package_name']}.egg-info"
+    egg_name = f"{ctx.package.name}.egg-info"
     report.info(ctx, "pacakge.clean", "removing build directories")
     for artifact in ("dist", "build", egg_name, f"src/{egg_name}"):
         artifact_dir = ctx.directory / artifact
@@ -30,10 +61,9 @@ def clean(ctx):
 
 @invoke.task
 def format(ctx):
-    """ Auto format package source files.
-    """
+    """Auto format package source files."""
 
-    isort_command = f"isort -rc {ctx.package.directory!s}"
+    isort_command = f"isort {ctx.package.directory!s}"
     black_command = f"black {ctx.package.directory.parent!s}"
 
     report.info(ctx, "package.format", "sorting imports")
@@ -42,20 +72,27 @@ def format(ctx):
     ctx.run(black_command)
 
 
+@invoke.task()
+def requirements(ctx):
+    """Generate requirements.txt from pyproject.toml."""
+
+    report.info(
+        ctx, "package.requirements", "generating requirements.txt from Poetry's lock"
+    )
+    ctx.run("poetry export -f requirements.txt > requirements.txt")
+
+
 @invoke.task(pre=[clean, format])
 def build(ctx):
-    """ Build pacakge source files.
-    """
+    """Build pacakge source files."""
 
-    build_command = "python setup.py sdist bdist_wheel"
     report.info(ctx, "package.build", "building package")
-    ctx.run(build_command)
+    ctx.run("poetry build")
 
 
 @invoke.task(pre=[build])
 def check(ctx):
-    """ Check built package is valid.
-    """
+    """Check built package is valid."""
 
     check_command = f"twine check {ctx.directory!s}/dist/*"
     report.info(ctx, "package.check", "checking package")
@@ -63,104 +100,20 @@ def check(ctx):
 
 
 @invoke.task
-def licenses(
-    ctx,
-    summary=False,
-    from_classifier=False,
-    with_system=False,
-    with_authors=False,
-    with_urls=False,
-):
-    """ List dependency licenses.
-    """
-
-    licenses_command = "pip-licenses --order=license"
-    report.info(ctx, "package.licenses", "listing licenses of package dependencies")
-    if summary:
-        report.debug(ctx, "package.licenses", "summarizing licenses")
-        licenses_command += " --summary"
-    if from_classifier:
-        report.debug(ctx, "package.licenses", "reporting from classifiers")
-        licenses_command += " --from-classifier"
-    if with_system:
-        report.debug(ctx, "package.licenses", "including system packages")
-        licenses_command += " --with-system"
-    if with_authors:
-        report.debug(ctx, "package.licenses", "including package authors")
-        licenses_command += " --with-authors"
-    if with_urls:
-        report.debug(ctx, "package.licenses", "including package urls")
-        licenses_command += " --with-urls"
-    ctx.run(licenses_command)
-
-
-@invoke.task
-def version(ctx, version=None, force=False):
-    """ Specify a new version for the package.
-
-    .. important:: If no version is specified, will take the most recent parsable git
-        tag and bump the patch number.
-
-    :param str version: The new version of the package.
-    :param bool force: If True, skips version check
-    """
-
-    # define replacement strategies for files where the version needs to be in sync
-    updates = {
-        ctx.directory.joinpath("setup.cfg"): [
-            (r"^(version\s?=\s?)(.*)", "\\g<1>{version}")
-        ],
-        ctx.package.directory.joinpath("__version__.py"): [
-            (r"(__version__\s?=\s?)(.*)", '\\g<1>"{version}"')
-        ],
-    }
-
-    previous_version = get_previous_version(ctx)
-    if isinstance(version, str):
-        version = parver.Version.parse(version)
-        if not force and version <= previous_version:
-            error_message = (
-                f"version {version!s} is <= to previous version {previous_version!s}"
-            )
-            report.error(ctx, "package.version", error_message)
-            raise ValueError(error_message)
-    else:
-        version = previous_version.bump_release(index=len(previous_version.release) - 1)
-
-    report.info(ctx, "package.version", f"updating version to {version!s}")
-    for (path, replacements) in updates.items():
-        if path.is_file():
-            content = path.read_text()
-            for (pattern, sub) in replacements:
-                report.debug(
-                    ctx,
-                    "package.version",
-                    f"applying replacement ({pattern!r}, {sub!r}) to {path!s}",
-                )
-                content = re.sub(
-                    pattern, sub.format(version=version), content, flags=re.M
-                )
-            path.write_text(content)
-
-
-@invoke.task
 def stub(ctx):
-    """ Generate typing stubs for the package.
-    """
+    """Generate typing stubs for the package."""
 
-    report.info(ctx, "package.stub", f"generating typing stubs for package")
+    report.info(ctx, "package.stub", "generating typing stubs for package")
     ctx.run(
         f"stubgen --include-private --no-import "
         f"--output {ctx.directory.joinpath('stubs')!s} "
-        f"--search-path {ctx.directory.joinpath('src')!s} "
-        f"--package {ctx.metadata['package_name']}"
+        f"{ctx.package.directory!s}"
     )
 
 
 @invoke.task(pre=[stub])
 def typecheck(ctx):
-    """ Run type checking with generated package stubs.
-    """
+    """Run type checking with generated package stubs."""
 
-    report.info(ctx, "package.typecheck", f"typechecking package")
+    report.info(ctx, "package.typecheck", "typechecking package")
     ctx.run(f"mypy {ctx.package.directory!s}")
