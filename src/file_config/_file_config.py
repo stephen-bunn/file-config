@@ -1,149 +1,124 @@
-# Copyright (c) 2019 Stephen Bunn <stephen@bunn.io>
+# -*- encoding: utf-8 -*-
+# Copyright (c) 2021 Stephen Bunn <stephen@bunn.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
-from typing import Any
-from functools import partialmethod
-from collections import OrderedDict
+"""
+"""
 
-import attr
-import jsonschema
+from typing import Any, Dict, List, Type, Union, TypeVar, Callable, Optional, overload
+from dataclasses import field, dataclass, make_dataclass
 
-from . import handlers
-from .utils import (
-    typecast,
-    is_config,
-    encode_bytes,
-    is_enum_type,
-    is_array_type,
-    is_bytes_type,
-    is_config_var,
-    is_config_type,
-    is_object_type,
-    is_typing_type,
-)
+from .types import CONFIG_FIELD_MISSING, Config_T, ConfigField_T
 from .constants import CONFIG_KEY
-from .schema_builder import build_schema
+
+_T = TypeVar("_T")
 
 
-@attr.s(slots=True)
-class _ConfigEntry(object):
-    """ Configuration entry.
-    """
+@dataclass
+class _ConfigMetadata:
+    """Defines metadata for a config class."""
 
-    type = attr.ib(default=None)
-    default = attr.ib(type=Any, default=None)
-    name = attr.ib(type=str, default=None)
-    title = attr.ib(type=str, default=None)
-    description = attr.ib(type=str, default=None)
-    required = attr.ib(type=bool, default=True)
-    examples = attr.ib(type=list, default=None)
-    encoder = attr.ib(default=None)
-    decoder = attr.ib(default=None)
-    min = attr.ib(type=(int, float), default=None)
-    max = attr.ib(type=(int, float), default=None)
-    unique = attr.ib(type=bool, default=None)
-    contains = attr.ib(type=list, default=None)
+    title: Optional[str] = field(default=None)
+    description: Optional[str] = field(default=None)
+    schema_id: Optional[str] = field(default=None)
+    schema_draft: Optional[str] = field(default=None)
 
 
-def _handle_dumps(self, handler, **kwargs):
-    """ Dumps caller, used by partial method for dynamic handler assignments.
+@dataclass
+class _ConfigFieldMetadata:
+    """Defines metadata for a config field entry."""
 
-    :param object handler: The dump handler
-    :return: The dumped string
-    :rtype: str
-    """
-
-    return handler.dumps(self.__class__, to_dict(self), **kwargs)
-
-
-def _handle_dump(self, handler, file_object, **kwargs):
-    """ Dump caller, used by partial method for dynamic handler assignments.
-
-    :param object handler: The dump handler
-    :param file file_object: The file object to dump to
-    :return: The dumped string
-    :rtype: str
-    """
-
-    return handler.dump(self.__class__, to_dict(self), file_object, **kwargs)
-
-
-@classmethod
-def _handle_loads(cls, handler, content, validate=False, **kwargs):
-    """ Loads caller, used by partial method for dynamic handler assignments.
-
-    :param object handler: The loads handler
-    :param str content: The content to load from
-    :param bool validate: Performs content validation before loading,
-        defaults to False, optional
-    :return: The loaded instance
-    :rtype: object
-    """
-
-    return from_dict(cls, handler.loads(cls, content, **kwargs), validate=validate)
+    type: Optional[Type] = field(default=None)
+    default: Any = field(default=None)
+    name: Optional[str] = field(default=None)
+    title: Optional[str] = field(default=None)
+    description: Optional[str] = field(default=None)
+    required: bool = field(default=True)
+    examples: List[str] = field(default_factory=list)
+    # NOTE: unfortunately until mypy supports recurisve types, it is pretty hard to have
+    # a JsonSerializable type that these two callables would really benefit from.
+    # https://github.com/python/typing/issues/182#issuecomment-629711850
+    encoder: Optional[Callable[[Any], Any]] = field(default=None)
+    decoder: Optional[Callable[[Any], Any]] = field(default=None)
+    min: Optional[Union[int, float]] = field(default=None)
+    max: Optional[Union[int, float]] = field(default=None)
+    unique: bool = field(default=False)
+    contains: List[Any] = field(default_factory=list)
 
 
-@classmethod
-def _handle_load(cls, handler, file_object, validate=False, **kwargs):
-    """ Loads caller, used by partial method for dynamic handler assignments.
+@overload
+def config(cls: None, **kwargs) -> Callable[[Type[_T]], Config_T[_T]]:
+    ...
 
-    :param object handler: The loads handler
-    :param file file_object: The file object to load from
-    :param bool validate: Performs content validation before loading,
-        defaults to False, optional
-    :return: The loaded instance
-    :rtype: object
-    """
 
-    return from_dict(cls, handler.load(cls, file_object, **kwargs), validate=validate)
+@overload
+def config(cls: Type[_T], **kwargs) -> Config_T[_T]:
+    ...
 
 
 def config(
-    maybe_cls=None,
-    these=None,
-    title=None,
-    description=None,
-    schema_id=None,
-    schema_draft=None,
+    cls: Optional[Type[_T]] = None,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    schema_id: Optional[str] = None,
+    schema_draft: Optional[str] = None,
     **kwargs,
-):
-    """ File config class decorator.
+) -> Union[Config_T[_T], Callable[[Type[_T]], Config_T[_T]]]:
+    """File config class decorator.
 
-    Usage is to simply decorate a **class** to make it a
-    :func:`config <file_config._file_config.config>` class.
+    Use this function as a decorator on a classes that have config vars
+    (using :func:`~var`) as class variables.
 
-    >>> import file_config
-    >>> @file_config.config(
-            title="My Config Title",
-            description="A description about my config"
-        )
-        class MyConfig(object):
-            pass
+    Examples:
+        >>> import file_config
+        >>> @file_config.config(
+                title="My Config Title",
+                description="A description about my config"
+            )
+            class MyConfig:
+                name: str = file_config.var()
 
-    :param class maybe_cls: The class to inherit from, defaults to None, optional
-    :param dict these: A dictionary of str to ``file_config.var`` to use as attribs
-    :param str title: The title of the config, defaults to None, optional
-    :param str description: A description of the config, defaults to None, optional
-    :param str schema_id: The JSONSchema ``$id`` to use when building the schema,
-        defaults to None, optional
-    :param str schema_raft: The JSONSchema ``$schema`` to use when building the schema,
-        defaults to None, optional
-    :return: Config wrapped class
-    :rtype: class
+    Args:
+        cls (Optional[Type[_T]]):
+            The class that should be decorated as a config.
+            Defaults to None when this decorator is called with arguments.
+        title (Optional[str]):
+            A title for the config.
+            Defaults to None.
+        description (Optional[str]):
+            A description of the config's purpose.
+            Defaults to None.
+        schema_id (Optional[str]):
+            The JSONSchema ``$id`` to use when building the config's schema.
+            Defaults to None.
+        schema_draft (Optional[str]):
+            The JSONSchema ``$schema`` to use when building the config's schema.
+            Defaults to None.
+
+    Returns:
+        Union[Type[_T], Callable[[Type[_T]], Type[_T]]]:
+            A config class that can be used for serialization.
     """
 
-    def wrap(config_cls):
-        """ The wrapper function.
+    def wrap(cls: Type[_T]) -> Type[_T]:
+        """Wrap a given class as a config class.
 
-        :param class config_cls: The class to wrap
-        :return: The config_cls wrapper
-        :rtype: class
+        Applies various adjustments to the class definition that is required for
+        understanding how to handle the class during serialization or schema buliding.
+
+        Args:
+            cls (Type[_T]):
+                The class to wrap.
+
+        Returns:
+            Type[_T]:
+                The newly wrapped class.
         """
 
         setattr(
-            config_cls,
+            cls,
             CONFIG_KEY,
-            dict(
+            _ConfigMetadata(
                 title=title,
                 description=description,
                 schema_id=schema_id,
@@ -151,112 +126,102 @@ def config(
             ),
         )
 
-        # dynamically assign available handlers to the wrapped class
-        for handler_name in handlers.__all__:
-            handler = getattr(handlers, handler_name)
-            if handler.available:
-                handler = handler()
-                setattr(
-                    config_cls,
-                    f"dumps_{handler.name}",
-                    partialmethod(_handle_dumps, handler),
-                )
-                setattr(
-                    config_cls,
-                    f"dump_{handler.name}",
-                    partialmethod(_handle_dump, handler),
-                )
-                setattr(
-                    config_cls,
-                    f"loads_{handler.name}",
-                    partialmethod(_handle_loads, handler),
-                )
-                setattr(
-                    config_cls,
-                    f"load_{handler.name}",
-                    partialmethod(_handle_load, handler),
-                )
-        config_vars = these if isinstance(these, dict) else None
-        config_options = {
-            key: value for (key, value) in kwargs.items() if key not in ("slots",)
-        }
-        return attr.s(config_cls, these=config_vars, slots=True, **config_options)
+        return dataclass(cls, **kwargs)
 
-    if maybe_cls is None:
-        return wrap
-    else:
-        return wrap(maybe_cls)
+    # `cls` is set to None when the decorator is explicitly called during usage
+    # (when users provide kwargs to the decorator). In this instance, we should return
+    # the wrapping callable so the decorator can still be applied to the class
+    return wrap if cls is None else wrap(cls)
 
 
 def var(
-    type=None,  # noqa
-    default=None,
-    name=None,
-    title=None,
-    description=None,
-    required=True,
-    examples=None,
-    encoder=None,
-    decoder=None,
-    min=None,  # noqa
-    max=None,  # noqa
-    unique=None,
-    contains=None,
+    default: Any = CONFIG_FIELD_MISSING,
+    name: Optional[str] = None,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    # TODO: potentially we should deprecated required for CONIG_FIELD_MISSING usage
+    # in the default. It is more in-line with dataclass syntax
+    required: bool = True,
+    examples: Optional[List[str]] = None,
+    encoder: Optional[Callable[[Any], Any]] = None,
+    decoder: Optional[Callable[[Any], Any]] = None,
+    # If we wanted to be _less_ implicit with `min` and `max` we could introduce
+    # `min_items` / `max_items` similar to what Pydantic does.
+    min: Optional[Union[int, float]] = None,
+    max: Optional[Union[int, float]] = None,
+    unique: bool = False,
+    contains: Optional[List[Any]] = None,
     **kwargs,
-):
-    """ Creates a config variable.
+) -> ConfigField_T:
+    """Config field definition function.
 
-    Use this method to create the class variables of your
-    :func:`config <file_config._file_config.config>` decorated class.
+    Args:
+        default (Any):
+            The default value for the field if desired.
+            Defaults to ``CONFIG_FIELD_MISSING`` which will prompt to raise an error
+            when a value is not provided for the field during class instantitation.
+        name (Optional[str]):
+            A different name to use for this field during serialization.
+            Defaults to None.
+        title (Optional[str]):
+            The schema title to use for this field.
+            Defaults to None.
+        description (Optional[str]):
+            A schema description to use for this field.
+            Defaults to None.
+        required (bool):
+            Whether to require this field during schema validation.
+            May be deprecated in the future.
+            Defaults to True.
+        examples (Optional[List[str]]):
+            A list of schema examples for this field.
+            Defaults to None.
+        encoder (Optional[Callable[[Any], Any]]):
+            The encoder callable to use when serializing this field.
+            Defaults to None.
+        decoder (Optional[Callable[[Any], Any]]):
+            The decoder callabe to use when deserializing this field.
+            Defaults to None.
+        min (Optional[Union[int, float]]):
+            The minimum value to allow for the field during validation.
+            What this value will validate against is still pretty implicit based on the
+            type used for the field.
+            Defaults to None.
+        max (Optional[Union[int, float]]):
+            The maximum value to allow for the field during validation.
+            What this field will validate against is still pretty impicit based on the
+            type used for the field.
+            Defaults to None.
+        unique (bool):
+            Whether to ensure a unique values for this field.
+            This only applies to iterable types.
+            Defaults to False.
+        contains (Optional[List[Any]]):
+            What values to ensure that the field value contains.
+            This only applies to iterable types.
+            Defaults to None.
 
-    >>> import file_config
-    >>> @file_config.config
-        class MyConfig(object):
-            name = file_config.var(str)
-
-    :param type type: The expected type of the variable, defaults to None, optional
-    :param default: The default value of the var, defaults to None, optional
-    :param str name: The serialized name of the variable, defaults to None, optional
-    :param str title: The validation title of the variable, defaults to None, optional
-    :param str description: The validation description of the variable,
-        defaults to None, optional
-    :param bool required: Flag to indicate if variable is required during validation,
-        defaults to True, optional
-    :param list examples: A list of validation examples, if necessary,
-        defaults to None, optional
-    :param encoder: The encoder to use for the var, defaults to None, optional
-    :param decoder: The decoder to use for the var, defaults to None, optional
-    :param int min: The minimum constraint of the variable, defaults to None, optional
-    :param int max: The maximum constraint of the variable, defaults to None, optional
-    :param bool unique: Flag to indicate if variable should be unique,
-        may not apply to all variable types, defaults to None, optional
-    :param contains: Value that list varaible should contain in validation,
-        may not apply to all variable types, defaults to None, optional
-    :return: A new config variable
-    :rtype: attr.Attribute
+    Returns:
+        ConfigField_T:
+            A config field definition.
     """
 
-    # NOTE: this method overrides some of the builtin Python method names on purpose in
-    # order to supply a readable and easy to understand api
-    # In this case it is not dangerous as they are only overriden in the scope and are
-    # never used within the scope
-    kwargs.update(dict(default=default, type=type))
-    return attr.ib(
+    kwargs.update(default=default)
+    return field(
         metadata={
-            CONFIG_KEY: _ConfigEntry(
-                type=type,
+            CONFIG_KEY: _ConfigFieldMetadata(
                 default=default,
                 name=name,
                 title=title,
                 description=description,
                 required=required,
-                examples=examples,
+                examples=(examples if examples else []),
                 encoder=encoder,
                 decoder=decoder,
                 min=min,
                 max=max,
                 unique=unique,
-                contains=contains,
+                contains=(contains if contains else []),
             )
         },
         **kwargs,
@@ -264,230 +229,19 @@ def var(
 
 
 def make_config(
-    name,
-    var_dict,
-    title=None,
-    description=None,
-    schema_id=None,
-    schema_draft=None,
+    name: str,
+    vars: Dict[str, ConfigField_T],
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    schema_id: Optional[str] = None,
+    schema_draft: Optional[str] = None,
     **kwargs,
-):
-    """ Creates a config instance from scratch.
-
-    Usage is virtually the same as :func:`attr.make_class`.
-
-    >>> import file_config
-    >>> MyConfig = file_config.make_config(
-            "MyConfig",
-            {"name": file_config.var(str)}
-        )
-
-    :param str name: The name of the config
-    :param dict var_dict: The dictionary of config variable definitions
-    :param str title: The title of the config, defaults to None, optional
-    :param str description: The description of the config, defaults to None, optional
-    :param str schema_id: The JSONSchema ``$id`` to use when building the schema,
-        defaults to None, optional
-    :param str schema_raft: The JSONSchema ``$schema`` to use when building the schema,
-        defaults to None, optional
-    :return: A new config class
-    :rtype: class
-    """
+) -> Config_T:
 
     return config(
-        attr.make_class(name, attrs={}, **kwargs),
-        these=var_dict,
+        make_dataclass(name, fields=vars, **kwargs),
         title=title,
         description=description,
         schema_id=schema_id,
         schema_draft=schema_draft,
     )
-
-
-def _build(config_cls, dictionary, validate=False):  # noqa
-    """ Builds an instance of ``config_cls`` using ``dictionary``.
-
-    :param type config_cls: The class to use for building
-    :param dict dictionary: The dictionary to use for building ``config_cls``
-    :param bool validate: Performs validation before building ``config_cls``,
-        defaults to False, optional
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    if not is_config_type(config_cls):
-        raise ValueError(
-            f"cannot build {config_cls!r} from {dictionary!r}, "
-            f"{config_cls!r} is not a config"
-        )
-
-    # perform jsonschema validation on the given dictionary
-    # (simplifys dynamic typecasting)
-    if validate:
-        jsonschema.validate(dictionary, build_schema(config_cls))
-
-    kwargs = {}
-    for var in attr.fields(config_cls):
-        if not is_config_var(var):
-            continue
-
-        entry = var.metadata[CONFIG_KEY]
-        arg_key = entry.name if entry.name else var.name
-        arg_default = var.default if var.default is not None else None
-        arg_type = entry.type if entry.type else var.type
-
-        if callable(entry.decoder):
-            kwargs[var.name] = entry.decoder(dictionary.get(arg_key, arg_default))
-            continue
-
-        if is_array_type(arg_type):
-            if is_typing_type(arg_type) and len(arg_type.__args__) > 0:
-                nested_type = arg_type.__args__[0]
-                if is_config_type(nested_type):
-                    kwargs[var.name] = [
-                        _build(nested_type, item)
-                        for item in dictionary.get(arg_key, [])
-                    ]
-                else:
-                    kwargs[var.name] = typecast(arg_type, dictionary.get(arg_key, []))
-        elif is_object_type(arg_type):
-            item = dictionary.get(arg_key, {})
-            if is_typing_type(arg_type) and len(arg_type.__args__) == 2:
-                (_, value_type) = arg_type.__args__
-                kwargs[var.name] = {
-                    key: _build(value_type, value)
-                    if is_config_type(value_type)
-                    else typecast(value_type, value)
-                    for (key, value) in item.items()
-                }
-            else:
-                kwargs[var.name] = typecast(arg_type, item)
-        elif is_config_type(arg_type):
-            if arg_key not in dictionary:
-                # if the default value for a nested config is the nested config class
-                # then build the empty state of the nested config
-                if is_config_type(arg_default) and arg_type == arg_default:
-                    kwargs[var.name] = _build(arg_type, {})
-                else:
-                    kwargs[var.name] = arg_default
-            else:
-                kwargs[var.name] = _build(
-                    arg_type, dictionary.get(arg_key, arg_default)
-                )
-        else:
-            if arg_key not in dictionary:
-                kwargs[var.name] = arg_default
-            else:
-                kwargs[var.name] = typecast(
-                    arg_type, dictionary.get(arg_key, arg_default)
-                )
-
-    return config_cls(**kwargs)
-
-
-def _dump(config_instance, dict_type=OrderedDict):
-    """ Dumps an instance from ``instance`` to a dictionary type mapping.
-
-    :param object instance: The instance to serialized to a dictionary
-    :param object dict_type: Some dictionary type, defaults to ``OrderedDict``
-    :return: Dumped dictionary
-    :rtype: collections.OrderedDict (or instance of ``dict_type``)
-    """
-
-    if not is_config(config_instance):
-        raise ValueError(
-            f"cannot dump instance {config_instance!r} to dict, "
-            "instance is not a config class"
-        )
-
-    result = dict_type()
-    for var in attr.fields(config_instance.__class__):
-        if not is_config_var(var):
-            continue
-
-        entry = var.metadata[CONFIG_KEY]
-        dump_key = entry.name if entry.name else var.name
-        dump_default = var.default if var.default else None
-        dump_type = entry.type if entry.type else var.type
-
-        if callable(entry.encoder):
-            result[dump_key] = entry.encoder(
-                getattr(config_instance, var.name, dump_default)
-            )
-            continue
-
-        if is_array_type(dump_type):
-            items = getattr(config_instance, var.name, [])
-            if items is not None:
-                result[dump_key] = [
-                    (_dump(item, dict_type=dict_type) if is_config(item) else item)
-                    for item in items
-                ]
-        elif is_enum_type(dump_type):
-            dump_value = getattr(config_instance, var.name, dump_default)
-            result[dump_key] = (
-                dump_value.value if dump_value in dump_type else dump_value
-            )
-        elif is_bytes_type(dump_type):
-            result[dump_key] = encode_bytes(
-                getattr(config_instance, var.name, dump_default)
-            )
-        else:
-            if is_config_type(dump_type):
-                result[dump_key] = _dump(
-                    getattr(config_instance, var.name, {}), dict_type=dict_type
-                )
-            else:
-                dump_value = getattr(config_instance, var.name, dump_default)
-                if is_object_type(type(dump_value)):
-                    dump_value = {
-                        key: (
-                            _dump(value, dict_type=dict_type)
-                            if is_config(value)
-                            else value
-                        )
-                        for (key, value) in dump_value.items()
-                    }
-
-                if dump_value is not None:
-                    result[dump_key] = dump_value
-
-    return result
-
-
-def validate(instance):
-    """ Validates a given ``instance``.
-
-    :param object instance: The instance to validate
-    :raises jsonschema.exceptions.ValidationError: On failed validation
-    """
-
-    jsonschema.validate(
-        to_dict(instance, dict_type=dict), build_schema(instance.__class__)
-    )
-
-
-def from_dict(config_cls, dictionary, validate=False):
-    """ Loads an instance of ``config_cls`` from a dictionary.
-
-    :param type config_cls: The class to build an instance of
-    :param dict dictionary: The dictionary to load from
-    :param bool validate: Preforms validation before building ``config_cls``,
-        defaults to False, optional
-    :return: An instance of ``config_cls``
-    :rtype: object
-    """
-
-    return _build(config_cls, dictionary, validate=validate)
-
-
-def to_dict(instance, dict_type=OrderedDict):
-    """ Dumps an instance to an dictionary mapping.
-
-    :param object instance: The instance to dump
-    :param object dict_type: The dictionary type to use, defaults to ``OrderedDict``
-    :return: Dictionary serialization of instance
-    :rtype: OrderedDict
-    """
-
-    return _dump(instance, dict_type=dict_type)
