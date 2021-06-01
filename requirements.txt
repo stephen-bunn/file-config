@@ -61,5 +61,5 @@ termcolor==1.1.0
 toml==0.10.0
 tomlkit==0.5.3
 ujson==1.35
-urllib3==1.24.2
+urllib3==1.26.5
 webencodings==0.5.1
